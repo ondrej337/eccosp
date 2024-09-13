@@ -35,7 +35,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
         contextPath: / # context path for ingress, default value '/'
         host: ecp.koval.top # URL on which the ECP Endpoint is exposed. Address needs to be aligned with hosting.
         tls: # section for TLS definition for HTTPS connection to ingress
-          secretName: eccosp-ecp  # secret where TLS certificate is stored
+          secretName: tls-koval-top  # secret where TLS certificate is stored
         annotations: # ingress annotations section
 #          kubernetes.io/ingressClassName: nginx  # ingress controller definition
 #          ingres.cilium.io/tls-passthrough: "enabled"

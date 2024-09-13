@@ -36,7 +36,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
         contextPath: / # context path for ingress, default value '/'
         host: edx.koval.top # URL on which the ECP Endpoint is exposed. Address needs to be aligned with hosting.
         tls: # section for TLS definition for HTTPS connection to ingress
-          secretName: eccosp-edx  # secret where TLS certificate is stored
+          secretName: tls-koval-top  # secret where TLS certificate is stored
         annotations: # ingress annotations section
           kubernetes.io/ingressClassName: nginx # ingress controller definition
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
