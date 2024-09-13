@@ -1,0 +1,273 @@
+# The commented parameters have default values but these defaults can be overridden when enabled
+# All available configuration parameters are described in values file values-edx-toolbox-tb1.yaml
+
+edx-toolbox:
+  enabled: true
+
+  instance:
+    - name: tb2
+      image:
+        name: entsoe/edx-toolbox
+        tag: 1.13.0
+        # pullPolicy: IfNotPresent
+      replicaCount: 1
+      resourcesK8s:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          cpu: 750m
+          memory: 1Gi
+      storageData: 1Gi
+      storageLogs: 256Mi
+      sharedStorageSize: 2Gi
+      sharedStorageClass: nfs-client
+      keepLogsAfterRestart: true
+      livenessProbe: false
+      readinessProbe: true
+
+      service:
+        https:
+          port: 8443
+        amqps:
+          port: 5672  
+      ingress:
+        enabled: false
+#        apiVersion: networking.k8s.io/v1
+#        contextPath: / # context path for ingress, default value '/'
+#        host: edx-toolbox.tb2.eccosp
+#        tls: # section for TLS definition for HTTPS connection to ingress
+#          secretName: tls-secret  # secret where TLS certificate is stored
+#        annotations:
+#          kubernetes.io/ingress.class: nginx
+#          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+#          nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+
+      edxProperties:
+        edxToolboxCode: ecp-endpoint-2
+        edxServiceCatalogueCode: ecp-endpoint-catalogue
+
+        edxConfigurationDuplicatesFilterEnabled: false
+#
+        edxToolboxPullPublicUrls:
+          - network: Internet
+            url: https://localhost:8443/api/rest/pull/download/
+
+        edxToolboxPullAutopullEnabledTypes: "*"
+
+        edxToolboxDeletingDeleteOlderThan: 168
+        edxToolboxDeletingDeleteJobDelay: 60000
+
+        edxToolboxClusterNetcfgUpdateJobPeriod: 5000
+
+        edxToolboxDmsStorageMaxFiles: 10000
+        edxToolboxDmsStorageMaxDirectories: 10000
+        edxToolboxDmsStorageCacheValidityDuration: 30
+
+        edxToolboxDataDirectory: /var/lib/edx-toolbox
+
+        edxToolboxPullSlicingEnabled: true
+        edxToolboxPullSlicingSize: 1024
+        edxToolboxPullSlicingTimeout: 60000
+        edxToolboxPullSlicingCompressionDisabledTypes: "*"
+        edxToolboxPullSlicingCompressionDisabledWildcard: "*"
+
+        springProfilesActive: edx-nonha
+
+        activemqDataDirectory: /var/lib/edx-toolbox/edx-activemq-data
+
+        springServletMultipartMaxFileSize: 64MB
+        springServletMultipartMaxRequestSize: 64MB
+
+        serverErrorWhitelabelEnabled: false
+        hawtioAuthenticationEnabled: false
+        endpointsJolokiaSensitive: falsee
+
+        springJmxEnabled: false
+
+        internalBrokerUseAuthentication: true
+        internalBrokerAuthUser: toolbox
+        internalBrokerAuthPassword: password
+        internalBrokerKeystoreLocation: /var/lib/edx-toolbox/authKeystore.jks
+        internalBrokerKeystorePassword: password
+        internalBrokerKeystoreAuthAlias: ecp_module_auth
+        internalBrokerAmqpPort: 5672
+        internalBrokerAmqpHost: 0.0.0.0
+        edxBrokerUrl: amqps://eccosp-edx-toolbox-tb2-svc:${internalBroker.amqp.port:5672}
+
+        ecpBrokerAmqpPort: 5671
+        ecpBrokerAmqpHost: eccosp-ecp-endpoint-ep2-svc
+        ecpBrokerKeystoreLocation: /var/lib/edx-toolbox/authKeystore.jks
+        ecpBrokerKeystorePassword: password
+        ecpBrokerKeystoreAuthAlias: ecp_module_auth
+        ecpBrokerAuthUser: endpoint
+        ecpBrokerAuthPassword: password
+        ecpBrokerUrl: amqps://${ecpBroker.amqp.host}:${ecpBroker.amqp.port}
+
+        ecpReceiveQueue: ecp.endpoint.inbox
+        ecpSendQueue: ecp.endpoint.outbox
+        ecpSendResponseQueue: ecp.endpoint.outbox.reply
+        ecpStatusQueue: ecp.endpoint.send.event
+
+        loggingFileName: /var/log/edx-toolbox/edx.log
+        loggingFilePath: /var/log/edx-toolbox
+
+        loggingLevels:
+          - package: eu.unicorn.edx
+            level: INFO
+          - package: eu.unicorn.eip
+            level: ERROR
+          - package: org.apache.camel
+            level: INFO
+
+        prometheusMonitoringEnabled: false # management.endpoints.web.exposure.include=info,health,readiness,prometheus
+
+        edxToolboxProjectName: k8s # edx.toolbox.projectName
+        edxToolboxEnvName: eccosp # edx.toolbox.envName
+
+        transportTrustStoreLocation: /var/lib/edx-toolbox/keystore.jks # transport.trustStoreLocation
+        transportTrustStorePassword: password # transport.trustStorePassword
+        transportVerifyHost: false # transport.verifyHost
+
+#      edxPasswordProperties:
+#        encryptionPassword: encryptionPassword
+
+      edxYml:
+        ################################### EDX Routing Configuration Example #######################################
+
+        ################################### Integration channels ####################################################
+        integrationChannels:
+
+          # Integration channels - general settings
+          # code - each endpoint shall have its unique code
+          # direction is "in" for input channels (from business applications to the toolbox) or out for output channels (from the toolbox to business applications)
+          # redeliveryAttemps is number of message delivery attempts, after these attempts message fails, default is 10, use -1 for unlimited redelivery attempts
+          # redeliveryDelay is delay between redelivery attempts, default is 5 seconds
+
+          ### AMQP channels settings
+          # queueName is the name of input or output queue
+          # replyQueueName is mandatory for input AMQP endpoints, it is used for acknowledgements when message reaches its final state
+          # connectionURI is URI of the AMQP broker, when not specified EDX internal broker is used
+
+          amqpEndpoints:
+            - {direction: in,  queueName: edx.endpoint.outbox, replyQueueName: edx.endpoint.reply, code: edx-endpoint-outbox}
+            - {direction: out,  queueName: edx.endpoint.inbox, code: default-in-queue, redeliveryAttempts: 100}
+
+        ### FTP channels settings
+        # protocol may be ftp, ftps or sftp
+        # hostname - hostname of the FTP server
+        # port - port number that should be used for FTP communication
+        # directory - directory under the FTP root that should be used as input or output message directory
+        # replyDirectory - used for input channels to deliver acknowledgements for sent messages, default is ".reply"
+        # failDirectory - used to store failed messages (e.g. messages that does not match naming convetions), default is ".failed"
+        # username - username used for FTP connection
+        # password - password used for FTP connection
+        # connectionParams - additional Camel connection parameters for special cases, see http://camel.apache.org/ftp.html for details
+
+        #  ftpEndpoints:
+        #    - {direction: in, protocol: ftp, hostname: 192.168.80.208, port: 21, directory: in-folder, replyDirectory: in/reply, username: user, password: password, code: my-ftp-endpoint-in, connectionParams: {stepwise: true, separator: UNIX}}
+        #    - {direction: out, hostname: 192.168.80.208, port: 21, directory: out-folder,  code: my-ftp-endpoint}
+
+        ### FSSF channels settings
+        # directory - local directory under that should be used as input or output message directory
+        # replyDirectory - used for input channels to deliver acknowledgements for sent messages, default is ".reply"
+        # failDirectory - used to store failed messages (e.g. messages that does not match naming convetions), default is ".failed"
+
+        #  fssfEndpoints:
+        #     Example with absolute path on unix system
+        #    - {direction: in, directory: "/opt/data/fssf/in", code: fssf-endpoint-1}
+        #    - {direction: out, directory: "/opt/data/fssf/out/MT1", code: fssf-endpoint-2}
+        #     Example with absolute path on windows system
+        #    - {direction: out, directory: "c:/Program Files/EDX Toolbox/data/fssf/out/MT2", code: fssf-endpoint-3}
+
+        ### Kafka channels settings
+        # topicName - topic name
+        # replyTopicName - reply topic name for acknowledgements
+        # connectionURI - connection URI to Kafka broker(s), list can be a subset of brokers or a VIP pointing to a subset of brokers
+        # options - Kafka consumer or producer options, see http://camel.apache.org/kafka.html for details
+        # partitionKeyMadesHeaders - When Apache Kafka Topic is partitioned the EDX Toolbox nodes must use some partitioning strategy to distribute messages across partitions.
+        #                            Default Round Robin strategy or partition key may be used. The Partition key can be composed from values of selected MADES message headers.
+
+        #  kafkaEndpoints:
+        #    -{direction: in, topicName: edx.endpoint.outbox.my-topic, replyTopicName: edx.endpoint.reply.my-reply-topic, connectionURI: "127.0.0.1: 9092", options: "groupId=edxGroup", code: my-kafka-in-endpoint}
+        #    -{direction: out, topicName: edx.endpoint.inbox.another-topic, connectionURI: "127.0.0.1: 9092", partitionKeyMadesHeaders:[businessType, receiverCode], code: kafka-out-endpoint}
+
+        ### ECP webservice endpoint is started automatically and can be also used in routing rules
+        # ECP webservice endpoint code for use as route start or end is "ecp-endpoint"
+
+        ################################### Routing rules ############################################################
+        # Routing rules for specific part of EDX processing
+
+        # Components to be used in defined routes, one or more codes of these components may be used as routing steps
+        components:
+          # validate against xsd
+          validations: []
+          #  - {code: my-validation-1, xsd: "file:c:/Program Files/EDX Toolbox/custom/xsd/person.xsd"}
+          #  - {code: my-validation-2, xsd: "file:/opt/edx/custom/xsd/person.xsd"}
+
+          # transform via xslt
+          transformations: []
+          #  - {code: my-transformation-1, xslt: "file:c:/Program Files/EDX Toolbox/custom/xslt/person.xslt"}
+          #  - {code: my-transformation-2, xslt: "file:/opt/edx/custom/xslt/person.xslt"}
+
+          # let message be processed by external system
+          externalProcessing: []
+        #  - {code: ext-processing-by-qap, in: edx.queue.qap.in, out: edx.queue.qap.out}
+        #  - {code: ext-processing-by-ba1, in: edx.queue.ba1.in, out: edx.queue.ba1.out}
+
+        # For all routing rules, it is possible to specify: messageType, service, sender, receiver or any combination of these attributes.
+        # Service attribute consists of three values: serviceCode, domainCode and serviceCatalogueCode.
+        # Start of the route is receiving endpoint code, "*" for all input endpoints or "toolbox-gateway" for messages from another toolboxes.
+        # End of the route is one or more output endpoint's code(s) (including "ecp-endpoint" for ECP WS interface) or "toolbox-gateway" for messages that should be delivered to another toolbox/toolboxes.
+        # Fail endpoint is output endpoint used to deliver failure notification message.
+        # Steps are custom processing steps composed of components defined above. After the last step, message is passed to delivery.
+
+        # When route starts by "toolbox-gateway", it is incoming message from another toolbox for business application.
+        # When route starts by an endpoint code (defined in integrationChannels section), it is route for messages from an endpoint that can be routed to another toolbox using "toolbox-gateway" as end.
+        # Route that starts with an input endpoint code can also end with another output endpoint (message is not send to another toolbox) - receiver should be local toolbox.
+
+        routing:
+          routes: []
+          # messages incoming from another toolbox with message type "a" will be delivered to endpoint fssf-endpoint-2, possible state notification will be also delivered to this endpoint
+          #  - {code: route-a, messageType: a, start: toolbox-gateway, end: fssf-endpoint-2, fail: fssf-endpoint-2, steps: [] }
+
+          # messages with message type "a" from fssf-ednpoint-1 will be delivered to another local endpoint fssf-endpoint-2 after XSLT transformation
+          #  - {code: a-fssf, messageType: a, start: fssf-endpoint-1, end: fssf-endpoint-2, fail: fssf-endpoint-2, steps: [my-transformation-1] }
+
+          # send messages with message type "b" from default-out-queue to another toolbox after two external processings and XSLT transformation, in case of failure, deliver notification to FTP
+          #  - {code: b-out, messageType: b, start: default-out-queue, end: toolbox-gateway, fail: my-ftp-endpoint, steps: [ext-processing-by-qap, my-transformation-2] }
+
+          # deliver messages received in OPDE service context and message type "b" to fssf-endpoint-2 after XSD validation and external processing
+          #  - {code: b-opde, messageType: b, service: {serviceCode: OPDE, domainCode: OPDE_DOMAIN, serviceCatalogueCode: OPDE_CATALOGUE}, start: toolbox-gateway, end: [fssf-endpoint-2], fail: my-ftp-endpoint, steps: [my-validation-1, ext-processing-by-ba1] }
+
+          # default routes for outgoing messages (from business applications to anoter toolboxes) and incoming messages (from another toolboxes for business applications)
+          sendProcessDefaultRoute: {start: "*", end: toolbox-gateway, fail: ecp-endpoint, steps: [] }
+          receiveProcessDefaultRoute: {start: toolbox-gateway, end: ecp-endpoint, fail: ecp-endpoint, steps: [] }
+
+      envConf:
+        resourcesJvm:
+          xms: 128M
+          xmx: 512M
+
+
+      edxUsersProperties:
+        edxTooboxUsers:
+          - login: admin
+            password: password
+
+      edxLockBack:
+        jmxConfigurator: true
+        
+      serverXml:
+        connectorHttpDisable: true
+        connectorHttpsDisable: false
+        connectorAjpDisable: true
+        
+      volumeMounts:
+
+# global config
+global:
+  storage:
+    class: standard
+  imagePullSecrets:
+    - name: regcred

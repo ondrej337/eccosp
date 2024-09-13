@@ -1,0 +1,791 @@
+{{- range $i, $instance := .Values.instance }}
+{{- if or $instance.enabled (not (hasKey $instance "enabled")) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{$.Release.Namespace}}-{{ $.Chart.Name }}-{{$instance.name}}-cm
+  labels:
+    backup.component.name: {{ $.Release.Name }}
+data:
+  broker.properties: |-
+    # Broker registration data
+    ecp.broker.contactPerson = {{ $instance.brokerProperties.ecpBrokerContactPerson }}
+    ecp.broker.contactEmail = {{ $instance.brokerProperties.ecpBrokerContactEmail }}
+    ecp.broker.contactPhone = {{ $instance.brokerProperties.ecpBrokerContactPhone }}
+    ecp.broker.organization = {{ $instance.brokerProperties.ecpBrokerOrganization }}
+
+    ## HA Configuration ##
+    {{ if $instance.brokerProperties.brokerStoreJdbcUrl }}{{print "broker.store.jdbc.url=" $instance.brokerProperties.brokerStoreJdbcUrl}}{{ else }}#broker.store.jdbc.url={{ end }}
+    {{ if $instance.brokerProperties.brokerStoreJdbcUser }}{{print "broker.store.jdbc.user=" $instance.brokerProperties.brokerStoreJdbcUser}}{{ else }}#broker.store.jdbc.user={{ end }}
+    {{ if $instance.brokerProperties.brokerStoreJdbcPassword }}{{print "broker.store.jdbc.password=" $instance.brokerProperties.brokerStoreJdbcPassword}}{{ else }}#broker.store.jdbc.password={{ end }}
+
+    # Broker URL with pattern <protocol>://<host>:<port>
+    # Broker protocol is typically amqps
+    ecp.broker.urls = {{ $instance.brokerProperties.ecpBrokerUrls }}
+    ecp.broker.networks = {{ $instance.brokerProperties.ecpBrokerNetworks | default "DefaultNetwork" }}
+    # Value is set by registration tool, do not modify
+    ecp.broker.registrationDirectoryId = {{ $instance.brokerProperties.ecpBrokerregistrationDirectoryId }}
+    # ECP Broker component code
+    ecp.broker.code = {{ $instance.brokerProperties.ecpBrokerCode }}
+
+    # Broker settings
+    # Location of broker.properties file
+    ecp.broker.configurationFile = /opt/ecp-broker/config/broker.properties
+    ecp.broker.filter.components = {{ $instance.brokerProperties.ecpBrokerFilterComponents | default "*" }}
+    ecp.broker.filter.types = {{ $instance.brokerProperties.ecpBrokerFilterTypes | default "*" }}
+    # Location of keystore with registration certificates. This keystore is provided with installation package.
+    # Registration keystore can be also obtained from component directory.
+    ecp.keystore.location = {{ $instance.brokerProperties.ecpKeystoreLocation | default "/opt/ecp-broker/config/registrationKeystore.jks" }}
+    ecp.keystore.password = {{ $instance.brokerProperties.ecpKeystorePassword | default "password" }}
+    # Location of keystore with authentication certificates.
+    #This keystore is created by broker registration tool after successful registration.
+    ecp.authKeystore.location = {{ $instance.brokerProperties.ecpAuthKeystoreLocation | default "/opt/ecp-broker/config/authKeystore.jks" }}
+    ecp.authKeystore.password = {{ $instance.brokerProperties.ecpAuthKeystorePassword | default "password" }}
+
+    # Component code of home component directory
+    ecp.directory.client.synchronization.homeComponentDirectoryPrimaryCode = {{ $instance.brokerProperties.ecpDirectoryClientSynchronizationHomeComponentDirectoryPrimaryCode }}
+    # Component directory synchronization interval (CRON expression)
+    ecp.directory.client.synchronization.directorySynchronizationInterval = {{ $instance.brokerProperties.ecpDirectoryClientSynchronizationDirectorySynchronizationInterval | default "0 */5 * * * *" }}
+    #URL of home component directory
+    ecp.directory.client.synchronization.homeComponentDirectoryPrimaryUrl = {{ $instance.brokerProperties.ecpDirectoryClientSynchronizationHomeComponentDirectoryPrimaryUrl }}
+    # Location of component directory storage directory
+    ecp.directory.client.root = {{ $instance.brokerProperties.ecpDirectoryClientRoot | default "/opt/ecp-broker/cd" }}
+
+    {{- if $instance.brokerProperties.ecpNatEnabled }}
+    # NAT configuration
+    ecp.natEnabled={{$instance.brokerProperties.ecpNatEnabled}}
+   {{- range $j, $item := $instance.brokerProperties.ecpNatTable }}
+    ecp.natTable[{{$j}}].network={{.network}}
+    ecp.natTable[{{$j}}].sourceIp={{.sourceIp}}
+    ecp.natTable[{{$j}}].sourcePort={{.sourcePort}}
+    ecp.natTable[{{$j}}].destinationIp={{.destinationIp}}
+    ecp.natTable[{{$j}}].destinationPort={{.destinationPort}}
+    {{- end}}
+    {{- end}}
+
+    {{- if $instance.brokerProperties.ecpSecurityProxyEnabled}}
+    # SOCKS proxy configuration
+    ecp.security.proxy.enabled={{ $instance.brokerProperties.ecpSecurityProxyEnabled }}
+    ecp.security.proxy.host={{ $instance.brokerProperties.ecpSecurityProxyHost }}
+    ecp.security.proxy.port={{ $instance.brokerProperties.ecpSecurityProxyProxyPort | default "1080" }}
+    {{ if $instance.brokerProperties.ecpSecurityProxyNonProxyHosts }}{{print "ecp.security.proxy.nonProxyHosts=" $instance.brokerProperties.ecpSecurityProxyNonProxyHosts}}{{ else }}#ecp.security.proxy.nonProxyHosts={{ end }}
+    {{ if $instance.brokerProperties.ecpSecurityProxyUsername }}{{print "ecp.security.proxy.username=" $instance.brokerProperties.ecpSecurityProxyUsername}}{{ else }}#ecp.security.proxy.username={{ end }}
+    {{ if $instance.brokerProperties.ecpSecurityProxyPassword }}{{print "ecp.security.proxy.password=" $instance.brokerProperties.ecpSecurityProxyPassword}}{{ else }}#ecp.security.proxy.password={{ end }}
+    {{- end}}
+
+  env: |-
+    #!/bin/sh
+    # ------------------------------------------------------------------------
+    # Licensed to the Apache Software Foundation (ASF) under one or more
+    # contributor license agreements.  See the NOTICE file distributed with
+    # this work for additional information regarding copyright ownership.
+    # The ASF licenses this file to You under the Apache License, Version 2.0
+    # (the "License"); you may not use this file except in compliance with
+    # the License.  You may obtain a copy of the License at
+    #
+    # http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
+    # ------------------------------------------------------------------------
+    #
+    # Configuration file for running Apache Active MQ as standalone provider.
+    #
+    # This file overwrites the predefined settings of the sysv init-script.
+    # You can also use alternate location for default settings -
+    # invoke the init-script without a argument an review help section "Configuration of this script"
+    # /etc/default/activemq <activemq user home>/.activemqrc <activemq installation dir>/bin/env
+
+    # Set jvm memory configuration (minimal/maximum amount of memory)
+    if [ -z "$ACTIVEMQ_OPTS_MEMORY" ] ; then
+        {{- if $instance.env}}
+        ACTIVEMQ_OPTS_MEMORY="-Xms{{$instance.env.resourcesJvm.xms | default "64M"}} -Xmx{{$instance.env.resourcesJvm.xmx | default "1G"}}"
+        {{- else }}
+        ACTIVEMQ_OPTS_MEMORY="-Xms64M -Xmx1G"
+        {{- end}}
+    fi
+
+    if [ -z "$ACTIVEMQ_OPTS" ] ; then
+        ACTIVEMQ_OPTS="$ACTIVEMQ_OPTS_MEMORY -Djava.util.logging.config.file=logging.properties -Djava.security.auth.login.config=$ACTIVEMQ_CONF/login.config -Decp.directory.client.root={{ $instance.brokerProperties.ecpDirectoryClientRoot | default "/opt/ecp-broker/cd" }}{{- if $instance.env}} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath={{ $instance.env.heapDumpPath | default "/opt/ecp-broker/activemq/data/broker-dump.hprof" }}"{{- else }} -XX:HeapDumpPath=/opt/ecp-broker/activemq/data/broker-dump.hprof"{{- end}}
+    fi
+
+    # Uncomment to enable audit logging
+    #ACTIVEMQ_OPTS="$ACTIVEMQ_OPTS -Dorg.apache.activemq.audit=true"
+
+    ACTIVEMQ_OPTS="$ACTIVEMQ_OPTS -Decp.cluster.manager.localInstanceID=$HOSTNAME"
+
+    # Set jvm jmx configuration
+    # This enables jmx access over a configured jmx-tcp-port.
+    # You have to configure the first four settings if you run a ibm jvm, caused by the
+    # fact that IBM's jvm does not support VirtualMachine.attach(PID).
+    # JMX access is needed for quering a running activemq instance to gain data or to
+    # trigger management operations.
+    #
+    # Example for ${ACTIVEMQ_CONF}/jmx.access:
+    # ---
+    # # The "monitorRole" role has readonly access.
+    # # The "controlRole" role has readwrite access.
+    # monitorRole readonly
+    # controlRole readwrite
+    # ---
+    #
+    # Example for ${ACTIVEMQ_CONF}/jmx.password:
+    # ---
+    # # The "monitorRole" role has password "abc123".
+    # # # The "controlRole" role has password "abcd1234".
+    # monitorRole abc123
+    # controlRole abcd1234
+    # ---
+    #
+    # ACTIVEMQ_SUNJMX_START="$ACTIVEMQ_SUNJMX_START -Dcom.sun.management.jmxremote.port=11099 "
+    # ACTIVEMQ_SUNJMX_START="$ACTIVEMQ_SUNJMX_START -Dcom.sun.management.jmxremote.password.file=${ACTIVEMQ_CONF}/jmx.password"
+    # ACTIVEMQ_SUNJMX_START="$ACTIVEMQ_SUNJMX_START -Dcom.sun.management.jmxremote.access.file=${ACTIVEMQ_CONF}/jmx.access"
+    # ACTIVEMQ_SUNJMX_START="$ACTIVEMQ_SUNJMX_START -Dcom.sun.management.jmxremote.ssl=false"
+    ACTIVEMQ_SUNJMX_START="$ACTIVEMQ_SUNJMX_START -Dcom.sun.management.jmxremote"
+
+    # Set jvm jmx configuration for controlling the broker process
+    # You only have to configure the first four settings if you run a ibm jvm, caused by the
+    # fact that IBM's jvm does not support VirtualMachine.attach(PID)
+    # (see also com.sun.management.jmxremote.port, .jmx.password.file and .jmx.access.file )
+    #ACTIVEMQ_SUNJMX_CONTROL="--jmxurl service:jmx:rmi:///jndi/rmi://127.0.0.1:1099/jmxrmi --jmxuser controlRole --jmxpassword abcd1234"
+    ACTIVEMQ_SUNJMX_CONTROL=""
+
+    # Specify the queue manager URL for using "browse" option of sysv initscript
+    if [ -z "$ACTIVEMQ_QUEUEMANAGERURL" ]; then
+        ACTIVEMQ_QUEUEMANAGERURL="--amqurl tcp://localhost:61616"
+    fi
+
+    # Set additional JSE arguments
+    #ACTIVEMQ_SSL_OPTS="-Dcom.sun.security.enableCRLDP=true -Docsp.enable=true -Docsp.responderURL=http://ocsp.example.net:80"
+    ACTIVEMQ_SSL_OPTS=""
+
+    # Uncomment to enable remote debugging
+    #ACTIVEMQ_DEBUG_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+
+    # ActiveMQ tries to shutdown the broker by jmx,
+    # after a specified number of seconds send SIGKILL
+    if [ -z "$ACTIVEMQ_KILL_MAXSECONDS" ]; then
+        ACTIVEMQ_KILL_MAXSECONDS=30
+    fi
+
+    # Active MQ installation dirs
+    # ACTIVEMQ_HOME="<Installationdir>/"
+    # ACTIVEMQ_BASE="$ACTIVEMQ_HOME"
+    # ACTIVEMQ_CONF="$ACTIVEMQ_BASE/conf"
+    # ACTIVEMQ_DATA="$ACTIVEMQ_BASE/data"
+    # ACTIVEMQ_TMP="$ACTIVEMQ_BASE/tmp"
+
+    # Configure a user with non root privileges, if no user is specified do not change user
+    # (the entire activemq installation should be owned by this user)
+    ACTIVEMQ_USER=""
+
+    # location of the pidfile
+    # ACTIVEMQ_PIDFILE="$ACTIVEMQ_DATA/activemq.pid"
+
+    # Location of the java installation
+    # Specify the location of your java installation using JAVA_HOME, or specify the
+    # path to the "java" binary using JAVACMD
+    # (set JAVACMD to "auto" for automatic detection)
+    #JAVA_HOME=""
+    JAVACMD="auto"
+
+  activemq.xml: |-
+    <!--
+        Licensed to the Apache Software Foundation (ASF) under one or more
+        contributor license agreements.  See the NOTICE file distributed with
+        this work for additional information regarding copyright ownership.
+        The ASF licenses this file to You under the Apache License, Version 2.0
+        (the "License"); you may not use this file except in compliance with
+        the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+    -->
+    <beans xmlns="http://www.springframework.org/schema/beans"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:spring="http://www.springframework.org/schema/beans"
+           xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                    http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+        <!-- Allows us to use system properties as variables in this configuration file -->
+        <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+            <property name="locations">
+                <value>file:${activemq.conf}/credentials.properties</value>
+            </property>
+            <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        </bean>
+
+        <!-- Allows accessing the server log -->
+        <!-- <bean id="logQuery" class="io.fabric8.insight.log.log4j.Log4jLogQuery"
+              lazy-init="false" scope="singleton"
+              init-method="start" destroy-method="stop">
+        </bean> -->
+
+        <!--LeaseLockerIOExceptionHandler for external database-->
+        {{- if $instance.brokerProperties.springDatasourceDriverClassName }}
+        <bean id="ioExceptionHandler" class="org.apache.activemq.util.LeaseLockerIOExceptionHandler" />
+        {{ else }}
+        <!-- <bean id="ioExceptionHandler" class="org.apache.activemq.util.LeaseLockerIOExceptionHandler" /> -->
+        {{- end }}
+
+        <!--import ECP broker security plugin configuration-->
+        <import resource="ecp-config.xml"/>
+
+        <!--
+            The <broker> element is used to configure the ActiveMQ broker.
+        -->
+        <broker xmlns="http://activemq.apache.org/schema/core" brokerName="broker-${ecp.cluster.manager.localInstanceID:local}" dataDirectory="${activemq.data}" {{ if $instance.brokerProperties.springDatasourceDriverClassName }}ioExceptionHandler="#ioExceptionHandler"{{- end }}>
+
+            <destinationPolicy>
+                <policyMap>
+                    <policyEntries>
+                        <policyEntry queue=">" producerFlowControl="false" memoryLimit="100 mb"></policyEntry>
+                        <policyEntry topic=">" >
+                            <!-- The constantPendingMessageLimitStrategy is used to prevent
+                                 slow topic consumers to block producers and affect other consumers
+                                 by limiting the number of messages that are retained
+                                 For more information, see:
+
+                                 http://activemq.apache.org/slow-consumer-handling.html
+
+                            -->
+                            <pendingMessageLimitStrategy>
+                                <constantPendingMessageLimitStrategy limit="1000"/>
+                            </pendingMessageLimitStrategy>
+                        </policyEntry>
+                    </policyEntries>
+                </policyMap>
+            </destinationPolicy>
+
+
+            <!--
+                The managementContext is used to configure how ActiveMQ is exposed in
+                JMX. By default, ActiveMQ uses the MBean server that is started by
+                the JVM. For more information, see:
+
+                http://activemq.apache.org/jmx.html
+            -->
+            <managementContext>
+                <managementContext createConnector="false"/>
+            </managementContext>
+
+            <!--
+                Configure message persistence for the broker. The default persistence
+                mechanism is the KahaDB store (identified by the kahaDB tag).
+                For more information, see:
+
+                http://activemq.apache.org/persistence.html
+            -->
+
+            <!--Persistence adapter for HA deployment. -->
+            {{- if $instance.brokerProperties.springDatasourceDriverClassName }}
+            {{- if or (eq $instance.brokerProperties.springDatasourceDriverClassName "org.mariadb.jdbc.Driver") (eq $instance.brokerProperties.springDatasourceDriverClassName "com.mysql.jdbc.Driver") }}
+            <persistenceAdapter>
+                <jdbcPersistenceAdapter adapter="#mysql-adapter" maxRows="{{$instance.brokerProperties.brokerSpringDatasourceAdapterMaxrows | default "32767"}}" dataSource="#broker-ds" lockKeepAlivePeriod="5000">
+                    <adapter>
+                        <mysql-jdbc-adapter maxRows="{{$instance.brokerProperties.brokerSpringDatasourceAdapterMaxrows | default "32767"}}"/>
+                    </adapter>
+                    <locker>
+                        <lease-database-locker lockAcquireSleepInterval="10000"/>
+                    </locker>
+                </jdbcPersistenceAdapter>
+            </persistenceAdapter>
+
+            {{- else if eq $instance.brokerProperties.springDatasourceDriverClassName "com.microsoft.sqlserver.jdbc.SQLServerDriver"}}
+            <persistenceAdapter>
+                <jdbcPersistenceAdapter maxRows="{{$instance.brokerProperties.brokerSpringDatasourceAdapterMaxrows | default "32767"}}" dataSource="#broker-ds" lockKeepAlivePeriod="5000">
+                    <adapter>
+                        <sqlServerJDBCAdapter/>
+                    </adapter>
+                    <locker>
+                        <lease-database-locker lockAcquireSleepInterval="10000"/>
+                    </locker>
+                </jdbcPersistenceAdapter>
+            </persistenceAdapter>
+
+            {{- else if eq $instance.brokerProperties.springDatasourceDriverClassName "org.postgresql.Driver"}}
+            <persistenceAdapter>
+                <jdbcPersistenceAdapter maxRows="{{$instance.brokerProperties.brokerSpringDatasourceAdapterMaxrows | default "32767"}}" dataSource="#broker-ds" lockKeepAlivePeriod="5000">
+                    <adapter>
+                        <postgresql-jdbc-adapter/>
+                    </adapter>
+                    <locker>
+                        <lease-database-locker lockAcquireSleepInterval="10000"/>
+                    </locker>
+                </jdbcPersistenceAdapter>
+            </persistenceAdapter>
+
+            {{- else if eq $instance.brokerProperties.springDatasourceDriverClassName "oracle.jdbc.OracleDriver"}}
+            <persistenceAdapter>
+                <jdbcPersistenceAdapter maxRows="{{$instance.brokerProperties.brokerSpringDatasourceAdapterMaxrows | default "32767"}}" dataSource="#broker-ds" lockKeepAlivePeriod="5000">
+                    <adapter>
+                        <oracleJDBCAdapter/>
+                    </adapter>
+                    <locker>
+                        <lease-database-locker lockAcquireSleepInterval="10000"/>
+                    </locker>
+                </jdbcPersistenceAdapter>
+            </persistenceAdapter>
+            {{ else }}
+            <persistenceAdapter>
+                <kahaDB directory="${activemq.data}/kahadb"/>
+            </persistenceAdapter>
+            {{- end }}
+            {{- end }}
+
+            <!--
+              The systemUsage controls the maximum amount of space the broker will
+              use before disabling caching and/or slowing down producers. For more information, see:
+              http://activemq.apache.org/producer-flow-control.html
+            -->
+            <systemUsage>
+                <systemUsage>
+                    <memoryUsage>
+                        <memoryUsage percentOfJvmHeap="70"/>
+                    </memoryUsage>
+                    <storeUsage>
+                        <storeUsage percentLimit="80"/>
+                    </storeUsage>
+                    <tempUsage>
+                        <tempUsage percentLimit="10"/>
+                    </tempUsage>
+                </systemUsage>
+            </systemUsage>
+
+            <plugins>
+                <!-- ECP JAAS Authentication plugin -->
+                <jaasCertificateAuthenticationPlugin configuration="CertLogin"/>
+
+                <!-- ECP Authorization plugin -->
+                <spring:bean id="ecpAuthorizationPlugin" class="eu.entsoe.ecp.activemq.plugin.auth.EcpAuthorizationPlugin">
+                    <spring:constructor-arg name="additionalFilter" ref="ecpBrokerFilter"/>
+                </spring:bean>
+            </plugins>
+
+            <sslContext>
+                <sslContext keyStore="${ecp.authKeystore.location}" keyStorePassword="password"
+                            trustStore="${ecp.authKeystore.location}" trustStorePassword="password"/>
+            </sslContext>
+
+            <!--
+                The transport connectors expose ActiveMQ over a given protocol to
+                clients and other brokers. For more information, see:
+
+                http://activemq.apache.org/configuring-transports.html
+            -->
+            <transportConnectors>
+                <transportConnector name="amqp+ssl" uri="amqp+ssl://0.0.0.0:{{ (($instance.service).amqps).port | default "5671" }}?needClientAuth=true&amp;transport.enabledProtocols=TLSv1.3&amp;transport.enabledCipherSuites=TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_AES_128_GCM_SHA256"/>
+            </transportConnectors>
+
+            <!-- destroy the spring context on shutdown to stop jetty -->
+            <shutdownHooks>
+                <bean xmlns="http://www.springframework.org/schema/beans" class="org.apache.activemq.hooks.SpringContextHook" />
+            </shutdownHooks>
+
+        </broker>
+
+        <!--Datastore configuration for HA setup-->
+
+        {{- if $instance.brokerProperties.springDatasourceDriverClassName }}
+
+        <bean id="broker-ds" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+            
+            {{- if eq $instance.brokerProperties.springDatasourceDriverClassName "org.mariadb.jdbc.Driver"}}
+            <property name="driverClassName" value="org.mariadb.jdbc.Driver"/>
+            <property name="validationQuery" value="select 1 as dbcp_connection_test"/>
+            
+            {{- else if eq $instance.brokerProperties.springDatasourceDriverClassName "com.microsoft.sqlserver.jdbc.SQLServerDriver"}}
+            <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+            <property name="validationQuery" value="select 1 as dbcp_connection_test"/>
+
+            {{- else if eq $instance.brokerProperties.springDatasourceDriverClassName "org.postgresql.Driver"}}
+            <property name="driverClassName" value="org.postgresql.Driver"/>
+            <property name="validationQuery" value="select 1 as dbcp_connection_test"/>
+
+            {{- else if eq $instance.brokerProperties.springDatasourceDriverClassName "oracle.jdbc.OracleDriver"}}
+            <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
+            <property name="validationQuery" value="select 1 from dual"/>
+            
+            {{- end }}
+            <property name="url" value="${broker.store.jdbc.url}"/>
+            <property name="username" value="${broker.store.jdbc.user}"/>
+            <property name="password" value="${broker.store.jdbc.password}"/>
+            <property name="maxTotal" value="${broker.datasource.maxTotal:200}"/>
+            <property name="maxIdle" value="${broker.datasource.maxIdle:100}"/>
+            <property name="poolPreparedStatements" value="true"/>
+            <property name="testOnBorrow" value="true"/>
+            <property name="validationQueryTimeout" value="5"/>
+            <property name="timeBetweenEvictionRunsMillis" value="${broker.datasource.timeBetweenEvictionRunsMillis:5000}"/>
+            <property name="minEvictableIdleTimeMillis" value="${broker.datasource.minEvictableIdleTimeMillis:60000}"/>
+            <property name="numTestsPerEvictionRun" value="3"/>
+        </bean>
+        {{- end }}
+        
+        <!--
+            Enable web consoles, REST and Ajax APIs and demos
+            The web consoles requires by default login, you can disable this in the jetty.xml file
+
+            Take a look at ${ACTIVEMQ_HOME}/conf/jetty.xml for more details
+        -->
+        <import resource="jetty.xml"/>
+    </beans>
+
+  jetty-realm.properties: |-
+    ## ---------------------------------------------------------------------------
+    ## Licensed to the Apache Software Foundation (ASF) under one or more
+    ## contributor license agreements.  See the NOTICE file distributed with
+    ## this work for additional information regarding copyright ownership.
+    ## The ASF licenses this file to You under the Apache License, Version 2.0
+    ## (the "License"); you may not use this file except in compliance with
+    ## the License.  You may obtain a copy of the License at
+    ##
+    ## http://www.apache.org/licenses/LICENSE-2.0
+    ##
+    ## Unless required by applicable law or agreed to in writing, software
+    ## distributed under the License is distributed on an "AS IS" BASIS,
+    ## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    ## See the License for the specific language governing permissions and
+    ## limitations under the License.
+    ## ---------------------------------------------------------------------------
+
+    # Defines users that can access the web (console, demo, etc.)
+    # username: password [,rolename ...]
+    {{- range $i, $item := $instance.jettyRealmProperties }}
+    {{ $item.login }}: {{ $item.password }}, admin
+    {{- end }}
+
+
+  
+  jetty.xml: |-
+    <!--
+        Licensed to the Apache Software Foundation (ASF) under one or more contributor
+        license agreements. See the NOTICE file distributed with this work for additional
+        information regarding copyright ownership. The ASF licenses this file to You under
+        the Apache License, Version 2.0 (the "License"); you may not use this file except in
+        compliance with the License. You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or
+        agreed to in writing, software distributed under the License is distributed on an
+        "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+        implied. See the License for the specific language governing permissions and
+        limitations under the License.
+    -->
+    <!--
+        An embedded servlet engine for serving up the Admin consoles, REST and Ajax APIs and
+        some demos Include this file in your configuration to enable ActiveMQ web components
+        e.g. <import resource="jetty.xml"/>
+    -->
+    <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+        <bean id="securityLoginService" class="org.eclipse.jetty.security.HashLoginService">
+            <property name="name" value="ActiveMQRealm" />
+            <property name="config" value="${activemq.conf}/jetty-realm.properties" />
+        </bean>
+
+        <bean id="securityConstraint" class="org.eclipse.jetty.util.security.Constraint">
+            <property name="name" value="BASIC" />
+            <property name="roles" value="user,admin" />
+            <!-- set authenticate=false to disable login -->
+            <property name="authenticate" value="true" />
+        </bean>
+        <bean id="adminSecurityConstraint" class="org.eclipse.jetty.util.security.Constraint">
+            <property name="name" value="BASIC" />
+            <property name="roles" value="admin" />
+            <!-- set authenticate=false to disable login -->
+            <property name="authenticate" value="true" />
+        </bean>
+        <bean id="securityConstraintMapping" class="org.eclipse.jetty.security.ConstraintMapping">
+            <property name="constraint" ref="securityConstraint" />
+            <property name="pathSpec" value="/*,/api/*,/admin/*,*.jsp" />
+        </bean>
+        <bean id="adminSecurityConstraintMapping" class="org.eclipse.jetty.security.ConstraintMapping">
+            <property name="constraint" ref="adminSecurityConstraint" />
+            <property name="pathSpec" value="*.action" />
+        </bean>
+
+        <bean id="rewriteHandler" class="org.eclipse.jetty.rewrite.handler.RewriteHandler">
+            <property name="rules">
+                <list>
+                    <bean id="header" class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                        <property name="pattern" value="*" />
+                        <property name="name" value="X-FRAME-OPTIONS" />
+                        <property name="value" value="SAMEORIGIN" />
+                    </bean>
+                    <bean id="header" class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                        <property name="pattern" value="*" />
+                        <property name="name" value="X-XSS-Protection" />
+                        <property name="value" value="1; mode=block" />
+                    </bean>
+                    <bean id="header" class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                        <property name="pattern" value="*" />
+                        <property name="name" value="X-Content-Type-Options" />
+                        <property name="value" value="nosniff" />
+                    </bean>
+                </list>
+            </property>
+        </bean>
+
+        <bean id="secHandlerCollection" class="org.eclipse.jetty.server.handler.HandlerCollection">
+            <property name="handlers">
+                <list>
+                    <ref bean="rewriteHandler" />
+                    <bean class="org.eclipse.jetty.webapp.WebAppContext">
+                        <property name="contextPath" value="/admin" />
+                        <property name="resourceBase" value="${activemq.home}/webapps/admin" />
+                        <property name="logUrlOnStart" value="true" />
+                    </bean>
+                    <bean class="org.eclipse.jetty.webapp.WebAppContext">
+                        <property name="contextPath" value="/api" />
+                        <property name="resourceBase" value="${activemq.home}/webapps/api" />
+                        <property name="logUrlOnStart" value="true" />
+                    </bean>
+                    <bean class="org.eclipse.jetty.server.handler.ResourceHandler">
+                        <property name="directoriesListed" value="false" />
+                        <property name="welcomeFiles">
+                            <list>
+                                <value>index.html</value>
+                            </list>
+                        </property>
+                        <property name="resourceBase" value="${activemq.home}/webapps/" />
+                    </bean>
+                    <bean id="defaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">
+                        <property name="serveIcon" value="false" />
+                    </bean>
+                </list>
+            </property>
+        </bean>
+        <bean id="securityHandler" class="org.eclipse.jetty.security.ConstraintSecurityHandler">
+            <property name="loginService" ref="securityLoginService" />
+            <property name="authenticator">
+                <bean class="org.eclipse.jetty.security.authentication.BasicAuthenticator" />
+            </property>
+            <property name="constraintMappings">
+                <list>
+                    <ref bean="adminSecurityConstraintMapping" />
+                    <ref bean="securityConstraintMapping" />
+                </list>
+            </property>
+            <property name="handler" ref="secHandlerCollection" />
+        </bean>
+
+        <bean id="contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection">
+        </bean>
+
+        <bean id="jettyPort" class="org.apache.activemq.web.WebConsolePort" init-method="start">
+            <!-- the default port number for the web console -->
+            <property name="host" value="{{ (($instance.service).http).host | default "0.0.0.0" }}"/>
+            <property name="port" value="{{ (($instance.service).http).port | default "8161" }}"/>
+        </bean>
+
+        <bean id="Server" depends-on="jettyPort" class="org.eclipse.jetty.server.Server" destroy-method="stop">
+
+            <property name="handler">
+                <bean id="handlers" class="org.eclipse.jetty.server.handler.HandlerCollection">
+                    <property name="handlers">
+                        <list>
+                            <ref bean="contexts" />
+                            <ref bean="securityHandler" />
+                        </list>
+                    </property>
+                </bean>
+            </property>
+
+        </bean>
+
+        <bean id="invokeConnectors" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+            <property name="targetObject" ref="Server" />
+            <property name="targetMethod" value="setConnectors" />
+            <property name="arguments">
+                <list>
+                    {{- if (($instance.service).http).port }}
+                    <bean id="Connector" class="org.eclipse.jetty.server.ServerConnector">
+                        <constructor-arg ref="Server" />
+                        <!-- see the jettyPort bean -->
+      
+                        <property name="host" value="#{systemProperties['jetty.host']}" />
+                        <property name="port" value="#{systemProperties['jetty.port']}" />
+                    </bean>
+                    {{- end }}
+                    {{- if (($instance.service).https).port }}
+                    <!--              
+                        Enable this connector if you wish to use https with web console
+                    -->
+                    <bean id="SecureConnector" class="org.eclipse.jetty.server.ServerConnector">
+                        <constructor-arg ref="Server" />
+                        <constructor-arg>
+                            <bean id="handlers" class="org.eclipse.jetty.util.ssl.SslContextFactory$Server">
+                                <property name="keyStorePath" value="{{ $instance.brokerProperties.ecpAuthKeystoreLocation | default "/opt/ecp-broker/config/authKeystore.jks" }}" />
+                                <property name="keyStorePassword" value="{{ $instance.brokerProperties.ecpAuthKeystorePassword | default "password" }}" />
+                            </bean>
+                        </constructor-arg>
+                        <property name="port" value="{{ ($instance.service.https).port | default "8162" }}" />
+                        <property name="host" value="{{ ($instance.service.https).host | default "0.0.0.0" }}" />
+                    </bean>
+                    {{- end }}
+                </list>
+            </property>
+        </bean>
+
+        <bean id="configureJetty" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+            <property name="staticMethod" value="org.apache.activemq.web.config.JspConfigurer.configureJetty" />
+            <property name="arguments">
+                <list>
+                    <ref bean="Server" />
+                    <ref bean="secHandlerCollection" />
+                </list>
+            </property>
+        </bean>
+
+        <bean id="invokeStart" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"
+            depends-on="configureJetty, invokeConnectors">
+            <property name="targetObject" ref="Server" />
+            <property name="targetMethod" value="start" />
+        </bean>
+    </beans>
+  
+
+  jmxremote.properties: |-
+    {{- if $instance.jmxRemoteProperties }}
+    com.sun.management.jmxremote={{ $instance.jmxRemoteProperties.comSunManagementJmxRemote | default "false" }}
+    com.sun.management.jmxremote.port={{ $instance.jmxRemoteProperties.comSunManagementJmxRemotePort | default "1099" }}
+    com.sun.management.jmxremote.rmi.port={{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteRmiPort | default "1098" }}
+    com.sun.management.jmxremote.password.file={{ $instance.jmxRemoteProperties.comSunManagementJmxRemotePasswordFile | default "/etc/ecp-directory/jmxremote.password" }}
+    com.sun.management.jmxremote.access.file={{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteAccessFile | default "/etc/ecp-directory/jmxremote.access" }}
+    com.sun.management.jmxremote.ssl={{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteSsl | default "false" }}
+    com.sun.management.jmxremote.registry.ssl={{ $instance.jmxRemoteProperties.comSunManagementJmxRegistrySsl | default "false" }}
+    com.sun.management.jmxremote.ssl.config.file={{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteSslConfigFile | default "/etc/ecp-directory/jmxremote.ssl" }}
+    com.sun.management.jmxremote.authenticate={{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteAuthenticate | default "false" }}
+    {{- end }}
+
+  jmxremote.password: |-
+    {{- if $instance.jmxRemotePassword }}
+    {{- range $i, $item := $instance.jmxRemotePassword.jmxRemoteUsers }}
+    {{.login}} {{.password}}
+    {{- end }}
+    {{- end }}
+
+  jmxremote.access: |-
+    {{- if $instance.jmxRemotePassword }}
+    {{- range $i, $item := $instance.jmxRemotePassword.jmxRemoteUsers }}
+    {{.login}} {{.access}}
+    {{- end }}
+    {{- end }}
+
+  jmxremote.ssl: |-
+    {{- if $instance.jmxRemoteSsl }}
+    javax.net.ssl.keyStore={{ $instance.jmxRemoteSsl.javaxNetSslKeystore | default "/path/to/keystore.jks" }}
+    javax.net.ssl.keyStorePassword={{ $instance.jmxRemoteSsl.javaxNetSslKeystorePassword | default "keystore_password" }}
+    javax.net.ssl.trustStore={{ $instance.jmxRemoteSsl.javaxNetSslTrustStore | default "/path/to/truststore.jks" }}
+    javax.net.ssl.trustStorePassword={{ $instance.jmxRemoteSsl.javaxNetSslTrustStorePassword | default "truststore_password" }}
+    {{- end }}
+
+  log4j.properties: |-
+    ## ---------------------------------------------------------------------------
+    ## Licensed to the Apache Software Foundation (ASF) under one or more
+    ## contributor license agreements.  See the NOTICE file distributed with
+    ## this work for additional information regarding copyright ownership.
+    ## The ASF licenses this file to You under the Apache License, Version 2.0
+    ## (the "License"); you may not use this file except in compliance with
+    ## the License.  You may obtain a copy of the License at
+    ##
+    ## http://www.apache.org/licenses/LICENSE-2.0
+    ##
+    ## Unless required by applicable law or agreed to in writing, software
+    ## distributed under the License is distributed on an "AS IS" BASIS,
+    ## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    ## See the License for the specific language governing permissions and
+    ## limitations under the License.
+    ## ---------------------------------------------------------------------------
+
+    #
+    # This file controls most of the logging in ActiveMQ which is mainly based around
+    # the commons logging API.
+    #
+    log4j.rootLogger=INFO, console, logfile
+    log4j.logger.org.apache.activemq.spring=WARN
+    log4j.logger.org.apache.activemq.web.handler=WARN
+    log4j.logger.org.springframework=WARN
+    log4j.logger.org.apache.xbean=WARN
+    log4j.logger.org.apache.camel=INFO
+    log4j.logger.org.eclipse.jetty=WARN
+    log4j.logger.eu.entsoe=DEBUG
+
+    # When debugging or reporting problems to the ActiveMQ team,
+    # comment out the above lines and uncomment the next.
+
+    #log4j.rootLogger=DEBUG, logfile, console
+
+    # Or for more fine grained debug logging uncomment one of these
+    #log4j.logger.org.apache.activemq=DEBUG
+    #log4j.logger.org.apache.camel=DEBUG
+
+    # Console appender
+    log4j.appender.console=org.apache.log4j.ConsoleAppender
+    log4j.appender.console.layout=org.apache.log4j.PatternLayout
+    log4j.appender.console.layout.ConversionPattern=%5p | %m%n
+    log4j.appender.console.threshold=INFO
+
+    # File appender
+    log4j.appender.logfile=org.apache.log4j.RollingFileAppender
+    log4j.appender.logfile.file=${activemq.data}/activemq.log
+    log4j.appender.logfile.maxFileSize=1024KB
+    log4j.appender.logfile.maxBackupIndex=5
+    log4j.appender.logfile.append=true
+    log4j.appender.logfile.layout=org.apache.log4j.PatternLayout
+    log4j.appender.logfile.layout.ConversionPattern=%d | %-5p | %m | %c | %t%n%throwable{full}
+
+    # you can control the rendering of exception in the ConversionPattern
+    # by default, we display the full stack trace
+    # if you want to display short form of the exception, you can use
+    #
+    # log4j.appender.logfile.layout.ConversionPattern=%d | %-5p | %m | %c | %t%n%throwable{short}
+    #
+    # a classic issue with filebeat/logstash is about multiline exception. The following pattern
+    # allows to work smoothly with filebeat/logstash
+    #
+    # log4j.appender.logfile.layour.ConversionPattern=%d | %-5p | %m | %c | %t%n%replace(%throwable){\n}{ }
+    #
+
+    # use some of the following patterns to see MDC logging data
+    #
+    # %X{activemq.broker}
+    # %X{activemq.connector}
+    # %X{activemq.destination}
+    #
+    # e.g.
+    #
+    # log4j.appender.logfile.layout.ConversionPattern=%d | %-20.20X{activemq.connector} | %-5p | %m | %c | %t%n
+
+    log4j.throwableRenderer=org.apache.log4j.EnhancedThrowableRenderer
+
+    ###########
+    # Audit log
+    ###########
+
+    log4j.additivity.org.apache.activemq.audit=false
+    log4j.logger.org.apache.activemq.audit=INFO, audit
+
+    log4j.appender.audit=org.apache.log4j.RollingFileAppender
+    log4j.appender.audit.file=${activemq.base}/data/audit.log
+    log4j.appender.audit.maxFileSize=1024KB
+    log4j.appender.audit.maxBackupIndex=5
+    log4j.appender.audit.append=true
+    log4j.appender.audit.layout=org.apache.log4j.PatternLayout
+    log4j.appender.audit.layout.ConversionPattern=%-5p | %m | %t%n
+
+  {{ range $i, $item := $instance.configMap }}
+  {{ .subPath }}: |-
+  {{- .content | nindent 4 }}
+  {{ end }}
+---
+{{- end }}
+{{ end }}

@@ -1,0 +1,307 @@
+{{- range $i, $instance := .Values.instance }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{$.Release.Namespace}}-{{$.Chart.Name}}-{{$instance.name}}
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/configMap.yaml") $ | sha256sum }}
+  labels:
+    app: {{$.Release.Namespace}}-{{$.Chart.Name}}-{{$instance.name}}
+spec:
+  serviceName: {{$.Release.Namespace}}-{{$.Chart.Name}}-{{$instance.name}}
+  replicas: {{ $instance.replicaCount | default "1"}}
+  selector:
+    matchLabels:
+      app: {{$.Release.Namespace}}-{{$.Chart.Name}}-{{$instance.name}}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configMap.yaml") $ | sha256sum }}
+        {{- if $instance.template }}
+          {{- range $i, $item := $instance.template.annotations }}
+          {{- toYaml $item | nindent 8 }}
+          {{- end }}
+        {{- end }}
+      labels:
+        app: {{$.Release.Namespace}}-{{$.Chart.Name}}-{{$instance.name}}
+        {{- if $instance.template }}
+          {{- range $i, $item := $instance.template.labels }}
+          {{- toYaml $item | nindent 8 }}
+          {{- end }}
+        {{- end }}
+    spec:
+    {{- with $.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- if $instance.affinity }}
+      affinity:
+        {{- toYaml $instance.affinity | nindent 8 }}
+    {{- end }}
+
+      securityContext:
+        fsGroup: {{ ($instance.securityContext).fsGroup | default "2020" }}
+        {{- if ($instance.securityContext).fsGroupChangePolicy }}
+        fsGroupChangePolicy: {{ ($instance.securityContext).fsGroupChangePolicy | default "OnRootMismatch" | quote }}
+        {{- end }}
+
+      initContainers:
+        - name: ensure-persistent-volume-sync-with-image-data
+          image: "{{$instance.image.name}}:{{$instance.image.tag}}"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh","-c"]
+          args:
+            - cp -Rn /var/lib/edx-catalogue/* /tmp/edx-catalogue-dir/
+          volumeMounts:
+          - name: data
+            mountPath: "/tmp/edx-catalogue-dir"
+        - name: pgsql-data-permission-fix-and-livenessprobe-script
+          image: "{{ $.Values.global.imageBusybox.name }}"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh","-c"]
+          args:
+            - /bin/chmod 777 -R /data;
+              {{- if $instance.keepLogsAfterRestart}}
+              /bin/chmod 777 -R /logs;
+              {{- end }}
+          volumeMounts:
+          - name: data
+            mountPath: /data
+          {{- if $instance.keepLogsAfterRestart}}
+          - name: logs
+            mountPath: /logs
+          {{- end }}
+
+         {{- if $instance.readinessProbe}}
+         {{- if $instance.catalogueProperties.springDatasourceDriverClassName }}
+         {{- if or (eq $instance.catalogueProperties.springDatasourceDriverClassName "org.mariadb.jdbc.Driver") (eq $instance.catalogueProperties.springDatasourceDriverClassName "com.mysql.jdbc.Driver") }}
+        - name: mysql-readiness-check
+          image: "{{ $.Values.global.imageMysqlClient.name }}"
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/sh","-c" ]
+          args:
+            - dbs=$(echo {{$instance.catalogueProperties.edxDBHostname}} | tr "," "\n");
+              while true; do
+              for db in $dbs; do
+              mysql -h $db -u {{$instance.catalogueProperties.edxDBUsername}} -p{{$instance.catalogueProperties.edxDBPassword}} -D {{$instance.catalogueProperties.edxDBName}} -e "SHOW DATABASES LIKE '{{$instance.catalogueProperties.edxDBName}}'";
+              if [ $? -eq 0 ]; then break 2; fi
+              done;
+              echo waiting for database;
+              sleep 2;
+              done
+         {{- end }}
+
+         {{- if eq $instance.catalogueProperties.springDatasourceDriverClassName "com.microsoft.sqlserver.jdbc.SQLServerDriver"}}
+        - name: mssql-readiness-check
+          image: "{{ $.Values.global.imageMsSqlClient.name }}"
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash","-c" ]
+          args: 
+            - dbs=$(echo {{$instance.catalogueProperties.edxDBHostname}} | tr "," "\n");
+              while true; do
+              for db in $dbs; do
+              export DB_STATE=$(/opt/mssql-tools/bin/sqlcmd -S $db -U {{$instance.catalogueProperties.edxDBUsername}} -P {{$instance.catalogueProperties.edxDBPassword}} -Q "IF DB_ID('{{$instance.catalogueProperties.edxDBName}}') IS NOT NULL print 'OK'");
+              if [ "$DB_STATE" = 'OK' ]; then break 2; fi
+              done;
+              echo waiting for database;
+              sleep 2;
+              done
+         {{- end }}
+
+         {{- if eq $instance.catalogueProperties.springDatasourceDriverClassName "org.postgresql.Driver"}}
+        - name: postgres-readiness-check
+          image: "{{ $.Values.global.imagePostgresClient.name }}"
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash","-c" ]
+          args: 
+            - export DB_PORT=$(echo "{{$instance.catalogueProperties.edxDBUrl}}" | awk '{n=split($0,x,":"); print x[n]}' | awk -F "/" '{print $1}' );
+              dbs=$(echo {{$instance.catalogueProperties.edxDBHostname}} | tr "," "\n");
+              while true; do
+              for db in $dbs; do
+              export DB_KNOWN=$(PGPASSWORD={{$instance.catalogueProperties.edxDBPassword}} psql -h $db -p $DB_PORT -U {{$instance.catalogueProperties.edxDBUsername}} -lqt | cut -d \| -f 1 | grep -w {{$instance.catalogueProperties.edxDBName}} | wc -l);
+              if [ $DB_KNOWN -eq 1 ]; then break 2; fi
+              done;
+              echo waiting for database;
+              sleep 2;
+              done
+         {{- end }}
+
+         {{- if eq $instance.catalogueProperties.springDatasourceDriverClassName "oracle.jdbc.OracleDriver"}}
+        - name: oracle-readiness-check
+          image: "{{ $.Values.global.imageOracleClient.name }}"
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash","-c" ]
+          args: 
+            - export PDB=$(echo {{$instance.catalogueProperties.edxDBUrl}} | awk '{n=split($0,x,"/"); print x[n]}');
+              echo "SELECT USER FROM DUAL WHERE USER = '{{upper $instance.catalogueProperties.edxDBUsername}}';" > /select.sql;
+              dbs=$(echo {{$instance.catalogueProperties.edxDBHostname}} | tr "," "\n");
+              while true; do
+              for db in $dbs; do
+              export CONN_STR="{{$instance.catalogueProperties.edxDBUsername}}/{{$instance.catalogueProperties.edxDBPassword}}@//$db/$PDB"
+              export DB_KNOWN=$(sqlplus $CONN_STR < /select.sql | grep -wx "{{upper $instance.catalogueProperties.edxDBUsername }}" | wc -l);
+              if [ $DB_KNOWN -eq 1 ]; then break 2; fi
+              done;
+              echo waiting for database;
+              sleep 2;
+              done
+         {{- end }}
+
+         {{- end }}
+         {{- end }}
+      {{- range $i, $item := $instance.initContainers }}
+        - {{- toYaml $item | nindent 10 }}
+      {{- end }}
+
+      containers:
+        - name: {{$.Release.Name}}
+          image: "{{ $instance.image.name }}:{{ $instance.image.tag }}"
+          {{- if $instance.command }}
+          command: {{- toYaml $instance.command | nindent 10 }}
+          args: {{- toYaml $instance.args | nindent 10 }}
+          {{- end }}
+          {{- if $instance.image.registry }}
+          registry: {{ $instance.image.registry }}
+          {{- end }}
+          imagePullPolicy: {{ $instance.image.pullPolicy | default "IfNotPresent" }}
+          {{- if $instance.livenessProbe}}
+          # Liveness probes rules
+          livenessProbe:
+            httpGet:
+              path: {{ $instance.catalogueProperties.livenessContextPath | default "/actuator/health" }}
+              port: {{ (($instance.service).https).port | default (($instance.service).http).port }}
+              scheme: {{ if (($instance.service).https).port -}}HTTPS{{- else -}}HTTP{{- end }}
+              httpHeaders:
+              - name: Authorization
+                value: {{ $firstUser := index $instance.edxUsersProperties.edxCatalogueUsers 0 }} {{ printf "Basic %s" (b64enc (printf "%s:%s" $firstUser.login $firstUser.password )) }} 
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            {{- end }}
+
+          securityContext:
+            runAsUser: {{ ($instance.securityContext).runAsUser | default "2020" }}
+            runAsGroup: {{ ($instance.securityContext).runAsGroup | default "2020" }}
+
+          {{- if $instance.service }}
+          ports:
+            {{- if $instance.service.http }}
+            - name: http
+              containerPort: {{$instance.service.http.port}}
+              protocol: TCP
+            {{- end}}
+            {{- if $instance.service.https }}
+            - name: https
+              containerPort: {{ $instance.service.https.port }}
+              protocol: TCP
+            {{- end}}
+            {{- if $instance.service.amqp }}
+            - name: amqp
+              containerPort: {{$instance.service.amqp.port}}
+              protocol: TCP
+            {{- end }}
+            {{- if $instance.service.amqps }}
+            - name: amqps
+              containerPort: {{$instance.service.amqps.port}}
+              protocol: TCP
+            {{- end }}
+          {{- end }}
+
+          volumeMounts:
+            - name: config
+              subPath: catalogue.properties
+              mountPath: /etc/edx-catalogue/catalogue.properties
+            - name: config
+              subPath: edx-users.properties
+              mountPath: /etc/edx-catalogue/edx-users.properties
+            {{- if $instance.jmxRemoteProperties }}
+            - name: config
+              subPath: jmxremote.properties
+              mountPath: /etc/edx-catalogue/jmxremote.properties
+            - name: config
+              subPath: jmxremote.password
+              mountPath: {{ $instance.jmxRemoteProperties.comSunManagementJmxRemotePasswordFile | default "/etc/edx-catalogue/jmxremote.password" }}
+            - name: config
+              subPath: jmxremote.access
+              mountPath: {{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteAccessFile | default "/etc/edx-catalogue/jmxremote.access" }}
+            - name: config
+              subPath: jmxremote.ssl
+              mountPath: {{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteSslConfigFile | default "/etc/edx-catalogue/jmxremote.ssl" }}
+            {{- end }}
+            - name: data
+              mountPath: {{ $instance.catalogueProperties.dataDirectory | default "/var/lib/edx-catalogue" }}
+            {{- if $instance.keepLogsAfterRestart}}
+            - name: logs
+              mountPath: {{ $instance.catalogueProperties.loggingFilePath | default "/var/log/edx-catalogue" }}
+            {{- end }}
+            - name: config
+              subPath: edx-logback.xml
+              mountPath: /etc/edx-catalogue/edx-logback.xml
+            - name: config
+              subPath: server.xml
+              mountPath: /usr/share/edx-catalogue/conf/server.xml
+            {{- if $instance.edxPasswordProperties }}
+            - name: config
+              subPath: edx-password.properties
+              mountPath: /etc/edx-catalogue/edx-password.properties
+            {{- end }}
+            - name: config
+              subPath: env.conf
+              mountPath: /etc/systemd/system/edx-catalogue.service.d/env.conf
+            - name: config
+              subPath: setenv.sh
+              mountPath: /usr/share/edx-catalogue/bin/setenv.sh
+            - name: config
+              subPath: users.properties
+              mountPath: /etc/edx-catalogue/users.properties
+            - name: config
+              subPath: groups.properties
+              mountPath: /etc/edx-catalogue/groups.properties
+            {{- range $i, $item := $instance.volumeMounts }}
+            - {{- toYaml $item | nindent 14 }}
+            {{- end }}
+          {{- if $instance.resourcesK8s}}
+          resources:
+            requests:
+              cpu: {{$instance.resourcesK8s.requests.cpu}} # Minimum CPU allocation for pod
+              memory: {{$instance.resourcesK8s.requests.memory}} # Minimum memory allocation for pod
+            limits:
+              cpu: {{$instance.resourcesK8s.limits.cpu}} # Maximum CPU limit for pod
+              memory: {{$instance.resourcesK8s.limits.memory}} # Maximum memory limit for pod
+          {{- end }}
+      {{- range $i, $item := $instance.containers }}
+        - {{- toYaml $item | nindent 10 }}
+      {{- end }}
+
+      volumes:
+        - name: config
+          configMap:
+            name: {{$.Release.Namespace}}-{{ $.Chart.Name }}-{{$instance.name}}-cm
+        {{- range $i, $item := $instance.volumes }}
+        - {{- toYaml $item | nindent 10 }}
+        {{- end }}
+        - name: data
+          emptyDir: {}
+
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ (($.Values.global).storage).class | default "standard" }}
+      resources:
+        requests:
+          storage: {{$instance.storageData | default "512Mi"}}
+  {{- if $instance.keepLogsAfterRestart}}
+  - metadata:
+      name: logs
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ (($.Values.global).storage).class | default "standard" }}
+      resources:
+        requests:
+          storage: {{$instance.storageLogs | default "512Mi"}}
+   {{- end }}
+  {{- range $i, $item := $instance.volumeClaimTemplates }}
+  - {{- toYaml $item | nindent 4 }}
+  {{- end }}
+---
+{{ end }}

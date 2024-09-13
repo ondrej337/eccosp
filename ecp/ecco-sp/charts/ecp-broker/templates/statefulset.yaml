@@ -1,0 +1,349 @@
+{{- range $i, $instance := .Values.instance }}
+{{- if or $instance.enabled (not (hasKey $instance "enabled")) }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{$.Release.Namespace}}-{{$.Chart.Name}}-{{$instance.name}}
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/configMap.yaml") $ | sha256sum }}
+  labels:
+    app: {{$.Release.Namespace}}-{{$.Chart.Name}}-{{$instance.name}}
+spec:
+  serviceName: {{$.Release.Namespace}}-{{$.Chart.Name}}-{{$instance.name}}
+  replicas: {{ $instance.replicaCount | default "1"}}
+  selector:
+    matchLabels:
+      app: {{$.Release.Namespace}}-{{$.Chart.Name}}-{{$instance.name}}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configMap.yaml") $ | sha256sum }}
+        {{- if $instance.template }}
+          {{- range $i, $item := $instance.template.annotations }}
+          {{- toYaml $item | nindent 8 }}
+          {{- end }}
+        {{- end }}
+      labels:
+        app: {{$.Release.Namespace}}-{{$.Chart.Name}}-{{$instance.name}}
+        {{- if $instance.template }}
+          {{- range $i, $item := $instance.template.labels }}
+          {{- toYaml $item | nindent 8 }}
+          {{- end }}
+        {{- end }}
+        
+    spec:
+    {{- with $.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- if $instance.affinity }}
+      affinity:
+        {{- toYaml $instance.affinity | nindent 8 }}
+    {{- end }}
+
+      securityContext:
+        fsGroup: {{ ($instance.securityContext).fsGroup | default "2000" }}
+        {{- if ($instance.securityContext).fsGroupChangePolicy }}
+        fsGroupChangePolicy: {{ ($instance.securityContext).fsGroupChangePolicy | default "OnRootMismatch" }}
+        {{- end }}
+
+      initContainers:
+        - name: ensure-persistent-volume-sync-with-image-data
+          image: "{{$instance.image.name}}:{{$instance.image.tag}}"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh","-c"]
+          args:
+            - cp -Rn /opt/ecp-broker/config/* /tmp/ecp-broker-dir/
+          volumeMounts:
+          - name: data
+            mountPath: "/tmp/ecp-broker-dir"
+        - name: pgsql-data-permission-fix-and-livenessprobe-script
+          image: "{{ $.Values.global.imageBusybox.name }}"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh","-c"]
+          args:
+            - /bin/chmod 777 -R /data;
+              chown {{ ($instance.securityContext).runAsUser | default "2000" }}:{{ ($instance.securityContext).runAsGroup | default "2000" }} -R /data;
+              {{- if $instance.keepLogsAfterRestart}}
+              /bin/chmod 777 -R /logs;
+              chown {{ ($instance.securityContext).runAsUser | default "2000" }}:{{ ($instance.securityContext).runAsGroup | default "2000" }} -R /data;
+              {{- end }}
+
+          volumeMounts:
+          - name: data
+            mountPath: /data
+          {{- if $instance.keepLogsAfterRestart}}
+          - name: logs
+            mountPath: /logs
+          {{- end }}
+
+         {{- if $instance.readinessProbe}}
+         {{- if $instance.brokerProperties.springDatasourceDriverClassName }}
+         {{- if or (eq $instance.brokerProperties.springDatasourceDriverClassName "org.mariadb.jdbc.Driver") (eq $instance.brokerProperties.springDatasourceDriverClassName "com.mysql.jdbc.Driver")}}
+        - name: mysql-readiness-check
+          image: "{{ $.Values.global.imageMysqlClient.name }}"
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/sh","-c" ]
+          args:
+            - dbs=$(echo {{$instance.brokerProperties.ecpDBHostname}} | tr "," "\n");
+              while true; do
+              for db in $dbs; do
+              mysql -h $db -u {{$instance.brokerProperties.brokerStoreJdbcUser}} -p{{$instance.brokerProperties.brokerStoreJdbcPassword}} -D {{$instance.brokerProperties.ecpDBName}} -e "SHOW DATABASES LIKE '{{$instance.brokerProperties.ecpDBName}}'";
+              if [ $? -eq 0 ]; then break 2; fi
+              done;
+              echo waiting for database;
+              sleep 2;
+              done
+         {{- end }}
+
+         {{- if eq $instance.brokerProperties.springDatasourceDriverClassName "com.microsoft.sqlserver.jdbc.SQLServerDriver"}}
+        - name: mssql-readiness-check
+          image: "{{ $.Values.global.imageMsSqlClient.name }}"
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash","-c" ]
+          args: 
+            - dbs=$(echo {{$instance.brokerProperties.ecpDBHostname}} | tr "," "\n");
+              while true; do
+              for db in $dbs; do
+              export DB_STATE=$(/opt/mssql-tools/bin/sqlcmd -S $db -U {{$instance.brokerProperties.brokerStoreJdbcUser}} -P {{$instance.brokerProperties.brokerStoreJdbcPassword}} -Q "IF DB_ID('{{$instance.brokerProperties.ecpDBName}}') IS NOT NULL print 'OK'");
+              if [ "$DB_STATE" = 'OK' ]; then break 2; fi
+              done;
+              echo waiting for database;
+              sleep 2;
+              done
+         {{- end }}
+
+         {{- if eq $instance.brokerProperties.springDatasourceDriverClassName "org.postgresql.Driver"}}
+        - name: postgres-readiness-check
+          image: "{{ $.Values.global.imagePostgresClient.name }}"
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash","-c" ]
+          args: 
+            - export DB_PORT=$(echo "{{$instance.brokerProperties.brokerStoreJdbcUrl}}" | awk '{n=split($0,x,":"); print x[n]}' | awk -F "/" '{print $1}' );
+              dbs=$(echo "{{$instance.brokerProperties.ecpDBHostname}}" | tr "," "\n");
+              while true; do
+              for db in $dbs; do
+              export DB_KNOWN=$(PGPASSWORD="{{$instance.brokerProperties.brokerStoreJdbcPassword}}" psql -h $db -p $DB_PORT -U "{{$instance.brokerProperties.brokerStoreJdbcUser}}" -lqt | cut -d \| -f 1 | grep -w "{{$instance.brokerProperties.ecpDBName}}" | wc -l);
+              if [ $DB_KNOWN -eq 1 ]; then break 2; fi
+              done;
+              echo waiting for database;
+              sleep 2;
+              done
+         {{- end }}
+
+         {{- if eq $instance.brokerProperties.springDatasourceDriverClassName "oracle.jdbc.OracleDriver"}}
+        - name: oracle-readiness-check
+          image: "{{ $.Values.global.imageOracleClient.name }}"
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash","-c" ]
+          args: 
+            - export PDB=$(echo {{$instance.brokerProperties.brokerStoreJdbcUrl}} | awk '{n=split($0,x,"/"); print x[n]}');
+              echo "SELECT USER FROM DUAL WHERE USER = '{{upper $instance.brokerProperties.brokerStoreJdbcUser}}';" > /select.sql;
+              dbs=$(echo {{$instance.brokerProperties.ecpDBHostname}} | tr "," "\n");
+              while true; do
+              for db in $dbs; do
+              export CONN_STR="{{$instance.brokerProperties.brokerStoreJdbcUser}}/{{$instance.brokerProperties.brokerStoreJdbcPassword}}@//$db/$PDB"
+              export DB_KNOWN=$(sqlplus $CONN_STR < /select.sql | grep -wx "{{upper $instance.brokerProperties.brokerStoreJdbcUser }}" | wc -l);
+              if [ $DB_KNOWN -eq 1 ]; then break 2; fi
+              done;
+              echo waiting for database;
+              sleep 2;
+              done
+         {{- end }}
+         
+         {{- end }}
+         {{- end }}
+      {{- range $i, $item := $instance.initContainers }}
+        - {{- toYaml $item | nindent 10 }}
+      {{- end }}
+
+      containers:
+        - name: {{$.Release.Name}}
+          image: "{{ $instance.image.name }}:{{ $instance.image.tag }}"
+          {{- if $instance.command }}
+          command: {{- toYaml $instance.command | nindent 10 }}
+          args: {{- toYaml $instance.args | nindent 10 }}
+          {{- end }}
+          {{- if $instance.image.registry }}
+          registry: {{ $instance.image.registry }}
+          {{- end }}
+          imagePullPolicy: {{ $instance.image.pullPolicy | default "IfNotPresent" }}
+          {{- if $instance.readinessProbe}}
+          readinessProbe:
+            tcpSocket:
+              port: {{ (($instance.service).amqps).port | default (($instance.service).amqp).port | default 5671 }}
+            initialDelaySeconds: 120
+            periodSeconds: 60
+          {{- end }}
+          {{- if $instance.livenessProbe}}
+          # Liveness probes rules
+          livenessProbe:
+            tcpSocket:
+              port: {{ (($instance.service).https).port | default (($instance.service).http).port }}
+            initialDelaySeconds: 120
+            periodSeconds: 60
+          {{- end }}
+          securityContext:
+            runAsUser: {{ ($instance.securityContext).runAsUser | default "2000" }}
+            runAsGroup: {{ ($instance.securityContext).runAsGroup | default "2000" }}
+          {{- if $instance.command }}
+          command: {{- toYaml $instance.command | nindent 10 }}
+          {{- end }}
+          {{- if $instance.args }}
+          args: {{- toYaml $instance.args | nindent 10 }}
+          {{- end }}
+          ports:
+          {{- if ($instance.service).http }}
+            - name: http
+              containerPort: {{$instance.service.http.port | default "8161" }}
+              protocol: TCP
+          {{- end }}
+          {{- if ($instance.service).https }}
+            - name: https
+              containerPort: {{$instance.service.https.port | default "8162" }}
+              protocol: TCP
+          {{- end }}
+            - name: amqps
+              containerPort: {{ (($instance.service).amqps).port | default "5671" }}
+              protocol: TCP
+
+          volumeMounts:
+            - name: config
+              subPath: broker.properties
+              mountPath: /opt/ecp-broker/config/broker.properties
+            {{- if $instance.jmxRemoteProperties }}
+            - name: config
+              subPath: jmxremote.properties
+              mountPath: /opt/ecp-broker/config/jmxremote.properties
+            - name: config
+              subPath: jmxremote.password
+              mountPath: {{ $instance.jmxRemoteProperties.comSunManagementJmxRemotePasswordFile | default "/opt/ecp-broker/config/jmxremote.password" }}
+            - name: config
+              subPath: jmxremote.access
+              mountPath: {{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteAccessFile | default "/opt/ecp-broker/config/jmxremote.access" }}
+            - name: config
+              subPath: jmxremote.ssl
+              mountPath: {{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteSslConfigFile | default "/opt/ecp-broker/config/jmxremote.ssl" }}
+            {{- end }}
+            {{- if $instance.jettyRealmProperties }}
+            - name: config
+              subPath: jetty-realm.properties
+              mountPath: /opt/ecp-broker/activemq/conf/jetty-realm.properties
+            {{- end }}
+            {{- if empty $instance.brokerProperties.springDatasourceDriverClassName }}
+            - name: kahadb
+              mountPath: /opt/ecp-broker/activemq/data/kahadb
+            {{- end }}
+            - name: data
+              mountPath: /opt/ecp-broker/config
+            {{- if $instance.keepLogsAfterRestart}}
+            - name: logs
+              mountPath: /opt/ecp-broker/activemq/data
+            {{- end }}
+            - name: registrationtoollogs
+              mountPath: /opt/logs
+            - name: config
+              subPath: env
+              mountPath: /opt/ecp-broker/activemq/bin/env
+            - name: config
+              subPath: activemq.xml
+              mountPath: /opt/ecp-broker/activemq/conf/activemq.xml
+            - name: config
+              subPath: log4j.properties
+              mountPath: /opt/ecp-broker/activemq/conf/log4j.properties
+            {{- if or ($instance.service).http ($instance.service).https }}
+            - name: config
+              subPath: jetty.xml
+              mountPath: /opt/ecp-broker/activemq/conf/jetty.xml
+            {{- end }}
+            {{- range $i, $item := $instance.volumeMounts }}
+            - {{- toYaml $item | nindent 14 }}
+            {{- end }}
+         {{- if $instance.resourcesK8s}}
+          resources:
+            requests:
+              cpu: {{$instance.resourcesK8s.requests.cpu}} # Minimum CPU allocation for pod
+              memory: {{$instance.resourcesK8s.requests.memory}} # Minimum memory allocation for pod
+            limits:
+              cpu: {{$instance.resourcesK8s.limits.cpu}} # Maximum CPU limit for pod
+              memory: {{$instance.resourcesK8s.limits.memory}} # Maximum memory limit for pod
+          {{- end }}
+      {{- range $i, $item := $instance.containers }}
+        - {{- toYaml $item | nindent 10 }}
+      {{- end }}
+
+      volumes:
+        - name: config
+          configMap:
+            name: {{$.Release.Namespace}}-{{ $.Chart.Name }}-{{$instance.name}}-cm
+        {{- range $i, $item := $instance.volumes }}
+        - {{- toYaml $item | nindent 10 }}
+        {{- end }}
+        {{- if $instance.useSharedStorageForConfiguration }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: shared-storage-ecp-broker-{{$instance.name}}-claim
+        {{- end }}
+
+  volumeClaimTemplates:
+  {{- if not ($instance.useSharedStorageForConfiguration) }}
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{$.Values.global.storage.class}}
+      resources:
+        requests:
+          storage: {{$instance.storageData | default "2Gi"}}
+  {{- end }}
+  {{- if empty $instance.brokerProperties.springDatasourceDriverClassName }}
+  - metadata:
+      name: kahadb
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{$.Values.global.storage.class}}
+      resources:
+        requests:
+          storage: {{$instance.storageData | default "1Gi"}}
+   {{- end }}
+
+  {{- if $instance.keepLogsAfterRestart}}
+  - metadata:
+      name: logs
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{$.Values.global.storage.class}}
+      resources:
+        requests:
+          storage: {{$instance.storageLogs | default "512Mi"}}
+   {{- end }}
+
+  - metadata:
+      name: registrationtoollogs
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{$.Values.global.storage.class}}
+      resources:
+        requests:
+          storage: {{$instance.storageLogsSize | default "64Mi"}}
+  {{- range $i, $item := $instance.volumeClaimTemplates }}
+  - {{- toYaml $item | nindent 4 }}
+  {{- end }}
+
+{{- if $instance.useSharedStorageForConfiguration }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-storage-ecp-broker-{{$instance.name}}-claim 
+spec:
+  storageClassName: {{ $instance.sharedStorageClass }}
+  accessModes:
+    - {{ $instance.sharedStorageAccessMode | default "ReadWriteMany" }}
+  resources:
+    requests:
+      storage: {{ $instance.sharedStorageSize }}
+{{ end }}
+---
+{{- end }}
+{{ end }}

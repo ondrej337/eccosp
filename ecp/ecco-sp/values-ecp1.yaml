@@ -1,0 +1,322 @@
+# The commented parameters have default values but these defaults can be overridden when enabled
+
+ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-broker
+  enabled: true # boolean flag which defines whether the component will be deployed or not
+  
+  instance: # array of ECP endpoint instances - one values file can hold multiple instances
+    - name: ep1 # name of kubernetes instance
+      image: # section for information about Docker image
+        name: entsoe/ecp-endpoint # URL to docker image.
+        tag: 4.12.0.1871 # Docker image tag - version or 'latest'
+        # pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
+      replicaCount: 2 # number of replicas - ECP cluster
+      resourcesK8s: # section for CPU and memory specification
+        requests: # minimum guaranteed amount of a resource that is reserved for a container
+          cpu: 500m # minimum CPU - one CPU = 1000m or 1
+          memory: 256Mi # minimum memory for container - 1Gi is equal to 1024 Mi
+        limits: # maximum amount of a resource to be used by a container. Should be always higher than application can allocate (xmx)
+          cpu: 1000m # maximum CPU - two CPUs = 2000m or 2
+          memory: 500Mi # maximum memory for container
+      storageData: 1Gi # Storage for embedded database and certificates. If external DB is used, the value can be lower.
+      storageLogs: 256Mi # storage for logs
+      keepLogsAfterRestart: true # boolean flag - indicates if ECP logs are persisted after pod restart, default value false
+      livenessProbe: false # automatic restart if pod is not in health state, default value false
+      readinessProbe: true # ECP pod will not started before readiness probe is fulfilled - check of availability of external DB
+
+      service: # section for definition of services exposed within kubernetes environment
+        https: # protocol used for accessing GUI - can be http or https
+          port: 8443 # port used for exposing HTTP(S) service
+        amqps: # protocol used for connection on AMQP interface of ECP Endpoint - can be AMQP or AMQPS
+          port: 5671 # port used for exposing AMQP(S) service 
+      ingress: # an object that allows access to Kubernetes services from outside the Kubernetes cluster.
+        enabled: true # boolean flag for enable/disable ingress, default value false
+        ingressClassName: nginx
+        apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
+        contextPath: / # context path for ingress, default value '/'
+        host: ecp.koval.top # URL on which the ECP Endpoint is exposed. Address needs to be aligned with hosting.
+        tls: # section for TLS definition for HTTPS connection to ingress
+          secretName: ecco-sp-ecp  # secret where TLS certificate is stored
+        annotations: # ingress annotations section
+          kubernetes.io/ingressClassName: nginx  # ingress controller definition
+#          ingres.cilium.io/tls-passthrough: "enabled"
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
+          nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
+
+      # The naming convention for configuration files name and parameters is camelCase instead of 'dot case format'.
+      # Mapping of Helm values to ECP configuration file is available in config map ./ecp-endpoint/templates/configMap.yaml
+      ecpProperties: # stands for ecp.properties file
+        springProfilesActive: ecp-ha #stands for parameter spring.profiles.active
+        dataDirectory: /var/lib/ecp-endpoint # dataDirectory config parameter for storage of persistent data
+        ecpKeystoreLocation: /var/lib/ecp-endpoint/keystore.jks # ecp.keystore.location
+        ecpKeystorePassword: password # password for the keystore.jks # ecp.keystore.password
+        ecpAuthKeystoreLocation: /var/lib/ecp-endpoint/authKeystore.jks #  ecp.authKeystore.location
+        ecpAuthKeystorePassword: password # ecp.authKeystore.password
+
+        # Uncomment desired DB configuration section if external DB is used. Change value of parameters as needed.
+
+        # ------ mysql -------
+#        springProfilesActive: ecp-ha # high-availibility profile of the application - configuration of external database
+#        ecpDBUrl: jdbc:mariadb://1.2.3.4:3306/ep1?characterEncoding=UTF-8&useSSL=false&autoReconnect=true # database connection string
+#        ecpDBUsername: ep1 # username of the user of the external database
+#        ecpDBPassword: password # password of the user of the external database
+#        ecpDBHostname: 1.2.3.4 # required for readiness check, server hostname or IP
+#        ecpDBName: ep1 # required for readiness check, external database name
+#        springDatasourceValidationQuery: select 1 # database query, that is called once in a while to maintain the db <-> app connection active
+#        springDatasourceDriverClassName: org.mariadb.jdbc.Driver # database driver
+
+#        internalBrokerStoreJdbcUrl: jdbc:mariadb://1.2.3.4:3306/ep_ib_ep1?characterEncoding=UTF-8&useSSL=false&autoReconnect=true # connection string for the external database of internal broker
+#        internalBrokerStoreJdbcUser: ecp_ib_ep1 # username of the internal broker user of the external database
+#        internalBrokerStoreJdbcPassword: password # password of the internal broker user of the external database
+
+        # ------ mssql -------
+#        springProfilesActive: ecp-ha
+#        ecpDBUrl: jdbc:sqlserver://1.2.3.4:1433;databaseName=ep1
+#        ecpDBUsername: ep1
+#        ecpDBPassword: password
+#        ecpDBHostname: 1.2.3.4 # Required for readiness check
+#        ecpDBName: ep1 # Required for readiness check
+#        springDatasourceValidationQuery: select 1
+#        springDatasourceDriverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+#        internalBrokerStoreJdbcUrl: jdbc:sqlserver://1.2.3.4:1433;databaseName=ep_ib_ep1
+#        internalBrokerStoreJdbcUser: ecp_ib_ep1
+#        internalBrokerStoreJdbcPassword: password
+
+        # ------ postgres -------
+        springProfilesActive: ecp-ha
+        ecpDBUrl: jdbc:postgresql://ecp-db-cluster-rw.cloudnative-pg.svc.cluster.local:5432/ep1
+        ecpDBUsername: ep1
+        ecpDBPassword: password
+        ecpDBHostname: ecp-db-cluster-rw.cloudnative-pg.svc.cluster.local # Required for readiness check
+        ecpDBName: ep1 # Required for readiness check
+        springDatasourceValidationQuery: select 1
+        springDatasourceDriverClassName: org.postgresql.Driver
+
+        internalBrokerStoreJdbcUrl: jdbc:postgresql://ecp-db-broker-cluster-rw.cloudnative-pg.svc.cluster.local:5432/ep_ib_ep1
+        internalBrokerStoreJdbcUser: ecp_ib_ep1
+        internalBrokerStoreJdbcPassword: password
+
+        # ------ oracle -------
+#        springProfilesActive: ecp-ha
+#        ecpDBUrl: jdbc:oracle:thin:@1.2.3.4:1521/ORACLE05PDB
+#        ecpDBUsername: ep1
+#        ecpDBPassword: password
+#        ecpDBHostname: 1.2.3.4 # Required for readiness check
+#        ecpDBName: ep1 # Required for readiness check
+#        springDatasourceValidationQuery: select 1 from dual
+#        springDatasourceDriverClassName: oracle.jdbc.OracleDriver
+
+#        internalBrokerStoreJdbcUrl: jdbc:oracle:thin:@1.2.3.4:1521/my_schema
+#        internalBrokerStoreJdbcUser: ecp_ib_ep1
+#        internalBrokerStoreJdbcPassword: password
+
+        internalBrokerHost: 0.0.0.0 # internalBroker.amqp.host
+        internalBrokerAmqpPort: 5671 # internalBroker.amqp.port
+        internalBrokerUseAuthentication: true # internalBroker.useAuthentication
+        internalBrokerAuthUser: endpoint # internalBroker.auth.user
+        internalBrokerAuthPassword: password # internalBroker.auth.password
+        internalBrokerKeystoreLocation: ${dataDirectory}/authKeystore.jks # internalBroker.keystore.location
+        internalBrokerKeystorePassword: password # internalBroker.keystore.password
+        internalBrokerKeystoreAuthAlias: ecp_module_auth # internalBroker.keystore.authAlias
+        internalBrokerUrls: amqps://ecco-sp-ecp-endpoint-ep1-svc:5671 # internalBroker.urls
+
+        loggingFileName: /var/log/ecp-endpoint/ecp.log # logging.file.name
+        loggingFilePath: /var/log/ecp-endpoint # logging.file.path
+        loggingConfig: /etc/ecp-endpoint/ecp-logback.xml # logging.config
+        loggingLevelOrgApacheQpid: WARN # logging.level.org.apache.qpid
+
+#        ecpContentStorageRoot: ${dataDirectory}/content # ecp.content.storage.root
+#        ecpContentStorageStorageId: 1 # ecp.content.storage.storageId
+
+        springJmxEnabled: false # spring.jmx.enabled
+        serverErrorWhiteLabelEnabled: false # server.error.whitelabel.enabled
+
+        ecpDBKeystorePassword: password # ecp.db.keystore.password
+
+        ecpEndpointAmqpApiEnabled: true # ecp.endpoint.amqpApiEnabled
+        ecpEndpointAmqpApiSendHandlerEnabled: true # enable AMQP API Send Handler
+        sendHandlerBeanName: amqpApiSendHandler # ecp.endpoint.sendHandler[0].beanName
+        sendHandlertypeName: "*" # ecp.endpoint.sendHandler[0].typeName
+
+#        ecpNatEnabled: false # NAT is disabled by default - equals to  ecp.natEnabled
+#        ecpNatTable: # additional parameter for NAT array. Array values are divided by ' - '
+#          - network: internet # ecp.natTable[0].network
+#            sourceIp: 1.2.3.4 # ecp.natTable[0].sourceIp
+#            sourcePort: 8443 # ecp.natTable[0].sourcePort
+#            destinationIp: 5.6.7.8 # ecp.natTable[0].destinationIp
+#            destinationPort: 8443 # ecp.natTable[0].destinationPort
+#          - network: ATOM # ecp.natTable[1].network
+#            sourceIp: 1.1.1.1 # ecp.natTable[1].sourceIp
+#            sourcePort: 5671 # ecp.natTable[1].sourcePort
+#            destinationIp: 2.2.2.2 # ecp.natTable[1].destinationIp
+#            destinationPort: 5671 # ecp.natTable[1].destinationPort
+
+#        ecpSecurityProxyEnabled: false # ecp.security.proxy.enabled
+#        ecpSecurityProxyHost: socks-host # ecp.security.proxy.host
+#        ecpSecurityProxyProxyPort: 1081 # ecp.security.proxy.port
+#        ecpSecurityProxyNonProxyHosts: 127.0.0.1,0.0.0.0 # ecp.security.proxy.nonProxyHosts
+#        ecpSecurityProxyUsername: sockssuser # ecp.security.proxy.username
+#        ecpSecurityProxyPassword: sockspassword # ecp.security.proxy.password
+
+#        jasyptEncryptorAlgorithm: PBEWithHMACSHA512AndAES_256 # jasypt.encryptor.algorithm
+#        prometheusMonitoringEnabled: false # management.endpoints.web.exposure.include=info,health,readiness,prometheus
+
+#        ecpMaxRequestSize: 2097152 # ecp.maxRequestSize
+
+         ## Keycloak settings
+#        keycloakAuthServerUrl: # keycloak.auth-server-url
+#        keycloakRealm: # keycloak.realm
+#        keycloakResource: # keycloak.resource
+#        keycloakPublicClient: # keycloak.public-client
+#        keycloakPrincipalAttribute: # keycloak.principal-attribute
+#        keycloakEnableBasicAuth: # keycloak.enable-basic-auth
+#        keycloakUseResourceRolemappings: # keycloak.use-resource-rolemappings
+
+        ## Fall Release 2023
+#        ecpHealthExclude: connectedBrokers,waitingToDeliver,waitingToReceive,internalBrokerQueuesQueueSize,isReloading,endpointStatus,certificatesStatus,invalidMessagePath,withoutValidMessagePath,synchronizationStatus
+
+#        ecpHealthThresholdConnectedBrokers: # ecp.healthThreshold.connectedBrokers
+#        ecpHealthThresholdWaitingToDeliver: # ecp.healthThreshold.waitingToDeliver
+#        ecpHealthThresholdWaitingToReceive: # ecp.healthThreshold.waitingToReceive
+#        ecpHealthThresholdInternalBrokerQueuesQueueSize: # ecp.healthThreshold.internalBrokerQueuesQueueSize
+#        ecpHealthThresholdInvalidMessagePath: # ecp.healthThreshold.invalidMessagePath
+
+      envConf: # stands for env.conf file
+        resourcesJvm: # memory allocation for ECP component
+          xms: 128M # lower bound of java heap memory size
+          xmx: 1G # upper bound of java heap memory size
+#        ecpLogFullStackTrace: false # ecp.logFullStackTrace
+
+      ecpUsersProperties: # stands for ecp-users.properties
+        ecpEndpointUsers: # array of users
+          - login: admin # ecp.endpoint.users[0].login
+            password: password # ecp.endpoint.users[0].password
+            role: admin # ecp.endpoint.users[0].role
+          - login: tester # ecp.endpoint.users[1].login
+            password: passwordtester # ecp.endpoint.users[1].password
+            role: user # ecp.endpoint.users[1].login
+
+#      ecpPasswordProperties: # ecp-password.properties
+#        encryptionPassword: encryptionPassword # encryption password for Jasypt
+
+#      jmxRemoteProperties: # jmxremote.properties
+#        comSunManagementJmxRemote: true # com.sun.management.jmxremote
+#        comSunManagementJmxRemotePort: 2099 # com.sun.management.jmxremote.port
+#        comSunManagementJmxRemoteRmiPort: 2098 # com.sun.management.jmxremote.rmi.port
+#        comSunManagementJmxRemotePasswordFile: /etc/ecp-endpoint/jmxremote.password # com.sun.management.jmxremote.password.file
+#        comSunManagementJmxRemoteAccessFile: /etc/ecp-endpoint/jmxremote.access # com.sun.management.jmxremote.access.file
+#        comSunManagementJmxRemoteSsl: true # com.sun.management.jmxremote.ssl
+#        comSunManagementJmxRegistrySsl: true # com.sun.management.jmxremote.registry.ssl
+#        comSunManagementJmxRemoteSslConfigFile: /etc/ecp-endpoint/jmxremote.ssl # com.sun.management.jmxremote.ssl.config.file
+#        comSunManagementJmxRemoteAuthenticate: true # com.sun.management.jmxremote.authenticate
+
+#      jmxRemoteSsl: # jmxremote.ssl
+#        javaxNetSslKeystore: /path/to/keystore.jks # javax.net.ssl.keyStore
+#        javaxNetSslKeystorePassword: keystore_password # javax.net.ssl.keyStorePassword
+#        javaxNetSslTrustStore: /path/to/truststore.jks # javax.net.ssl.trustStore
+#        javaxNetSslTrustStorePassword: truststore_password # javax.net.ssl.trustStorePassword
+
+#      jmxRemotePassword: # jmxremote.password
+#        jmxRemoteUsers: # array of JMX users
+#          - login: jmxuser # login for the first JMX user
+#            password: jmxpassword # password for the first JMX user
+#            access: readonly # access role for the first JMX user
+#          - login: jmxadmin # login for second JMX user
+#            password: jmxadminpassword # password for second JMX user
+#            access: readwrite # access role for the second JMX user
+
+      volumeMounts: # volume mounts - can be used for mapping config files or storages
+        - name: config # name of volume mounts for config
+          subPath: activemq-nonha.xml # name of configuration file
+          mountPath: /etc/ecp-endpoint/jms/activemq-nonha.xml # path where config file will be mounted
+
+      configMap: # config maps array
+        - subPath: activemq-nonha.xml # name of config file/volume mount
+          content: |- # content is shifted by two spaces
+            <?xml version="1.0" encoding="UTF-8"?>
+
+            <!-- TEST --> 
+            
+            <!--
+            This configures an embedded ActiveMQ internal broker with a kahaBD (file) persistent store. This store can be used
+            for non-HA deployments and for HA deployments with shared file system.
+            -->
+
+            <beans xmlns="http://www.springframework.org/schema/beans"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+                <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+                    <property name="ignoreUnresolvablePlaceholders" value="false"/>
+                </bean>
+
+                <!-- This creates an embedded ActiveMQ Broker -->
+                <broker xmlns="http://activemq.apache.org/schema/core" brokerName="internal" useJmx="${spring.jmx.enabled:false}"
+                        persistent="true" startAsync="true" schedulerSupport="false" dataDirectory="${dataDirectory}/internalBroker">
+
+                    <destinationPolicy>
+                        <policyMap>
+                            <policyEntries>
+                                <policyEntry queue=">" advisoryForConsumed="true" />
+                                <policyEntry queue="ecp.endpoint.outbox" producerFlowControl="true" memoryLimit="100 mb" maxPageSize="10" advisoryForConsumed="true" />
+                                <policyEntry queue="ecp.endpoint.internal.outbox" producerFlowControl="true" memoryLimit="100 mb" maxPageSize="10" advisoryForConsumed="true" />
+                                <policyEntry queue="ecp.endpoint.inbox" producerFlowControl="false" memoryLimit="100 mb" maxPageSize="10" advisoryForConsumed="true" />
+                                <policyEntry queue="ecp.endpoint.inbox.*" producerFlowControl="false" memoryLimit="100 mb" maxPageSize="10" advisoryForConsumed="true" />
+                                <policyEntry queue="ecp.endpoint.download" producerFlowControl="false" memoryLimit="150 mb" maxPageSize="10" advisoryForConsumed="true" />
+                                <policyEntry queue="ecp.endpoint.archive" producerFlowControl="false" memoryLimit="100 mb" maxPageSize="10" advisoryForConsumed="true" />
+                                <policyEntry queue="ecp.endpoint.upload.*" producerFlowControl="false" memoryLimit="100 mb" maxPageSize="10" advisoryForConsumed="true" />
+                                <policyEntry queue="ecp.endpoint.handler.*" producerFlowControl="false" memoryLimit="100 mb" maxPageSize="10" advisoryForConsumed="true" />
+                                <policyEntry topic=">" producerFlowControl="false"/>
+                            </policyEntries>
+                        </policyMap>
+                    </destinationPolicy>
+
+                    <systemUsage>
+                        <systemUsage>
+                            <memoryUsage>
+                                <!-- in-memory buffer for messages -->
+                                <memoryUsage limit="400 mb" />
+                            </memoryUsage>
+                            <storeUsage>
+                                <!-- storage buffer for messages -->
+                                <storeUsage percentLimit="50"/>
+                            </storeUsage>
+                            <tempUsage>
+                                <tempUsage percentLimit="10" />
+                            </tempUsage>
+                        </systemUsage>
+                    </systemUsage>
+
+                    <persistenceAdapter>
+                        <kahaDB directory="${dataDirectory}/internalBroker/data" checksumJournalFiles="true" checkForCorruptJournalFiles="true"/>
+                    </persistenceAdapter>
+
+                    <transportConnectors>
+                        <transportConnector name="amqp" uri="amqp://${internalBroker.host:127.0.0.1}:${internalBroker.amqp.port:5671}#{'${internalBroker.parameters:}' != '' ? '?${internalBroker.parameters:}' : ''}"/>
+                    </transportConnectors>
+
+                    <plugins>
+                        <bean xmlns="http://www.springframework.org/schema/beans" id="loggingPlugin" class="eu.entsoe.ecp.endpoint.broker.internal.InternalBrokerLoggingPlugin"/>
+                    </plugins>
+                </broker>
+
+            </beans>
+
+#  See ECP Kubernetes Guide, chapter ECP Endpoint Shared Folder configuration
+#      volumeClaimTemplates:
+#        - metadata:
+#            name: fssf # volume name
+#          spec:
+#            accessModes: [ "ReadWriteMany" ] # storage of type ReadWriteMany
+#            storageClassName: nfs-storage # name of storage class - needs to be provided by Kubernetes administrator
+#            resources:
+#              requests:
+#                storage: 512Mi # request for shared storage size
+
+# global config
+global: # global config
+  storage: # storage section
+    class: longhorn # storage class – needs to be provided by Kubernetes cluster administrator
+#  imagePullSecrets: # secrets which hold information about login to docker repository
+#    - name: regcred # name of secret – name is defined by Kubernetes cluster administrator
