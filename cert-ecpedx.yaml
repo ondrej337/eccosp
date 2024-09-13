@@ -1,0 +1,27 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: eccosp-ecp
+  namespace: eccosp
+spec:
+  secretName: eccosp-ecp
+  issuerRef:
+    name: acme-issuer-wcard
+    kind: ClusterIssuer
+  commonName: "ecp.koval.top"
+  dnsNames:
+    - "ecp.koval.top"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: eccosp-edx
+  namespace: eccosp
+spec:
+  secretName: eccosp-edx
+  issuerRef:
+    name: acme-issuer-wcard
+    kind: ClusterIssuer
+  commonName: "edx.koval.top"
+  dnsNames:
+    - "edx.koval.top"
