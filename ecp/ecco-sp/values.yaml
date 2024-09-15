@@ -160,7 +160,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 #        ecpSecurityProxyPassword: sockspassword # ecp.security.proxy.password
 
 #        jasyptEncryptorAlgorithm: PBEWithHMACSHA512AndAES_256 # jasypt.encryptor.algorithm
-#        prometheusMonitoringEnabled: false # management.endpoints.web.exposure.include=info,health,readiness,prometheus
+        prometheusMonitoringEnabled: true # management.endpoints.web.exposure.include=info,health,readiness,prometheus
 
 #        ecpMaxRequestSize: 2097152 # ecp.maxRequestSize
 
