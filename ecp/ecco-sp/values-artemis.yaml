@@ -29,7 +29,7 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
       keepLogsAfterRestart: false # boolean flag - indicates if Artemis logs are persisted after pod restart, default value false
       livenessProbe: false # automatic restart if pod is not in health state, default value false
       readinessProbe: true # Artemis pod will not started before readiness probe is fulfilled
-      useSharedStorageForConfiguration: false # if enabled, all replicas of this pod will use shared storage for configs and certificates
+      useSharedStorageForConfiguration: true # if enabled, all replicas of this pod will use shared storage for configs and certificates
       useSharedStorageForJournal: true # if enabled, all replicas of this pod will use shared storage for journal
       prometheusEnabled: false #boolean flag - indicates if Prometheus metrics is enabled
 
