@@ -176,15 +176,15 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
 #             };
 
 # See ECP Kubernetes Guide, Shared Folder Configuration – Custom Volume Mounts
-#      volumeClaimTemplates:
-#        - metadata:
-#            name: cd # volume name
-#          spec:
-#            accessModes: [ "ReadWriteMany" ] # storage of type ReadWriteMany
-#            storageClassName: nfs-storage # name of storage class - needs to be provided by Kubernetes administrator
-#            resources:
-#              requests:
-#                storage: 512Mi # request for storage size
+      volumeClaimTemplates:
+        - metadata:
+            name: cd # volume name
+          spec:
+            accessModes: [ "ReadWriteMany" ] # storage of type ReadWriteMany
+            storageClassName: longhorn # name of storage class - needs to be provided by Kubernetes administrator
+            resources:
+              requests:
+                storage: 512Mi # request for storage size
 
 # global config
 global: # global config
