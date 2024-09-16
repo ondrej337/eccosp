@@ -6,7 +6,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
   instance: # array of ECP endpoint instances - one values file can hold multiple instances
     - name: ep1 # name of kubernetes instance
       image: # section for information about Docker image
-        name: entsoe/ecp-endpoint # URL to docker image.
+        name: usyentsoe/ecp-endpoint # URL to docker image.
         tag: 4.14.0.2026 # Docker image tag - version or 'latest'
         # pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
       replicaCount: 1 # number of replicas - ECP cluster
