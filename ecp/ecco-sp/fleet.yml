@@ -28,4 +28,4 @@ helm:
 #    replicas: 2
   valuesFiles:
     - values.yaml
-    - values-artemis.yaml
+#    - values-artemis.yaml
