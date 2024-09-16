@@ -24,7 +24,7 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
       sharedStorageSizeJournal: 100Mi # if SharedStorage for artemis journal is used, this amount of storage will be requested
       sharedStorageClass: longhorn # if SharedStorage for artemis is used, this storage class will be used to allocate shared storage resources
       sharedStorageClassJournal: longhorn # if SharedStorage for artemis journal is used, this storage class will be used to allocate shared storage resources
-      #sharedStorageAccessMode: ReadWriteMany # sharedStorageAccessMode class
+      sharedStorageAccessMode: ReadWriteMany # sharedStorageAccessMode class
       #storageLogsSize: 64Mi # size of logs storage
       keepLogsAfterRestart: true # boolean flag - indicates if Artemis logs are persisted after pod restart, default value false
       livenessProbe: false # automatic restart if pod is not in health state, default value false
