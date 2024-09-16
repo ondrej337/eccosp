@@ -29,7 +29,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
         amqps: # protocol used for connection on AMQP interface of ECP Endpoint - can be AMQP or AMQPS
           port: 5671 # port used for exposing AMQP(S) service 
       ingress: # an object that allows access to Kubernetes services from outside the Kubernetes cluster.
-        enabled: false # boolean flag for enable/disable ingress, default value false
+        enabled: true # boolean flag for enable/disable ingress, default value false
         apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
         contextPath: / # context path for ingress, default value '/'
         host: ecp.koval.top # URL on which the ECP Endpoint is exposed. Address needs to be aligned with hosting.
