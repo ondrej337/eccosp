@@ -1,0 +1,280 @@
+# The commented parameters have default values but these defaults can be overriden when enabled
+
+# config for edx-catalogue
+edx-catalogue: # type of EDX component. Can be edx-catalogue, edx-toolbox
+  enabled: true # boolean flag which defines whether the component will be deployed or not
+
+  instance: # array of EDX catalogue instances - one values file can hold multiple instances
+    - name: sc # name of kubernetes instance
+      image: # section for information about Docker image
+        name: entsoe/edx-catalogue # URL to docker image.
+        tag: 1.14.0 # Docker image tag - version or 'latest'
+#        pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
+      replicaCount: 1 # number of replicas - EDX cluster
+      resourcesK8s: # section for CPU and memory specification
+        requests: # minimum guaranteed amount of a resource that is reserved for a container
+          cpu: 500m # minimum CPU - one CPU = 1000m or 1
+          memory: 512Mi # minimum memory for container
+        limits: # maximum amount of a resource to be used by a container. Should be always higher than application can allocate (xmx)
+          cpu: 1000m # maximum CPU - two CPUs = 2000m or 2
+          memory: 1Gi # maximum memory for container - 1Gi is equal to 1024 Mi
+      storageData: 1Gi # embedded database and certificates # storage for embedded database and certificates. If external DB is used, the value can be lower
+      storageLogs: 256Mi # logs # storage for logs
+      keepLogsAfterRestart: true # boolean flag - indicates if ECP logs are persisted after pod restart, default value false
+      livenessProbe: false # automatic restart if pod is not in health state, default value false
+      readinessProbe: true # ECP pod will not started before readiness probe is fulfilled - check of availability of external DB
+
+      service: # section for definition of services exposed within kubernetes environment
+        https: # protocol used for accessing GUI - can be http or https
+          port: 8443 # port used for exposing HTTP(S) service
+        amqps: # protocol used for connection on internal broker - can be AMQP or AMQPS
+          port: 5672 # port used for exposing AMQP(S) service 
+      ingress: # an object that allows access to Kubernetes services from outside the Kubernetes cluster.
+        enabled: false # boolean flag for enable/disable ingress, default value false
+#        apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
+#        contextPath: / # context path for ingress, default value '/'
+#        host: edx-catalogue.sc.eccosp # URL on which the ECP Endpoint is exposed. Address needs to be aligned with hosting.
+#        tls: # section for TLS definition for HTTPS connection to ingress
+#          secretName: tls-secret  # secret where TLS certificate is stored
+#        annotations: # ingress annotations section
+#          kubernetes.io/ingress.class: nginx # ingress controller definition
+#          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
+#          nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
+
+      # The naming convention for configuration files name and parameters is camelCase instead of 'dot case format'.
+      # Mapping of Helm values to EDX SC configuration file is available in config map ./edx-catalogue/templates/configMap.yaml
+      catalogueProperties: # stands for catalogue.properties
+        edxCatalogueCode: ecp-endpoint-catalogue # edx.catalogue.code
+        securityBasicEnabled: false # security.basic.enabled
+        serverErrorWhiteLabelEnabled: false # server.error.whitelabel.enabled
+        edxCatalogueDataDirectory: /var/lib/edx-catalogue # edx.catalogue.directory
+
+        internalBrokerUseAuthentication: true # internalBroker.useAuthentication
+        internalBrokerAmqpPort: 5672 # internalBroker.amqp.port
+        internalBrokerAuthUser: catalogue # internalBroker.auth.user
+        internalBrokerAuthPassword: password # internalBroker.auth.password
+        internalBrokerKeystoreLocation: /var/lib/edx-catalogue/authKeystore.jks # internalBroker.keystore.location
+        internalBrokerKeystorePassword: password # internalBroker.keystore.password
+        internalBrokerKeystoreAuthAlias: ecp_module_auth # internalBroker.keystore.authAlias
+        edxBrokerUrl: amqps://eccosp-eccosp-artemis-artemis-sc-svc:${internalBroker.amqp.port:5672} # edx.broker.url
+
+        ecpBrokerAmqpPort: 5672 # ecpBroker.amqp.port
+        ecpBrokerAmqpHost: eccosp-eccosp-artemis-artemis-sc-svc # ecpBroker.amqp.host
+        ecpBrokerUrl: amqps://${ecpBroker.amqp.host}:${ecpBroker.amqp.port} # ecp.broker.url
+        ecpBrokerKeystoreLocation: /var/lib/edx-catalogue/authKeystore.jks # ecpBroker.keystore.location
+        ecpBrokerKeystorePassword: password # ecpBroker.keystore.password
+        ecpBrokerKeystoreAuthAlias: ecp_module_auth # ecpBroker.keystore.authAlias
+        ecpBrokerAuthUser: endpoint # ecpBroker.auth.user
+        ecpBrokerAuthPassword: password # ecpBroker.auth.password
+
+        edxCatalogueProjectName: k8s # edx.catalogue.projectName
+        edxCatalogueEnvName: eccosp # edx.catalogue.envName
+
+#        springProfilesActive: edx-nonha, edx-audit # spring.profiles.active
+        springProfilesActive: edx-nonha
+#        edxDBUrl: jdbc:derby:${edx.catalogue.directory}/db;databaseName=edx;create=true
+#        edxDBUsername: edx
+#        edxDBPassword: password
+#        springDatasourceValidationQuery: values 1
+#        springDatasourceTestOnBorrow: true
+
+        # Uncomment desired DB configuration section if external DB is used. Change value of parameters as needed.
+
+        # ----- mysql -----
+#        springProfilesActive: edx-ha # high-availibility profile of the application - configuration of external database
+#        edxDBUrl: jdbc:mariadb://1.2.3.4:3306/sc?characterEncoding=UTF-8&useSSL=false&autoReconnect=true # database connection string
+#        edxDBUsername: sc # username of the user of the external database
+#        edxDBPassword: password # password of the user of the external database
+#        edxDBHostname: 1.2.3.4 # required for readiness check, server hostname or IP
+#        edxDBName: sc # required for readiness check, external database name
+
+#        springDatasourceValidationQuery: select 1 # database query, that is called once in a while to maintain the db <-> app connection active
+#        springDatasourceTestOnBorrow: true # spring.datasource.test-on-borrow
+#        springDatasourceDriverClassName: org.mariadb.jdbc.Driver # database driver
+
+        # ------ mssql -------
+#        springProfilesActive: edx-ha
+#        edxDBUrl: jdbc:sqlserver://1.2.3.4:1433;databaseName=sc;encrypt=true;trustServerCertificate=true;
+#        edxDBUsername: sc
+#        edxDBPassword: password
+#        edxDBHostname: 1.2.3.4 # Required for readiness check
+#        edxDBName: sc # Required for readiness check
+
+#        springDatasourceValidationQuery: select 1
+#        springDatasourceTestOnBorrow: true
+#        springDatasourceDriverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+        
+        # ------ postgres -------
+#        springProfilesActive: edx-ha
+#        edxDBUrl: jdbc:postgresql://1.2.3.4:5432/sc
+#        edxDBUsername: sc
+#        edxDBPassword: password
+#        edxDBHostname: 1.2.3.4 # Required for readiness check
+#        edxDBName: sc # Required for readiness check
+
+#        springDatasourceValidationQuery: select 1
+#        springDatasourceTestOnBorrow: true
+#        springDatasourceDriverClassName: org.postgresql.Driver
+        
+        # ------ oracle -------
+#        springProfilesActive: edx-ha
+#        edxDBUrl: jdbc:oracle:thin:@1.2.3.4:1521/my_schema
+#        edxDBUsername: sc
+#        edxDBPassword: password
+#        edxDBHostname: 1.2.3.4 # Required for readiness check
+#        edxDBName: sc # Required for readiness check
+
+#        springDatasourceValidationQuery: select 1 from dual
+#        springDatasourceTestOnBorrow: true
+#        springDatasourceDriverClassName: oracle.jdbc.OracleDriver
+
+#        springJmxEnabled: true # spring.jmx.enabled
+#        ecpReceiveQueue: ecp.endpoint.inbox # ecp.receiveQueue
+#        ecpSendQueue: ecp.endpoint.outbox # ecp.sendQueue
+#        ecpSendResponseQueue: ecp.endpoint.outbox.reply # ecp.sendResponseQueue
+#        ecpStatusQueue: ecp.endpoint.send.event # ecp.statusQueue
+#        loggingFileName: /var/log/edx-catalogue/ecp.log # logging.file.name
+#        loggingFilePath: /var/log/edx-catalogue # logging.file.path
+#        loggingConfig: /usr/share/edx-catalogue/ecp-logback.xml #  logging.config
+
+#        loggingLevels:  # additional parameter for logging Levels array. Array values are divided by ' - '
+#          - package: eu.unicorn.edx # logging.level.<package>
+#            level: INFO # Logging severity
+#          - package: eu.unicorn.eip
+#            level: INFO
+#          - package: org.apache.camel
+#            level: INFO
+
+#        edxNetworkManagementEnabled: false # edx.networkManagementEnabled
+#        edxLoginLockAttempts: 5 # edx.loginLock.attempts
+#        edxLoginLockLockTime: 300 # edx.loginLock.lockTime
+#        edxEcpAmqpClientMaxRedeliveries: 5 # edx.ecp.amqp.client.maxRedeliveries
+#        jasyptEncryptorAlgorithm: PBEWithHMACSHA512AndAES_256 # jasypt.encryptor.algorithm
+#        prometheusMonitoringEnabled: true # management.endpoints.web.exposure.include=info,health,readiness,prometheus
+#        edxCatalogueProjectName: k8s
+#        edxCatalogueEnvName: eccosp
+
+#        edxMaxRequestSize: 2097152 # edx.maxRequestSize
+
+        ## Spring Release 2024
+#        internalBrokerCatalogueQueuePrefix: edx.internal # internalBroker.queuePrefix
+
+#        ecpBrokerQueuePrefix: #{'${internalBroker.queuePrefix:}' == '' ? '' : '${internalBroker.queuePrefix:}.'} # ecpBroker.queuePrefix - It is recommended to use the same prefix for both ECP Endpoint and EDX Service Catalogue, therefore it is not necessary to specify this parameter. By default, the value from internalBrokerCatalogueQueuePrefix parameter will be used.
+#        edxHealthExclude: internalBrokerConnected
+        edxCsrfSecret: kAxFNLmNVlvpirUswMvXXFbx # edx.csrf.secret
+
+      envConf: # env.conf file
+        resourcesJvm: # configuration of Java Virtual Machine (JVM) resources
+          xms: 64M  # initial memory allocation pool for JVM
+          xmx: 768M # maximum memory allocation pool for JVM
+#        edxCatalogueTomcatPortShutdown: 8005 # edx.catalogue.tomcat.port.shutdown
+#        edxCatalogueTomcatPortHttp: 8080 # edx.catalogue.tomcat.port.http
+#        edxCatalogueTomcatPortAjp: 8009 # Dedx.catalogue.tomcat.port.ajp
+#        edxCatalogueTomcatPortAjpRedirect: 8443 # edx.catalogue.tomcat.port.ajp.redirect
+#        edxCatalogueTomcatPortHttpRedirect: 8443 # edx.catalogue.tomcat.port.http.redirect
+#        edxLogFullStackTrace: false # edx.logFullStackTrace
+
+      edxUsersProperties: # stands for edx-users.properties
+        edxCatalogueUsers: # array of users
+          - login: admin # edx.catalogue.users[0].login
+            password: password # edx.catalogue.users[0].password
+
+      jmxRemoteProperties: # jmxremote.properties
+#        comSunManagementJmxRemote: true # com.sun.management.jmxremote
+#        comSunManagementJmxRemotePort: 2099 # com.sun.management.jmxremote.port
+#        comSunManagementJmxRemoteRmiPort: 2098 # com.sun.management.jmxremote.rmi.port
+#        comSunManagementJmxRemotePasswordFile: /etc/edx-catalogue/jmxremote.password # com.sun.management.jmxremote.password.file
+#        comSunManagementJmxRemoteAccessFile: /etc/edx-catalogue/jmxremote.access # com.sun.management.jmxremote.access.file
+#        comSunManagementJmxRemoteSsl: true # com.sun.management.jmxremote.ssl
+#        comSunManagementJmxRegistrySsl: true # com.sun.management.jmxremote.registry.ssl # com.sun.management.jmxremote.registry.ssl
+#        comSunManagementJmxRemoteSslConfigFile: /etc/edx-catalogue/jmxremote.ssl # com.sun.management.jmxremote.ssl.config.file
+#        comSunManagementJmxRemoteAuthenticate: true # com.sun.management.jmxremote.authenticate
+
+#      jmxRemotePassword: # jmxremote.password
+#        jmxRemoteUsers: # array of JMX users
+#          - login: jmxuser # login for the first JMX user
+#            password: jmxpassword # password for the first JMX user
+#            access: readonly # access role for the first JMX user
+#          - login: jmxadmin # login for second JMX user
+#            password: jmxadminpassword # password for second JMX user
+#            access: readwrite # access role for the second JMX user
+
+#      jmxRemoteSsl: # jmxremote.ssl
+#        javaxNetSslKeystore: /path/to/keystore.jks # javax.net.ssl.keyStore
+#        javaxNetSslKeystorePassword: keystore_password # javax.net.ssl.keyStorePassword
+#        javaxNetSslTrustStore: /path/to/truststore.jks # javax.net.ssl.trustStore
+#        javaxNetSslTrustStorePassword: truststore_password # javax.net.ssl.trustStorePassword
+
+#      edxLockBack: edx-logback.xml
+#        jmxConfigurator: true # enable configure EDX logback via JMX when EDX SC is running
+
+      serverXml: # server.xml
+#        jvmRoute: route # Engine name="Catalina" defaultHost="localhost" jvmRoute=<route>
+        connectorHttpDisable: true # HTTP communication is disabled by default
+#        connectorHttpsDisable: false # HTTPS communication is enabled by default
+        connectorAjpDisable: true # AJP connector is disbled by default
+        # internalProxies: 127.0.0.1 # internalProxies
+
+#      volumeMounts:
+#        - name: config
+#          subPath: bootstrap.xml
+#          mountPath: /etc/edx-catalogue/jms/bootstrap.xml
+
+#      configMap:
+#        - subPath: bootstrap.xml
+#          content: |-
+#            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+#             <!--
+#               ~ Licensed to the Apache Software Foundation (ASF) under one or more
+#               ~ contributor license agreements. See the NOTICE file distributed with
+#               ~ this work for additional information regarding copyright ownership.
+#               ~ The ASF licenses this file to You under the Apache License, Version 2.0
+#               ~ (the "License"); you may not use this file except in compliance with
+#               ~ the License. You may obtain a copy of the License at
+#               ~
+#               ~     http://www.apache.org/licenses/LICENSE-2.0
+#               ~
+#               ~ Unless required by applicable law or agreed to in writing, software
+#               ~ distributed under the License is distributed on an "AS IS" BASIS,
+#               ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#               ~ See the License for the specific language governing permissions and
+#               ~ limitations under the License.
+#               -->
+
+#             <broker xmlns="http://activemq.apache.org/schema">
+
+#                <jaas-security domain="activemq"/>
+
+#                <!-- artemis.URI.instance is parsed from artemis.instance by the CLI startup.
+#                     This is to avoid situations where you could have spaces or special characters on this URI -->
+#                <server configuration="file:/opt/eccosp-artemis/etc/broker.xml"/>
+
+#                <!-- The web server is only bound to localhost by default -->
+#                <web path="web" rootRedirectLocation="console">
+#                    <binding name="artemis" uri="http://localhost:8161">
+#                        <app name="branding" url="activemq-branding" war="activemq-branding.war"/>
+#                        <app name="plugin" url="artemis-plugin" war="artemis-plugin.war"/>
+#                        <app name="console" url="console" war="console.war"/>
+#                        <app url="metrics" war="metrics.war"/>
+#                    </binding>
+#                </web>
+#             </broker>
+
+
+#  See EDX KubernetesGuide, chapter Shared Folder Configuration – Custom Volume Mounts
+#      volumeClaimTemplates:
+#        - metadata:
+#            name: opt # volume name
+#          spec:
+#            accessModes: [ "ReadWriteOnce" ] # access mode to the storage
+#            storageClassName: standard # name of storage class – needs to be provided by Kubernetes administrator
+#            resources:
+#              requests:
+#                storage: 512Mi # request for shared storage size
+
+# global config
+global: # storage section
+  storage:
+    class: standard # storage class – needs to be provided by Kubernetes cluster administrator
+  imagePullSecrets: # secrets which hold information about login to docker repository
+    - name: regcred # name of secret – name is defined by Kubernees cluster administrator
