@@ -13,7 +13,7 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
       resourcesK8s: # section for CPU and memory specification
         requests: # minimum guaranteed amount of a resource that is reserved for a container
           cpu: 500m # minimum CPU - one CPU = 1000m or 1
-          memory: 1Gi # minimum memory for container - 1Gi is equal to 1024 Mi
+          memory: 500Mi # minimum memory for container - 1Gi is equal to 1024 Mi
         limits: # maximum amount of a resource to be used by a container. Should be always higher than application can allocate (xmx)
           cpu: 1000m # maximum CPU
           memory: 1Gi # maximum memory for container - 5Gi is equal to 5120 Mi
