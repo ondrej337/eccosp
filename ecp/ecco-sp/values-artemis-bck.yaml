@@ -16,7 +16,7 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
           memory: 1Gi # minimum memory for container - 1Gi is equal to 1024 Mi
         limits: # maximum amount of a resource to be used by a container. Should be always higher than application can allocate (xmx)
           cpu: 1000m # maximum CPU
-          memory: 1Gi # maximum memory for container - 5Gi is equal to 5120 Mi
+          memory: 5Gi # maximum memory for container - 5Gi is equal to 5120 Mi
 
       storageData: 1Gi # certificates # storage certificates.
       storageLogs: 256Mi # logs # storage for logs
@@ -24,9 +24,9 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
       sharedStorageSizeJournal: 100Mi # if SharedStorage for artemis journal is used, this amount of storage will be requested
       sharedStorageClass: longhorn # if SharedStorage for artemis is used, this storage class will be used to allocate shared storage resources
       sharedStorageClassJournal: longhorn # if SharedStorage for artemis journal is used, this storage class will be used to allocate shared storage resources
-      sharedStorageAccessMode: ReadWriteMany # sharedStorageAccessMode class
+      #sharedStorageAccessMode: ReadWriteMany # sharedStorageAccessMode class
       #storageLogsSize: 64Mi # size of logs storage
-      keepLogsAfterRestart: true # boolean flag - indicates if Artemis logs are persisted after pod restart, default value false
+      keepLogsAfterRestart: false # boolean flag - indicates if Artemis logs are persisted after pod restart, default value false
       livenessProbe: false # automatic restart if pod is not in health state, default value false
       readinessProbe: true # Artemis pod will not started before readiness probe is fulfilled
       useSharedStorageForConfiguration: true # if enabled, all replicas of this pod will use shared storage for configs and certificates
