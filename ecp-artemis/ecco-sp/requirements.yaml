@@ -1,4 +1,8 @@
 dependencies:
+- name: eccosp-artemis
+  version: 4.14.0
+  repository: file://./charts/eccosp-artemis
+  condition: eccosp-artemis.enabled
 
 - name: ecp-endpoint
   version: 4.14.0
@@ -15,7 +19,3 @@ dependencies:
   repository: file://./charts/ecp-broker
   condition: ecp-broker.enabled
 
-- name: eccosp-artemis
-  version: 4.14.0
-  repository: file://./charts/eccosp-artemis
-  condition: eccosp-artemis.enabled
