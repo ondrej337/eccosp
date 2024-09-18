@@ -1,0 +1,777 @@
+---
+# Source: ecco-sp/charts/edx-toolbox/templates/configMap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eccosp-edx-toolbox-tb1-cm
+  labels:
+    backup.component.name: edx
+data:
+  edx.properties: |-
+    # EDX Toolbox configuration
+    ## Toolbox code ( ECP endpoint code assigned to this Toolbox)
+    edx.toolbox.code=ecp-endpoint-1
+
+    ## Service catalogue ECP code
+    edx.serviceCatalogue.code=ecp-endpoint-catalogue
+
+    # Unique identification of toolbox within cluster
+    # Must be defined in HA deployment different on each node
+
+    ## Filtering message duplicities
+    # Message types for duplicity check (comma delimiter)
+    edx.configuration.duplicates.filter.messageTypes=
+    # Turning filter on/off
+    edx.configuration.duplicates.filter.enabled=false
+
+    ## Comma separated list of public URLs used when creating URL for provided pull data
+    ## Last part of the property corresponds to physical network code
+    ## Repeat this property for all physical networks from which pull content is accessible
+    edx.toolbox.pull.publicUrl.Internet=https://localhost:8443/api/rest/pull/download/        
+    ## Setting of automatic pull messages types for download
+    ### List of message types separated by ,
+    ### edx.toolbox.pull.autopull.enabled.types=ATC,NTC
+    ### Value * represents all message types
+    ### edx.toolbox.pull.autopull.enabled.types=*
+    edx.toolbox.pull.autopull.enabled.types=*
+
+    ## Information whether NAT is enabled. Default value is false.
+    edx.toolbox.nat.natEnabled=false
+    # NAT configuration
+        
+    ## Path to file system directory dedicated for pull outgoing message files
+    ## When not set files are stored into System.getProperty("java.io.tmpdir")/"edx-pull-out"
+    edx.toolbox.pull.root.out=/opt/shared-storage/edx-pull-out
+    ## Path to file system directory dedicated for storing incoming message files
+    ## When not set files are stored into System.getProperty("java.io.tmpdir")/"edx-pull-in"
+    edx.toolbox.pull.root.in=/opt/shared-storage/edx-pull-in
+    ## Delay between pull download retry job executions in ms
+    edx.toolbox.pull.retryJobDelay=120000
+    ## Pull messages expiration configuration in hours
+    edx.toolbox.pull.expireOlderThan=24
+    ### Delay between expiration job executions in ms
+    edx.toolbox.pull.expireJobDelay=60000
+
+    ### Path to the truststore for validating data provider's certificate when HTTPS is required by data provider
+    edx.toolbox.pull.truststore.location=${edx.toolbox.data.directory}/authKeystore.jks
+    ### Password to the truststore
+    edx.toolbox.pull.truststore.password=password
+
+    ## Information whether message slicing is enabled. Default value is false.
+    edx.toolbox.pull.slicing.enabled=true
+    edx.toolbox.pull.slicing.size=1024
+    edx.toolbox.pull.slicing.timeout=60000
+    edx.toolbox.pull.slicing.compression.disabled.types=*
+    edx.toolbox.pull.slicing.compression.disabled.wildcard=*
+
+    ## Deleting job configuration
+    ### Age of messages to be deleted in hours
+    edx.toolbox.deleting.deleteOlderThan=168
+    edx.toolbox.deleting.dms.deleteOlderThan${edx.toolbox.deleting.deleteOlderThan}
+    ### Delay between deleting job executions in ms
+    edx.toolbox.deleting.deleteJobDelay=60000
+
+    ## Network Configuration cache update job parameters, only applicable in HA environment
+    ### Delay between checks whether cached configuration should be updated by later config. version from db
+    edx.toolbox.cluster.netcfg.updateJobPeriod=5000
+
+
+    ## Toolbox DMS specific configuration
+    ### Path to storage root on file system
+    ### When not set files are stored into System.getProperty("java.io.tmpdir")/"edx-dms"
+    edx.toolbox.dms.storage.root=/opt/shared-storage/edx-dms
+    ### Storage Id must be defined by in HA deployment different on each node
+    edx.toolbox.dms.storage.storageId=${edx.toolbox.node.id}
+    ### Maximal number of files in directory
+    ### When not set default value is: 10000
+    edx.toolbox.dms.storage.maxFiles=10000
+    ### Maximal number of directories created by DMS FS storage
+    ### When not set default value is: 10000
+    edx.toolbox.dms.storage.maxDirectories=10000
+    ### Duration of cache validity in minutes
+    ### When not set default value is: 30
+    edx.toolbox.dms.storage.cacheValidityDuration=30
+
+    ## Toolbox PULL DMS specific configuration
+    ### Path to storage root on file system
+    ### When not set files are stored into System.getProperty("java.io.tmpdir")/"edx-pull-dms"
+    edx.toolbox.pull.dms.storage.root=/opt/shared-storage/edx-pull-dms
+    ### Storage Id must be defined by in HA deployment different on each node
+    edx.toolbox.pull.dms.storage.storageId=${edx.toolbox.node.id}
+    ### Maximal number of files in directory
+    ### When not set default value is: 10000
+    edx.toolbox.pull.dms.storage.maxFiles=10000
+    ### Maximal number of directories created by DMS FS storage
+    ### When not set default value is: 10000
+    edx.toolbox.pull.dms.storage.maxDirectories=10000
+    ### Duration of cache validity in minutes
+    ### When not set default value is: 30
+    edx.toolbox.pull.dms.storage.cacheValidityDuration=30
+
+    # Database configuration
+    edx.toolbox.data.directory=/var/lib/edx-toolbox
+    edx.db.url=jdbc:postgresql://edx-db-cluster-rw.cloudnative-pg.svc.cluster.local:5432/tb1
+    edx.db.username=tb1
+    edx.db.password=password
+    spring.datasource.validation-query=select 1
+    spring.datasource.test-on-borrow=true
+    spring.datasource.driver-class-name=org.postgresql.Driver
+
+
+    spring.servlet.multipart.max-file-size=64MB
+    spring.servlet.multipart.max-request-size=64MB
+    server.error.whitelabel.enabled=false
+    hawtio.authenticationEnabled=false
+    endpoints.jolokia.sensitive=false
+    # Spring profile configuration
+    ## edx-nonha - toolbox does not support high availability
+    spring.profiles.active=edx-ha
+    spring.liquibase.parameters.activemq.autocreate.tables=true
+
+    ## Disabled JMX protocol for internal broker
+    #NOTE: warning when enabled the property then will be accessible JMX remote on port 1099
+    spring.jmx.enabled=false
+
+    internalBroker.useAuthentication=true
+    internalBroker.auth.user=toolbox
+    internalBroker.auth.password=password
+    internalBroker.keystore.location=/var/lib/edx-toolbox/authKeystore.jks
+    internalBroker.keystore.password=password
+    internalBroker.keystore.authAlias=ecp_module_auth
+    internalBroker.amqp.port=5672
+    internalBroker.amqp.host=127.0.0.1
+    edx.broker.url=amqps://eccosp-eccosp-artemis-artemis-eptb1-svc:${internalBroker.amqp.port:5672}
+
+    ecpBroker.amqp.port=5672
+    ecpBroker.amqp.host=eccosp-eccosp-artemis-artemis-eptb1-svc
+    ecpBroker.keystore.location=/var/lib/edx-toolbox/authKeystore.jks
+    ecpBroker.keystore.password=password
+    ecpBroker.keystore.authAlias=ecp_module_auth
+    ecpBroker.auth.user=endpoint
+    ecpBroker.auth.password=password
+    ecp.broker.url=amqps://${ecpBroker.amqp.host}:${ecpBroker.amqp.port}
+    ecpBroker.queuePrefix=#{'${internalBroker.queuePrefix:}' == '' ? '' : '${internalBroker.queuePrefix:}.'}
+
+    # ECP queues
+    ## Queue for receiving incoming messages from ECP
+    ecp.receiveQueue=${ecpBroker.queuePrefix}ecp.endpoint.inbox
+
+    ## Queue for sending outgoing messages by ECP
+    ecp.sendQueue=${ecpBroker.queuePrefix}ecp.endpoint.outbox
+
+    ## Queue for receiving responses about sent messages
+    ecp.sendResponseQueue=${ecpBroker.queuePrefix}ecp.endpoint.outbox.reply
+
+    ## Queue for ECP states propagation
+    ecp.statusQueue=${ecpBroker.queuePrefix}ecp.endpoint.send.event
+
+    # Health Actuator Parameters
+    spring.activemq.user=${internalBroker.auth.user}
+    spring.activemq.password=${internalBroker.auth.password}
+
+    # Logging configuration
+    logging.file.name=/var/log/edx-toolbox/edx.log
+    logging.file.path=/var/log/edx-toolbox
+    logging.config=/etc/edx-toolbox/edx-logback.xml
+    logging.level.eu.unicorn.edx=INFO
+    logging.level.eu.unicorn.eip=ERROR
+    logging.level.org.apache.camel=INFO
+    management.endpoints.web.exposure.include=info,health,readiness
+
+    edx.csrf.secret=kAxFNLmNVlvpirUswMvXXFbx
+    
+    internalBroker.enabled=true
+
+    edx.toolbox.projectName=MY-Koval-Project
+    edx.toolbox.envName=PROD
+
+    transport.trustStoreLocation=/var/lib/edx-toolbox/keystore.jks
+    transport.trustStorePassword=password
+    transport.verifyHost=false
+    
+    edx.toolbox.antivirus.antivirusEnabled=false
+    edx.toolbox.antivirus.antivirusClient=
+    edx.toolbox.antivirus.antivirusIp=
+    edx.toolbox.antivirus.antivirusPort=0
+    edx.toolbox.antivirus.antivirusTimeout=10000
+    edx.toolbox.antivirus.quarantinePath=
+    
+    spring.datasource.dbcp2.maxTotal=100
+    spring.datasource.dbcp2.maxIdle=100
+    spring.datasource.dbcp2.timeBetweenEvictionRunsMillis=5000
+    spring.datasource.dbcp2.minEvictableIdleTimeMillis=60000
+    spring.datasource.dbcp2.numTestsPerEvictionRun=3
+    spring.datasource.dbcp2.testOnBorrow=true
+    spring.datasource.dbcp2.validationQuery=values 1
+    spring.datasource.dbcp2.validationQueryTimeout=0
+    spring.datasource.dbcp2.poolPreparedStatements=true
+    internalBroker.datasource.maxTotal=100
+    internalBroker.datasource.maxIdle=100
+    internalBroker.datasource.timeBetweenEvictionRunsMillis=5000
+    internalBroker.datasource.minEvictableIdleTimeMillis=60000
+        
+    edx.cluster.manager.scheduleInterval=5000
+    edx.toolbox.node.cluster.manager.lockValidity=15000
+    
+    edx.toolbox.pull.embedded.enabled.types=
+    
+    edx.toolbox.signal.orange=30
+    edx.toolbox.signal.red=90
+    edx.toolbox.fssf.defaultExtension=
+
+    edx.security.proxy.enabled=false
+    edx.security.proxy.host=
+    edx.security.proxy.port=0
+    edx.security.proxy.nonProxyHosts=
+    edx.security.proxy.username=
+    edx.security.proxy.password=
+    management.endpoint.health.show-details=ALWAYS
+    
+    edx.healthExclude=oldMessages, internalBrokerConnected
+
+  edx-users.properties: |-
+    # Defines the list of users allowed to access application
+    # Changing default user and his password is strongly recommended    
+    
+
+  jmxremote.properties: |-
+    ## JMX is disabled for default
+    ## bellow is example for JMX settings with SSL  
+    
+    com.sun.management.jmxremote=false
+    #com.sun.management.jmxremote.port=1099
+    #com.sun.management.jmxremote.rmi.port=1098
+    #com.sun.management.jmxremote.password.file=/path/to/jmxremote.password
+    #com.sun.management.jmxremote.access.file=/path/to/jmxremote.access
+    #com.sun.management.jmxremote.ssl=false
+    #com.sun.management.jmxremote.registry.ssl=true
+    #com.sun.management.jmxremote.ssl.config.file=/etc/edx-toolbox/jmxremote.ssl    
+    #com.sun.management.jmxremote.authenticate=true
+
+  jmxremote.password: |-
+
+  jmxremote.access: |-
+
+  jmxremote.ssl: |-
+    #javax.net.ssl.keyStore=/path/to/keystore.jks
+    #javax.net.ssl.keyStorePassword=keystore_password
+    #javax.net.ssl.trustStore=/path/to/truststore.jks
+    #javax.net.ssl.trustStorePassword=truststore_password
+
+  env.conf: |-
+    [Service]
+    Environment='CATALINA_HOME=/usr/share/edx-toolbox'
+    Environment='CATALINA_BASE=/usr/share/edx-toolbox'
+    Environment='CATALINA_PID=/usr/share/edx-toolbox/catalina.pid'
+    Environment='CATALINA_OPTS=-Xms128M -Xmx512M\
+    			-XX:+HeapDumpOnOutOfMemoryError\
+                -XX:HeapDumpPath="/var/log/edx-toolbox/edx-dump.hprof"\
+                -Dspring.config.additional-location=/etc/edx-toolbox/edx.properties,/etc/edx-toolbox/edx-users.properties\
+                -Dedx.toolbox.yaml.directory=/etc/edx-toolbox\
+                -Dedx.toolbox.jms.directory=/etc/edx-toolbox/jms\
+                -Dbroker.internal.auth.settings.location=/etc/edx-toolbox\
+                -Dedx.toolbox.tomcat.port.shutdown=8005\
+                -Dedx.toolbox.tomcat.port.http=8080\
+                -Dedx.toolbox.tomcat.port.ajp=8009\
+                -Dedx.toolbox.tomcat.port.ajp.redirect=8443\
+                -Dedx.toolbox.tomcat.port.http.redirect=8443\
+                -Dedx.password.location=/etc/edx-toolbox/edx-password.properties\
+                -Dedx.toolbox.node.id=${HOSTNAME}\
+                -Dcom.sun.management.config.file=/etc/edx-toolbox/jmxremote.properties'
+
+  setenv.sh: |-
+    #!/bin/bash
+
+    ## This file will be copied into tomcat_base/bin/setenv.sh
+    ## Setup LOG file location for tomcat
+    export CATALINA_OUT=/var/log/edx-toolbox/catalina.out
+    export CATALINA_HOME=/usr/share/edx-toolbox
+    export CATALINA_BASE=/usr/share/edx-toolbox
+    export CATALINA_PID=/usr/share/edx-toolbox/catalina.pid
+    export CATALINA_OPTS="-Xms128M -Xmx512M\
+     -XX:+HeapDumpOnOutOfMemoryError\
+     -XX:HeapDumpPath="/var/log/edx-toolbox/edx-dump.hprof"\
+     -Dspring.config.additional-location=/etc/edx-toolbox/edx.properties,/etc/edx-toolbox/edx-users.properties\
+     -Dedx.toolbox.yaml.directory=/etc/edx-toolbox\
+     -Dedx.toolbox.jms.directory=/etc/edx-toolbox/jms\
+     -Dbroker.internal.auth.settings.location=/etc/edx-toolbox\
+     -Dedx.toolbox.tomcat.port.shutdown=8005\
+     -Dedx.toolbox.tomcat.port.http=8080\
+     -Dedx.toolbox.tomcat.port.ajp=8009\
+     -Dedx.toolbox.tomcat.port.ajp.redirect=8443\
+     -Dedx.toolbox.tomcat.port.http.redirect=8443\
+     -Dedx.password.location=/etc/edx-toolbox/edx-password.properties\
+     -Dedx.toolbox.node.id=$HOSTNAME\
+     -Dedx.logFullStackTrace=false\
+     -Dcom.sun.management.config.file=/etc/edx-toolbox/jmxremote.properties"
+
+  edx-logback.xml: |-
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration>
+  
+        <!--http://docs.spring.io/spring-boot/docs/current/reference/html/howto-logging.html-->
+        <!--http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-logging.html-->
+
+        <!--Common logger config and log file path-->
+        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+        <property name="AUDIT_LOG_FILE" value="${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/edx-audit.log"/>
+        <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}edx-default.log}"/>
+        <!-- owasp-a1 log message sanitized for CRLF to prevent logger injection -->
+        <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS,Etc/GMT} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %replace(%m){'[\r\n]', ''}%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+        <property name="LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE" value="50MB"/>
+        <property name="LOGBACK_ROLLINGPOLICY_MAX_HISTORY" value="7"/>
+        <property name="LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP" value="70MB"/>
+
+        <!--By default include file appender only-->
+        <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
+
+        <springProfile name="console-logging">
+            <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+            <root level="INFO">
+                <appender-ref ref="FILE"/>
+                <appender-ref ref="CONSOLE"/>
+            </root>
+        </springProfile>
+
+        <springProfile name="!console-logging">
+            <root level="INFO">
+                <appender-ref ref="FILE"/>
+            </root>
+        </springProfile>
+
+        <springProfile name="edx-audit">
+
+            <appender name="EdxAuditAppender"
+                      class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <encoder>
+                    <!-- owasp-a1 log message sanitized for CRLF to prevent logger injection -->
+                    <pattern>
+                        %d{yyyy-MM-dd HH:mm:ss.SSS,Etc/GMT} %logger{5} - %replace(%msg){'[\r\n]', ''}%n
+                    </pattern>
+                </encoder>
+                <file>${AUDIT_LOG_FILE}</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+                    <fileNamePattern>${AUDIT_LOG_FILE}.%i</fileNamePattern>
+                </rollingPolicy>
+                <triggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                    <MaxFileSize>10MB</MaxFileSize>
+                </triggeringPolicy>
+            </appender>
+
+            <logger name="EdxAuditLog" level="INFO" additivity="false">
+                <appender-ref ref="EdxAuditAppender"/>
+            </logger>
+
+        </springProfile>
+
+    </configuration>
+
+  server.xml: |-
+    <?xml version='1.0' encoding='utf-8'?>
+    <!--
+      Licensed to the Apache Software Foundation (ASF) under one or more
+      contributor license agreements.  See the NOTICE file distributed with
+      this work for additional information regarding copyright ownership.
+      The ASF licenses this file to You under the Apache License, Version 2.0
+      (the "License"); you may not use this file except in compliance with
+      the License.  You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+    -->
+    <!-- Note:  A "Server" is not itself a "Container", so you may not
+         define subcomponents such as "Valves" at this level.
+         Documentation at /docs/config/server.html
+     -->
+    <Server port="${edx.toolbox.tomcat.port.shutdown}" shutdown="SHUTDOWN">
+        <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
+        <!-- Security listener. Documentation at /docs/config/listeners.html
+        <Listener className="org.apache.catalina.security.SecurityListener" />
+        -->
+        <!--APR library loader. Documentation at /docs/apr.html -->
+        <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
+        <!-- Prevent memory leaks due to use of particular java/javax APIs-->
+        <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+        <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+        <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
+
+        <!-- Global JNDI resources
+             Documentation at /docs/jndi-resources-howto.html
+        -->
+        <GlobalNamingResources>
+            <!-- Editable user database that can also be used by
+                 UserDatabaseRealm to authenticate users
+            -->
+            <Resource name="UserDatabase" auth="Container"
+                      type="org.apache.catalina.UserDatabase"
+                      description="User database that can be updated and saved"
+                      factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+                      pathname="conf/tomcat-users.xml" />
+        </GlobalNamingResources>
+
+        <!-- A "Service" is a collection of one or more "Connectors" that share
+             a single "Container" Note:  A "Service" is not itself a "Container",
+             so you may not define subcomponents such as "Valves" at this level.
+             Documentation at /docs/config/service.html
+         -->
+        <Service name="Catalina">
+
+            <!--The connectors can use a shared executor, you can define one or more named thread pools-->
+            <!--
+            <Executor name="tomcatThreadPool" namePrefix="catalina-exec-"
+                maxThreads="150" minSpareThreads="4"/>
+            -->
+
+
+            <!-- A "Connector" represents an endpoint by which requests are received
+                 and responses are returned. Documentation at :
+                 Java HTTP Connector: /docs/config/http.html (blocking & non-blocking)
+                 Java AJP  Connector: /docs/config/ajp.html
+                 APR (HTTP/AJP) Connector: /docs/apr.html
+                 Define a non-SSL/TLS HTTP/1.1 Connector on port 8080
+            -->
+            <!--
+            <Connector port="${edx.toolbox.tomcat.port.http}" protocol="HTTP/1.1"
+                       connectionTimeout="20000"
+                       redirectPort="${edx.toolbox.tomcat.port.http.redirect}" />
+            -->
+            <!-- A "Connector" using the shared thread pool-->
+            <!--
+            <Connector executor="tomcatThreadPool"
+                       port="8080" protocol="HTTP/1.1"
+                       connectionTimeout="20000"
+                       redirectPort="8443" />
+            -->
+            <!-- Define a SSL/TLS HTTP/1.1 Connector on port 8443
+                 This connector uses the NIO implementation that requires the JSSE
+                 style configuration. When using the APR/native implementation, the
+                 OpenSSL style configuration is required as described in the APR/native
+                 documentation -->
+            <Connector port="${edx.toolbox.tomcat.port.http.redirect}" protocol="eu.entsoe.edx.connector.protocol.EdxHttp11NioProtocol"
+                       sslImplementationName="org.apache.tomcat.util.net.jsse.JSSEImplementation"
+                       maxThreads="150" SSLEnabled="true" maxParameterCount="1000" >
+                       <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
+
+                    <SSLHostConfig protocols="TLSv1.3" ciphers="TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_AES_128_GCM_SHA256" >
+                        <Certificate certificateKeystoreFile="/var/lib/edx-toolbox/authKeystore.jks" certificateKeystorePassword="password" type="RSA" />
+                    </SSLHostConfig>
+            </Connector>
+
+            <!-- Define an AJP 1.3 Connector on port 8009 -->
+            <!--
+            <Connector port="${edx.toolbox.tomcat.port.ajp}" protocol="AJP/1.3" redirectPort="${edx.toolbox.tomcat.port.ajp.redirect}" />
+            -->
+
+
+            <!-- An Engine represents the entry point (within Catalina) that processes
+                 every request.  The Engine implementation for Tomcat stand alone
+                 analyzes the HTTP headers included with the request, and passes them
+                 on to the appropriate Host (virtual host).
+                 Documentation at /docs/config/engine.html -->
+
+            <!-- You should set jvmRoute to support load-balancing via AJP ie :
+            <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
+            -->
+            <Engine name="Catalina" defaultHost="localhost">
+
+                <!--For clustering, please take a look at documentation at:
+                    /docs/cluster-howto.html  (simple how to)
+                    /docs/config/cluster.html (reference documentation) -->
+                <!--
+                <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>
+                -->
+
+                <!-- Use the LockOutRealm to prevent attempts to guess user passwords
+                     via a brute-force attack -->
+                <Realm className="org.apache.catalina.realm.LockOutRealm">
+                    <!-- This Realm uses the UserDatabase configured in the global JNDI
+                         resources under the key "UserDatabase".  Any edits
+                         that are performed against this UserDatabase are immediately
+                         available for use by the Realm.  -->
+                    <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+                           resourceName="UserDatabase"/>
+                </Realm>
+
+                <Host name="localhost"  appBase="webapps"
+                      unpackWARs="true" autoDeploy="true">
+
+                    <!-- SingleSignOn valve, share authentication between web applications
+                         Documentation at: /docs/config/valve.html -->
+                    <!--
+                    <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
+                    -->
+
+                    <Valve className="org.apache.catalina.valves.RemoteIpValve" internalProxies="" />
+                    <!-- Access log processes all example.
+                         Documentation at: /docs/config/valve.html
+                         Note: The pattern used is equivalent to using pattern="common" -->
+                    <Valve className="org.apache.catalina.valves.AccessLogValve" directory="/var/log/edx-toolbox"
+                           prefix="localhost_access_log" suffix=".txt" rotatable="false"
+                           pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+                    <Valve className="org.apache.catalina.valves.ErrorReportValve" showReport="false" showServerInfo="false"/>
+
+                </Host>
+            </Engine>
+        </Service>
+    </Server>
+
+  edx-password.properties: |-
+
+  users.properties: |-
+    toolbox=password
+
+  groups.properties: |-
+    admins=toolbox
+    tempDestinationAdmins=toolbox
+    users=toolbox
+  
+  edx.yml: |-
+    components:
+      externalProcessing: []
+      transformations: []
+      validations: []
+    integrationChannels:
+      amqpEndpoints:
+      - code: edx-endpoint-outbox
+        direction: in
+        queueName: edx.endpoint.outbox
+        replyQueueName: edx.endpoint.reply
+      - code: default-in-queue
+        direction: out
+        queueName: edx.endpoint.inbox
+        redeliveryAttempts: 100
+    routing:
+      receiveProcessDefaultRoute:
+        end: ecp-endpoint
+        fail: ecp-endpoint
+        start: toolbox-gateway
+        steps: []
+      routes: []
+      sendProcessDefaultRoute:
+        end: toolbox-gateway
+        fail: ecp-endpoint
+        start: '*'
+        steps: []
+---
+# Source: ecco-sp/charts/edx-toolbox/templates/statefulset.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-storage-edx-toolbox-tb1-claim 
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+# Source: ecco-sp/charts/edx-toolbox/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: eccosp-edx-toolbox-tb1-svc
+  labels:
+    backup.component.name: edx
+    app: eccosp-edx-toolbox-tb1
+spec:
+  type: 
+  ports:
+    - name: https
+      port: 8443
+      protocol: TCP
+    - name: amqps
+      port: 5672
+      protocol: TCP
+
+  selector:
+    app: eccosp-edx-toolbox-tb1
+---
+# Source: ecco-sp/charts/edx-toolbox/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: eccosp-edx-toolbox-tb1
+  annotations:
+    checksum/config: 172fca9364eb2bae9d21e1f9cfda3a797ea5fe794a9050d0f75d6e146304f3f1
+  labels:
+    app: eccosp-edx-toolbox-tb1
+spec:
+  serviceName: eccosp-edx-toolbox-tb1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eccosp-edx-toolbox-tb1
+  template:
+    metadata:
+      annotations:
+        checksum/config: 172fca9364eb2bae9d21e1f9cfda3a797ea5fe794a9050d0f75d6e146304f3f1
+      labels:
+        app: eccosp-edx-toolbox-tb1
+    spec:
+
+      securityContext:
+        fsGroup: 2020
+
+      initContainers:
+        - name: ensure-persistent-volume-sync-with-image-data
+          image: "usyentsoe/edx-toolbox:1.14.0.1521"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh","-c"]
+          args:
+            - cp -Rn /var/lib/edx-toolbox/* /tmp/edx-toolbox-dir/
+          volumeMounts:
+          - name: data
+            mountPath: "/tmp/edx-toolbox-dir"
+        - name: pgsql-data-permission-fix-and-livenessprobe-script
+          image: "busybox"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh","-c"]
+          args:
+            - /bin/chmod 777 -R /data;
+              /bin/chmod 777 -R /logs;
+          volumeMounts:
+          - name: data
+            mountPath: /data
+          - name: logs
+            mountPath: /logs
+        - name: postgres-readiness-check
+          image: "bitnami/postgresql:15"
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash","-c" ]
+          args: 
+            - export DB_PORT=$(echo "jdbc:postgresql://edx-db-cluster-rw.cloudnative-pg.svc.cluster.local:5432/tb1" | awk '{n=split($0,x,":"); print x[n]}' | awk -F "/" '{print $1}' );
+              dbs=$(echo edx-db-cluster-rw.cloudnative-pg.svc.cluster.local | tr "," "\n");
+              while true; do
+              for db in $dbs; do
+              export DB_KNOWN=$(PGPASSWORD=password psql -h $db -p $DB_PORT -U tb1 -lqt | cut -d \| -f 1 | grep -w tb1 | wc -l);
+              if [ $DB_KNOWN -eq 1 ]; then break 2; fi
+              done;
+              echo waiting for database;
+              sleep 2;
+              done
+
+      containers:
+        - name: edx
+          image: "usyentsoe/edx-toolbox:1.14.0.1521"
+          imagePullPolicy: IfNotPresent
+
+          securityContext:
+            runAsUser: 2020
+            runAsGroup: 2020
+          ports:
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+            - name: amqps
+              containerPort: 5672
+              protocol: TCP
+          
+          volumeMounts:
+            - name: config
+              subPath: edx.properties
+              mountPath: /etc/edx-toolbox/edx.properties
+            - name: config
+              subPath: edx-users.properties
+              mountPath: /etc/edx-toolbox/edx-users.properties
+            - name: data
+              mountPath: /var/lib/edx-toolbox
+            - name: logs
+              mountPath: /var/log/edx-toolbox
+            - name: config
+              subPath: edx-logback.xml
+              mountPath: /etc/edx-toolbox/edx-logback.xml
+            - name: config
+              subPath: server.xml
+              mountPath: /usr/share/edx-toolbox/conf/server.xml
+            - name: config
+              subPath: env.conf
+              mountPath: /etc/systemd/system/edx-toolbox.service.d/env.conf
+            - name: config
+              subPath: setenv.sh
+              mountPath: /usr/share/edx-toolbox/bin/setenv.sh
+            - name: config
+              subPath: users.properties
+              mountPath: /etc/edx-toolbox/users.properties
+            - name: config
+              subPath: groups.properties
+              mountPath: /etc/edx-toolbox/groups.properties
+            - name: config
+              subPath: edx.yml
+              mountPath: /etc/edx-toolbox/edx.yml
+            - name: shared-storage-edx-toolbox-tb1
+              mountPath: /opt/shared-storage
+          resources:
+            requests:
+              cpu: 500m # Minimum CPU allocation for pod
+              memory: 512Mi # Minimum memory allocation for pod
+            limits:
+              cpu: 1000m # Maximum CPU limit for pod
+              memory: 1Gi # Maximum memory limit for pod
+
+      volumes:
+        - name: config
+          configMap:
+            name: eccosp-edx-toolbox-tb1-cm
+        - name: data
+          emptyDir: {}
+        - name: shared-storage-edx-toolbox-tb1
+          persistentVolumeClaim:
+            claimName: shared-storage-edx-toolbox-tb1-claim
+
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: longhorn
+      resources:
+        requests:
+          storage: 512Mi
+  - metadata:
+      name: logs
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: longhorn
+      resources:
+        requests:
+          storage: 256Mi
+---
+# Source: ecco-sp/charts/edx-toolbox/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eccosp-edx-toolbox-tb1-ingress
+  labels:
+    backup.component.name: edx
+    app: eccosp-edx-toolbox-tb1
+    app-svc: Helm
+  annotations:
+    kubernetes.io/ingressClassName: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+spec:
+  tls:
+    - hosts:
+        - edx.koval.top
+      secretName: eccosp-edx
+  rules:
+  - host: edx.koval.top
+    http:
+      paths:
+        - backend:
+            service:
+              name: eccosp-edx-toolbox-tb1-svc
+              port:
+                number: 8443
+          pathType: Prefix
+          path: /
+---
+# Source: ecco-sp/charts/edx-toolbox/templates/statefulset.yaml
+---

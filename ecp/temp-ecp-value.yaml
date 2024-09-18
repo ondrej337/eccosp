@@ -604,7 +604,7 @@ metadata:
     app: eccosp-ecp-endpoint-ep1
     app-svc: Helm
   annotations:
-    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingressClassName: nginx
     nginx.ingress.kubernetes.io/backend-protocol: HTTPS
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 spec:
