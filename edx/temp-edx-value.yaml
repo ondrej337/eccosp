@@ -604,7 +604,7 @@ metadata:
     app: eccosp-edx-toolbox-tb1
 spec:
   serviceName: eccosp-edx-toolbox-tb1
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: eccosp-edx-toolbox-tb1

@@ -302,6 +302,7 @@ data:
           <!-- HA Connectors used to be announced through cluster connections and notifications -->
           <connectors>
             <connector name="MASTER">tcp://MASTER.eccosp-eccosp-artemis-artemis-eptb1-headless-svc.eccosp.svc.cluster.local:61616</connector>
+            <connector name="SLAVE1">tcp://SLAVE1.eccosp-eccosp-artemis-artemis-eptb1-headless-svc.eccosp.svc.cluster.local:61616</connector>
           </connectors>
 
           <!-- how often we are looking for how many bytes are being used on the disk in ms -->
@@ -344,6 +345,7 @@ data:
                     <cluster-connection name="ha-cluster">
                         <connector-ref>MASTER</connector-ref>
                         <static-connectors>
+                            <connector-ref>SLAVE1</connector-ref>
                         </static-connectors>
                     </cluster-connection>
                 </cluster-connections>
@@ -489,6 +491,7 @@ data:
           <!-- HA Connectors used to be announced through cluster connections and notifications -->
           <connectors>
             <connector name="MASTER">tcp://MASTER.eccosp-eccosp-artemis-artemis-eptb1-headless-svc.eccosp.svc.cluster.local:61616</connector>
+            <connector name="SLAVE1">tcp://SLAVE1.eccosp-eccosp-artemis-artemis-eptb1-headless-svc.eccosp.svc.cluster.local:61616</connector>
           </connectors>
 
           <!-- how often we are looking for how many bytes are being used on the disk in ms -->
@@ -617,7 +620,7 @@ data:
     ## Script designed to finish the broker.xml templates for Master/Slave HA. Replica with hostname ending with 0, will
     ## always be considered a master. Other replicas are marked as slaves. The pod names are loaded to the broker-master.xml
     ## and broker-slave.xml files and used for configuration.
-    REPLICA_COUNT=1
+    REPLICA_COUNT=2
     set -e
     cp /tmp/broker-master.xml /tmp/broker-master.xml.tmp
     cp /tmp/broker-slave.xml /tmp/broker-slave.xml.tmp
@@ -1410,19 +1413,19 @@ kind: StatefulSet
 metadata:
   name: eccosp-eccosp-artemis-artemis-eptb1
   annotations:
-    checksum/config: 7b26d41a1394324f34e860f1abcba7acd5a261745ebb01c734b72715a31c4ca9
+    checksum/config: 1ce98f024805d118ec5377f619856d65f8070ef74d1fa3d78cb7c899bcd23823
   labels:
     app: eccosp-eccosp-artemis-artemis-eptb1
 spec:
   serviceName: eccosp-eccosp-artemis-artemis-eptb1-headless-svc
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: eccosp-eccosp-artemis-artemis-eptb1
   template:
     metadata:
       annotations:
-        checksum/config: 7b26d41a1394324f34e860f1abcba7acd5a261745ebb01c734b72715a31c4ca9
+        checksum/config: 1ce98f024805d118ec5377f619856d65f8070ef74d1fa3d78cb7c899bcd23823
       labels:
         app: eccosp-eccosp-artemis-artemis-eptb1
         
@@ -1456,6 +1459,22 @@ spec:
             mountPath: /data
           - name: logs
             mountPath: /logs
+        - name: artemis-ha-configuration-update
+          image: "busybox"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "/tmp/configure-cluster.sh"]
+          volumeMounts:
+          - name: config
+            subPath: configure-cluster.sh
+            mountPath: /tmp/configure-cluster.sh
+          - name: config
+            subPath: broker-master.xml
+            mountPath: /tmp/broker-master.xml
+          - name: config
+            subPath: broker-slave.xml
+            mountPath: /tmp/broker-slave.xml
+          - name: data
+            mountPath: /opt/eccosp-artemis/etc/
       containers:
         - name: artemis
           image: "usyentsoe/eccosp-artemis:4.14.0.2026"
@@ -1496,8 +1515,12 @@ spec:
               subPath: bootstrap.xml
               mountPath: /opt/eccosp-artemis/etc/bootstrap.xml
             - name: config
-              subPath: broker.xml
-              mountPath: /opt/eccosp-artemis/etc/broker.xml
+              subPath: broker-master.xml
+              mountPath: /tmp/broker-master.xml
+            - name: config
+              subPath: broker-slave.xml
+              mountPath: /tmp/broker-slave.xml
+            
             - name: journal
               mountPath: /opt/eccosp-artemis/data/
             - name: data
@@ -1545,7 +1568,7 @@ metadata:
     app: eccosp-ecp-endpoint-ep1
 spec:
   serviceName: eccosp-ecp-endpoint-ep1
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: eccosp-ecp-endpoint-ep1
