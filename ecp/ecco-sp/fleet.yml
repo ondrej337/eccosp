@@ -5,11 +5,11 @@ helm:
   # The release name to use. If empty a generated release name will be used
   releases:
     - name: ecp
-      chart: ./ecp-endpoint
+      chart: ecp-endpoint
       valuesFiles:
         - values1.yaml
     - name: artemis
-      chart: ./eccosp-artemis
+      chart: eccosp-artemis
       valuesFiles:
         - values2.yaml
   
