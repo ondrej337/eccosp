@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: eccosp-artemis
+  namespace: eccosp
+spec:
+  secretName: eccosp-artemis
+  issuerRef:
+    name: acme-issuer-wcard
+    kind: ClusterIssuer
+  commonName: "artemis.koval.top"
+  dnsNames:
+    - "artemis.koval.top"
