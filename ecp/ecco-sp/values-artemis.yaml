@@ -9,7 +9,7 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
         name: usyentsoe/eccosp-artemis # URL to docker image.
         tag: 4.14.0.2026 # Docker image tag - version or 'latest'
 #        pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
-      replicaCount: 2 # number of replicas - ECCoSP Artemis cluster
+      replicaCount: 1 # number of replicas - ECCoSP Artemis cluster
       resourcesK8s: # section for CPU and memory specification
         requests: # minimum guaranteed amount of a resource that is reserved for a container
           cpu: 500m # minimum CPU - one CPU = 1000m or 1
