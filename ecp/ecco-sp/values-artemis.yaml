@@ -50,7 +50,7 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
         contextPath: / # context path for ingress, default value '/'
         host: artemis.koval.top # URL on which the ECCoSP Artemis is exposed. Address needs to be aligned with hosting.
         tls: # section for TLS definition for HTTPS connection to ingress
-          secretName: eccosp-artemis  # secret where TLS certificate is stored
+          secretName: tls-koval-top  # secret where TLS certificate is stored
         annotations: # ingress annotations section
           kubernetes.io/ingressClassName: nginx # ingress annotations - use nginx
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
