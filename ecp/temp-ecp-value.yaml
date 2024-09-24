@@ -611,7 +611,7 @@ spec:
   tls:
     - hosts:
         - ecp.koval.top
-      secretName: eccosp-ecp
+      secretName: tls-koval-top
   rules:
   - host: ecp.koval.top
     http:

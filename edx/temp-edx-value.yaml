@@ -760,7 +760,7 @@ spec:
   tls:
     - hosts:
         - edx.koval.top
-      secretName: eccosp-edx
+      secretName: tls-koval-top
   rules:
   - host: edx.koval.top
     http:

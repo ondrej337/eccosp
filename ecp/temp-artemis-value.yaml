@@ -1698,7 +1698,7 @@ spec:
   tls:
     - hosts:
         - artemis.koval.top
-      secretName: eccosp-artemis
+      secretName: tls-koval-top
   rules:
   - host: artemis.koval.top
     http:
@@ -1728,7 +1728,7 @@ spec:
   tls:
     - hosts:
         - ecp.koval.top
-      secretName: eccosp-ecp
+      secretName: tls-koval-top
   rules:
   - host: ecp.koval.top
     http:
