@@ -22,8 +22,8 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
       storageLogs: 256Mi # logs # storage for logs
       sharedStorageSize: 100Mi # if SharedStorage for artemis is used, this amount of storage will be requested
       sharedStorageSizeJournal: 100Mi # if SharedStorage for artemis journal is used, this amount of storage will be requested
-      sharedStorageClass: longhorn # if SharedStorage for artemis is used, this storage class will be used to allocate shared storage resources
-      sharedStorageClassJournal: longhorn # if SharedStorage for artemis journal is used, this storage class will be used to allocate shared storage resources
+      sharedStorageClass: longhorn-nfs # if SharedStorage for artemis is used, this storage class will be used to allocate shared storage resources
+      sharedStorageClassJournal: longhorn-nfs # if SharedStorage for artemis journal is used, this storage class will be used to allocate shared storage resources
       sharedStorageAccessMode: ReadWriteMany # sharedStorageAccessMode class
       #storageLogsSize: 64Mi # size of logs storage
       keepLogsAfterRestart: true # boolean flag - indicates if Artemis logs are persisted after pod restart, default value false
@@ -52,7 +52,7 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
         tls: # section for TLS definition for HTTPS connection to ingress
           secretName: tls-koval-top  # secret where TLS certificate is stored
         annotations: # ingress annotations section
-          kubernetes.io/ingressClassName: nginx # ingress annotations - use nginx
+          kubernetes.io/ingressClassName: cilium # ingress annotations - use nginx
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
           nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
 
@@ -181,7 +181,7 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
             name: cd # volume name
           spec:
             accessModes: [ "ReadWriteMany" ] # storage of type ReadWriteMany
-            storageClassName: longhorn # name of storage class - needs to be provided by Kubernetes administrator
+            storageClassName: longhorn-nfs # name of storage class - needs to be provided by Kubernetes administrator
             resources:
               requests:
                 storage: 512Mi # request for storage size

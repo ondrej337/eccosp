@@ -20,7 +20,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
       storageData: # Storage for embedded database and certificates. If external DB is used, the value can be lower.
       storageLogs: 256Mi # logs # storage for logs
       sharedStorageSize: 5Gi # Storage size shared between toolbox replicas of this instance. Storage for DMS and pull, located at /opt/shared-storage.
-      sharedStorageClass: longhorn # Storage class to allocate shared storage resources. ReadWriteMany access mode is required.
+      sharedStorageClass: longhorn-nfs # Storage class to allocate shared storage resources. ReadWriteMany access mode is required.
       keepLogsAfterRestart: true # boolean flag - indicates if EDX logs are persisted after pod restart, default value false
       livenessProbe: false # automatic restart if pod is not in health state, default value false
       readinessProbe: true # EDX pod will not started before readiness probe is fulfilled - check of availability of external DB
