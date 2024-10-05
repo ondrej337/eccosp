@@ -458,7 +458,7 @@ metadata:
     app: eccosp-ecp-endpoint-ep1
 spec:
   serviceName: eccosp-ecp-endpoint-ep1
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: eccosp-ecp-endpoint-ep1
