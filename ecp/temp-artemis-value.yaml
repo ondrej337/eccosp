@@ -303,7 +303,6 @@ data:
           <connectors>
             <connector name="MASTER">tcp://MASTER.eccosp-eccosp-artemis-artemis-eptb1-headless-svc.eccosp.svc.cluster.local:61616</connector>
             <connector name="SLAVE1">tcp://SLAVE1.eccosp-eccosp-artemis-artemis-eptb1-headless-svc.eccosp.svc.cluster.local:61616</connector>
-            <connector name="SLAVE2">tcp://SLAVE2.eccosp-eccosp-artemis-artemis-eptb1-headless-svc.eccosp.svc.cluster.local:61616</connector>
           </connectors>
 
           <!-- how often we are looking for how many bytes are being used on the disk in ms -->
@@ -347,7 +346,6 @@ data:
                         <connector-ref>MASTER</connector-ref>
                         <static-connectors>
                             <connector-ref>SLAVE1</connector-ref>
-                            <connector-ref>SLAVE2</connector-ref>
                         </static-connectors>
                     </cluster-connection>
                 </cluster-connections>
@@ -494,7 +492,6 @@ data:
           <connectors>
             <connector name="MASTER">tcp://MASTER.eccosp-eccosp-artemis-artemis-eptb1-headless-svc.eccosp.svc.cluster.local:61616</connector>
             <connector name="SLAVE1">tcp://SLAVE1.eccosp-eccosp-artemis-artemis-eptb1-headless-svc.eccosp.svc.cluster.local:61616</connector>
-            <connector name="SLAVE2">tcp://SLAVE2.eccosp-eccosp-artemis-artemis-eptb1-headless-svc.eccosp.svc.cluster.local:61616</connector>
           </connectors>
 
           <!-- how often we are looking for how many bytes are being used on the disk in ms -->
@@ -623,7 +620,7 @@ data:
     ## Script designed to finish the broker.xml templates for Master/Slave HA. Replica with hostname ending with 0, will
     ## always be considered a master. Other replicas are marked as slaves. The pod names are loaded to the broker-master.xml
     ## and broker-slave.xml files and used for configuration.
-    REPLICA_COUNT=3
+    REPLICA_COUNT=2
     set -e
     cp /tmp/broker-master.xml /tmp/broker-master.xml.tmp
     cp /tmp/broker-slave.xml /tmp/broker-slave.xml.tmp
@@ -1416,19 +1413,19 @@ kind: StatefulSet
 metadata:
   name: eccosp-eccosp-artemis-artemis-eptb1
   annotations:
-    checksum/config: 838388df4c299f6adae62cd7450774a5315fb083a6bb2b52ca6db8423f576408
+    checksum/config: 1ce98f024805d118ec5377f619856d65f8070ef74d1fa3d78cb7c899bcd23823
   labels:
     app: eccosp-eccosp-artemis-artemis-eptb1
 spec:
   serviceName: eccosp-eccosp-artemis-artemis-eptb1-headless-svc
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: eccosp-eccosp-artemis-artemis-eptb1
   template:
     metadata:
       annotations:
-        checksum/config: 838388df4c299f6adae62cd7450774a5315fb083a6bb2b52ca6db8423f576408
+        checksum/config: 1ce98f024805d118ec5377f619856d65f8070ef74d1fa3d78cb7c899bcd23823
       labels:
         app: eccosp-eccosp-artemis-artemis-eptb1
         
@@ -1571,7 +1568,7 @@ metadata:
     app: eccosp-ecp-endpoint-ep1
 spec:
   serviceName: eccosp-ecp-endpoint-ep1
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: eccosp-ecp-endpoint-ep1
@@ -1682,7 +1679,7 @@ spec:
               memory: 512Mi # Minimum memory allocation for pod
             limits:
               cpu: 1000m # Maximum CPU limit for pod
-              memory: 1Gi # Maximum memory limit for pod
+              memory: 512Mi # Maximum memory limit for pod
 
       volumes:
         - name: config
@@ -1706,6 +1703,16 @@ spec:
       resources:
         requests:
           storage: 256Mi
+  -
+    metadata:
+      name: fssf
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 512Mi
+      storageClassName: longhorn-nfs
 ---
 # Source: ecco-sp/charts/eccosp-artemis/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1

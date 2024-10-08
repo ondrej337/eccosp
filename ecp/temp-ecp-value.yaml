@@ -458,7 +458,7 @@ metadata:
     app: eccosp-ecp-endpoint-ep1
 spec:
   serviceName: eccosp-ecp-endpoint-ep1
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: eccosp-ecp-endpoint-ep1
@@ -593,6 +593,16 @@ spec:
       resources:
         requests:
           storage: 256Mi
+  -
+    metadata:
+      name: fssf
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 512Mi
+      storageClassName: longhorn-nfs
 ---
 # Source: ecco-sp/charts/ecp-endpoint/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1

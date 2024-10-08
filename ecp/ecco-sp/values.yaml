@@ -9,7 +9,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
         name: usyentsoe/ecp-endpoint # URL to docker image.
         tag: 4.14.0.2026 # Docker image tag - version or 'latest'
         # pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
-      replicaCount: 3 # number of replicas - ECP cluster
+      replicaCount: 2 # number of replicas - ECP cluster
       resourcesK8s: # section for CPU and memory specification
         requests: # minimum guaranteed amount of a resource that is reserved for a container
           cpu: 500m # minimum CPU - one CPU = 1000m or 1
@@ -248,15 +248,15 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
            </broker>
 
 #  See ECP Kubernetes Guide, chapter ECP Endpoint Shared Folder configuration
-#      volumeClaimTemplates:
-#        - metadata:
-#            name: fssf # volume name
-#          spec:
-#            accessModes: [ "ReadWriteMany" ] # storage of type ReadWriteMany
-#            storageClassName: longhorn # name of storage class - needs to be provided by Kubernetes administrator
-#            resources:
-#              requests:
-#                storage: 512Mi # request for shared storage size
+      volumeClaimTemplates:
+        - metadata:
+            name: fssf # volume name
+          spec:
+            accessModes: [ "ReadWriteMany" ] # storage of type ReadWriteMany
+            storageClassName: longhorn-nfs # name of storage class - needs to be provided by Kubernetes administrator
+            resources:
+              requests:
+                storage: 512Mi # request for shared storage size
 
 # global config
 global: # global config
