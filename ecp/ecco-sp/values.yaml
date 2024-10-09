@@ -6,8 +6,8 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
   instance: # array of ECP endpoint instances - one values file can hold multiple instances
     - name: ep1 # name of kubernetes instance
       image: # section for information about Docker image
-        name: usyentsoe/ecp-endpoint # URL to docker image.
-        tag: 4.14.0.2026 # Docker image tag - version or 'latest'
+        name: ondrej337/eccosp #usyentsoe/ecp-endpoint # URL to docker image.
+        tag: ecp-endpoint-4.14.0.2026 # Docker image tag - version or 'latest'
         # pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
       replicaCount: 2 # number of replicas - ECP cluster
       resourcesK8s: # section for CPU and memory specification
@@ -262,5 +262,5 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 global: # global config
   storage: # storage section
     class: longhorn # storage class – needs to be provided by Kubernetes cluster administrator
-#  imagePullSecrets: # secrets which hold information about login to docker repository
-#    - name: regcred # name of secret – name is defined by Kubernetes cluster administrator
+  imagePullSecrets: # secrets which hold information about login to docker repository
+    - name: regcred # name of secret – name is defined by Kubernetes cluster administrator

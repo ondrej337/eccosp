@@ -1430,13 +1430,15 @@ spec:
         app: eccosp-eccosp-artemis-artemis-eptb1
         
     spec:
+      imagePullSecrets:
+        - name: regcred
 
       securityContext:
         fsGroup: 2030
 
       initContainers:
         - name: ensure-persistent-volume-sync-with-image-data
-          image: "usyentsoe/eccosp-artemis:4.14.0.2026"
+          image: "ondrej337/eccosp:eccosp-artemis-4.14.0.2026"
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh","-c"]
           args:
@@ -1477,7 +1479,7 @@ spec:
             mountPath: /opt/eccosp-artemis/etc/
       containers:
         - name: artemis
-          image: "usyentsoe/eccosp-artemis:4.14.0.2026"
+          image: "ondrej337/eccosp:eccosp-artemis-4.14.0.2026"
           imagePullPolicy: IfNotPresent
           readinessProbe:
             tcpSocket:
@@ -1579,13 +1581,15 @@ spec:
       labels:
         app: eccosp-ecp-endpoint-ep1
     spec:
+      imagePullSecrets:
+        - name: regcred
 
       securityContext:
         fsGroup: 2000
 
       initContainers:
         - name: ensure-persistent-volume-sync-with-image-data
-          image: "usyentsoe/ecp-endpoint:4.14.0.2026"
+          image: "ondrej337/eccosp:ecp-endpoint-4.14.0.2026"
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh","-c"]
           args:
@@ -1624,7 +1628,7 @@ spec:
 
       containers:
         - name: artemis
-          image: "usyentsoe/ecp-endpoint:4.14.0.2026"
+          image: "ondrej337/eccosp:ecp-endpoint-4.14.0.2026"
           imagePullPolicy: IfNotPresent
           securityContext:
             runAsUser: 2000
@@ -1679,7 +1683,7 @@ spec:
               memory: 512Mi # Minimum memory allocation for pod
             limits:
               cpu: 1000m # Maximum CPU limit for pod
-              memory: 512Mi # Maximum memory limit for pod
+              memory: 1Gi # Maximum memory limit for pod
 
       volumes:
         - name: config

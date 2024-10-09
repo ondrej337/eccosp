@@ -469,13 +469,15 @@ spec:
       labels:
         app: eccosp-ecp-endpoint-ep1
     spec:
+      imagePullSecrets:
+        - name: regcred
 
       securityContext:
         fsGroup: 2000
 
       initContainers:
         - name: ensure-persistent-volume-sync-with-image-data
-          image: "usyentsoe/ecp-endpoint:4.14.0.2026"
+          image: "ondrej337/eccosp:ecp-endpoint-4.14.0.2026"
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh","-c"]
           args:
@@ -514,7 +516,7 @@ spec:
 
       containers:
         - name: ecp
-          image: "usyentsoe/ecp-endpoint:4.14.0.2026"
+          image: "ondrej337/eccosp:ecp-endpoint-4.14.0.2026"
           imagePullPolicy: IfNotPresent
           securityContext:
             runAsUser: 2000

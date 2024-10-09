@@ -6,8 +6,8 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
   instance: # array of EDX toolbox instances - one values file can hold multiple instances
     - name: tb1 # name of kubernetes instance
       image: # section for information about Docker image
-        name: usyentsoe/edx-toolbox # URL to docker image.
-        tag: 1.14.0.1521 # Docker image tag - version or 'latest'
+        name: ondrej337/eccosp #usyentsoe/edx-toolbox # URL to docker image.
+        tag: edx-toolbox-1.14.0.1521 #1.14.0.1521 # Docker image tag - version or 'latest'
         # pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
       replicaCount: 2 # number of replicas - EDX cluster
       resourcesK8s: # section for CPU and memory specification
@@ -486,5 +486,5 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
 global: # storage section
   storage:
     class: longhorn # storage class – needs to be provided by Kubernetes cluster administrator
-#  imagePullSecrets: # secrets which hold information about login to docker repository
-#    - name: regcred # name of secret – name is defined by Kubernees cluster administrator
+  imagePullSecrets: # secrets which hold information about login to docker repository
+    - name: regcred # name of secret – name is defined by Kubernees cluster administrator
