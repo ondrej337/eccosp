@@ -31,7 +31,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
       ingress: # an object that allows access to Kubernetes services from outside the Kubernetes cluster.
         enabled: true # boolean flag for enable/disable ingress, default value false
         apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
-        contextPath: / # context path for ingress, default value '/'
+        contextPath: /ecp # context path for ingress, default value '/'
         host: ecp.koval.top # URL on which the ECP Endpoint is exposed. Address needs to be aligned with hosting.
         tls: # section for TLS definition for HTTPS connection to ingress
           secretName: tls-koval-top  # secret where TLS certificate is stored
