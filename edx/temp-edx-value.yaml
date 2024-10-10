@@ -615,13 +615,15 @@ spec:
       labels:
         app: eccosp-edx-toolbox-tb1
     spec:
+      imagePullSecrets:
+        - name: regcred
 
       securityContext:
         fsGroup: 2020
 
       initContainers:
         - name: ensure-persistent-volume-sync-with-image-data
-          image: "usyentsoe/edx-toolbox:1.14.0.1521"
+          image: "ondrej337/eccosp:edx-toolbox-1.14.0.1521"
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh","-c"]
           args:
@@ -659,7 +661,7 @@ spec:
 
       containers:
         - name: edx
-          image: "usyentsoe/edx-toolbox:1.14.0.1521"
+          image: "ondrej337/eccosp:edx-toolbox-1.14.0.1521"
           imagePullPolicy: IfNotPresent
 
           securityContext:
@@ -760,7 +762,7 @@ spec:
   tls:
     - hosts:
         - edx.koval.top
-      secretName: tls-koval-top
+      secretName: eccosp-edx
   rules:
   - host: edx.koval.top
     http:
