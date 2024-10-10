@@ -1728,14 +1728,14 @@ metadata:
     app: eccosp-eccosp-artemis-artemis-eptb1
     app-svc: Helm
   annotations:
-    kubernetes.io/ingressClassName: cilium
+    kubernetes.io/ingressClassName: nginx
     nginx.ingress.kubernetes.io/backend-protocol: HTTPS
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 spec:
   tls:
     - hosts:
         - artemis.koval.top
-      secretName: tls-koval-top
+      secretName: eccosp-artemis
   rules:
   - host: artemis.koval.top
     http:
@@ -1765,7 +1765,7 @@ spec:
   tls:
     - hosts:
         - ecp.koval.top
-      secretName: tls-koval-top
+      secretName: eccosp-ecp
   rules:
   - host: ecp.koval.top
     http:
