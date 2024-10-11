@@ -13,7 +13,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
       resourcesK8s: # section for CPU and memory specification
         requests: # minimum guaranteed amount of a resource that is reserved for a container
           cpu: 500m # minimum CPU - one CPU = 1000m or 1
-          memory: 512Mi # minimum memory for container
+          memory: 1Gi # minimum memory for container
         limits: # maximum amount of a resource to be used by a container. Should be always higher than application can allocate (xmx)
           cpu: 1000m # maximum CPU - two CPUs = 2000m or 2
           memory: 1Gi # maximum memory for container - 1Gi is equal to 1024 Mi
