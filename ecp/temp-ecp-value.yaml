@@ -458,7 +458,7 @@ metadata:
     app: eccosp-ecp-endpoint-ep1
 spec:
   serviceName: eccosp-ecp-endpoint-ep1
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: eccosp-ecp-endpoint-ep1
@@ -568,10 +568,10 @@ spec:
           resources:
             requests:
               cpu: 500m # Minimum CPU allocation for pod
-              memory: 512Mi # Minimum memory allocation for pod
+              memory: 1Gi # Minimum memory allocation for pod
             limits:
               cpu: 1000m # Maximum CPU limit for pod
-              memory: 1Gi # Maximum memory limit for pod
+              memory: 1512Mi # Maximum memory limit for pod
 
       volumes:
         - name: config
@@ -623,7 +623,7 @@ spec:
   tls:
     - hosts:
         - ecp.koval.top
-      secretName: eccosp-ecp
+      secretName: tls-koval-top
   rules:
   - host: ecp.koval.top
     http:
@@ -634,4 +634,4 @@ spec:
             port:
               number: 8443
         pathType: Prefix
-        path: /ecp
+        path: /

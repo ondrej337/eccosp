@@ -1324,7 +1324,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: shared-storage-eccosp-artemis-artemis-eptb1-claim
 spec:
-  storageClassName: longhorn-nfs
+  storageClassName: longhorn
   accessModes:
     - ReadWriteMany
   resources:
@@ -1337,7 +1337,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: shared-storage-eccosp-artemis-journal-artemis-eptb1-claim
 spec:
-  storageClassName: longhorn-nfs
+  storageClassName: longhorn
   accessModes:
     - ReadWriteMany
   resources:
@@ -1532,10 +1532,10 @@ spec:
           resources:
             requests:
               cpu: 500m # Minimum CPU allocation for pod
-              memory: 512Mi # Minimum memory allocation for pod
+              memory: 1Gi # Minimum memory allocation for pod
             limits:
               cpu: 1000m # Maximum CPU limit for pod
-              memory: 1Gi # Maximum memory limit for pod
+              memory: 2Gi # Maximum memory limit for pod
 
       volumes:
         - name: config
@@ -1570,7 +1570,7 @@ metadata:
     app: eccosp-ecp-endpoint-ep1
 spec:
   serviceName: eccosp-ecp-endpoint-ep1
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: eccosp-ecp-endpoint-ep1
@@ -1680,10 +1680,10 @@ spec:
           resources:
             requests:
               cpu: 500m # Minimum CPU allocation for pod
-              memory: 512Mi # Minimum memory allocation for pod
+              memory: 1Gi # Minimum memory allocation for pod
             limits:
               cpu: 1000m # Maximum CPU limit for pod
-              memory: 1Gi # Maximum memory limit for pod
+              memory: 1512Mi # Maximum memory limit for pod
 
       volumes:
         - name: config
@@ -1716,7 +1716,7 @@ spec:
       resources:
         requests:
           storage: 512Mi
-      storageClassName: longhorn-nfs
+      storageClassName: nfs-storage
 ---
 # Source: ecco-sp/charts/eccosp-artemis/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1
@@ -1735,7 +1735,7 @@ spec:
   tls:
     - hosts:
         - artemis.koval.top
-      secretName: eccosp-artemis
+      secretName: tls-koval-top
   rules:
   - host: artemis.koval.top
     http:
@@ -1765,7 +1765,7 @@ spec:
   tls:
     - hosts:
         - ecp.koval.top
-      secretName: eccosp-ecp
+      secretName: tls-koval-top
   rules:
   - host: ecp.koval.top
     http:
@@ -1776,4 +1776,4 @@ spec:
             port:
               number: 8443
         pathType: Prefix
-        path: /ecp
+        path: /
