@@ -1,190 +1,262 @@
 # The commented parameters have default values but these defaults can be overridden when enabled
 
-# config for eccosp-artemis
-eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, ecp-broker, ecp-artemis
+ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-broker
   enabled: true # boolean flag which defines whether the component will be deployed or not
-  instance: # array of ECCoSP Artemis instances - one values file can hold multiple instances
-    - name: artemis-eptb1 # name of kubernetes instance
+  
+  instance: # array of ECP endpoint instances - one values file can hold multiple instances
+    - name: ep1 # name of kubernetes instance
       image: # section for information about Docker image
-        name: ondrej337/eccosp # URL to docker image.
-        tag: eccosp-artemis-4.14.0.2026 #ecp-endpoint-4.14.0.2026 #4.14.0.2026 # Docker image tag - version or 'latest'
-#        pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
-      replicaCount: 2 # number of replicas - ECCoSP Artemis cluster
+        name: ondrej337/eccosp #usyentsoe/ecp-endpoint # URL to docker image.
+        tag: ecp-endpoint-4.14.0.2026 # Docker image tag - version or 'latest'
+        # pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
+      replicaCount: 3 # number of replicas - ECP cluster
       resourcesK8s: # section for CPU and memory specification
         requests: # minimum guaranteed amount of a resource that is reserved for a container
           cpu: 500m # minimum CPU - one CPU = 1000m or 1
           memory: 1Gi # minimum memory for container - 1Gi is equal to 1024 Mi
         limits: # maximum amount of a resource to be used by a container. Should be always higher than application can allocate (xmx)
-          cpu: 1000m # maximum CPU
-          memory: 2Gi # maximum memory for container - 5Gi is equal to 5120 Mi
-
-      storageData: 1Gi # certificates # storage certificates.
-      storageLogs: 256Mi # logs # storage for logs
-      sharedStorageSize: 100Mi # if SharedStorage for artemis is used, this amount of storage will be requested
-      sharedStorageSizeJournal: 100Mi # if SharedStorage for artemis journal is used, this amount of storage will be requested
-      sharedStorageClass: longhorn # if SharedStorage for artemis is used, this storage class will be used to allocate shared storage resources
-      sharedStorageClassJournal: longhorn # if SharedStorage for artemis journal is used, this storage class will be used to allocate shared storage resources
-      sharedStorageAccessMode: ReadWriteMany # sharedStorageAccessMode class
-      #storageLogsSize: 64Mi # size of logs storage
-      keepLogsAfterRestart: true # boolean flag - indicates if Artemis logs are persisted after pod restart, default value false
+          cpu: 1000m # maximum CPU - two CPUs = 2000m or 2
+          memory: 1512Mi # maximum memory for container
+      storageData: 1Gi # Storage for embedded database and certificates. If external DB is used, the value can be lower.
+      storageLogs: 256Mi # storage for logs
+      keepLogsAfterRestart: true # boolean flag - indicates if ECP logs are persisted after pod restart, default value false
       livenessProbe: false # automatic restart if pod is not in health state, default value false
-      readinessProbe: true # Artemis pod will not started before readiness probe is fulfilled
-      useSharedStorageForConfiguration: true # if enabled, all replicas of this pod will use shared storage for configs and certificates
-      useSharedStorageForJournal: true # if enabled, all replicas of this pod will use shared storage for journal
-      prometheusEnabled: false #boolean flag - indicates if Prometheus metrics is enabled
-
-      artemisKeystoreLocation: /opt/eccosp-artemis/etc/keystore.jks
-      artemisKeystorePassword: password
+      readinessProbe: true # ECP pod will not started before readiness probe is fulfilled - check of availability of external DB
 
       service: # section for definition of services exposed within kubernetes environment
-        type: LoadBalancer # Default service type is LoadBalancer
-#        http: # protocol used for accessing GUI - can be http or https
-#          port: 8162 # port used for exposing HTTP(S) service
         https: # protocol used for accessing GUI - can be http or https
-          port: 8161 # port used for exposing HTTP(S) service
-        amqps: # protocol used for connection on AMQP interface of Artemis - can be AMQP or AMQPS
-          port: 5672 # port used for exposing AMQP(S) service
+          port: 8443 # port used for exposing HTTP(S) service
+        amqps: # protocol used for connection on AMQP interface of ECP Endpoint - can be AMQP or AMQPS
+          port: 5671 # port used for exposing AMQP(S) service 
       ingress: # an object that allows access to Kubernetes services from outside the Kubernetes cluster.
         enabled: true # boolean flag for enable/disable ingress, default value false
         apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
         contextPath: / # context path for ingress, default value '/'
-        host: artemis.koval.top # URL on which the ECCoSP Artemis is exposed. Address needs to be aligned with hosting.
+        host: ecp.koval.top # URL on which the ECP Endpoint is exposed. Address needs to be aligned with hosting.
         tls: # section for TLS definition for HTTPS connection to ingress
           secretName: tls-koval-top  # secret where TLS certificate is stored
         annotations: # ingress annotations section
-          kubernetes.io/ingressClassName: nginx # ingress annotations - use nginx
+          kubernetes.io/ingressClassName: nginx  # ingress controller definition
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
           nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
 
       # The naming convention for configuration files name and parameters is camelCase instead of 'dot case format'.
-      # Mapping of Helm values to ECCoSP Artemis configuration file is available in config map ./eccosp-artemis/templates/configMap.yaml
-      brokerXml: # stands for broker.xml file
-        default: # parent for default Artemis configuration
-          ecpComponentCode: artemis-eptb1 # Artemis identification code in ECP network (EIC) for Audit logging
-#          componentType: # Artemis component type ie. ECCo SP Artemis Internal Broker for Audit logging
-#          artemisName: # Artemis name, value is shown in GUI
-#          diskScanPeriod: # disk-scan-period
-#          diskMaxUsage: # max-disk-usage
-#          pageSyncTimeout: # page-sync-timeout
-#          globalMaxSize: # global-max-size
-#          globalMaxMessages: # global-max-messages
+      # Mapping of Helm values to ECP configuration file is available in config map ./ecp-endpoint/templates/configMap.yaml
+      ecpProperties: # stands for ecp.properties file
+        springProfilesActive: ecp-ha #stands for parameter spring.profiles.active
+        dataDirectory: /var/lib/ecp-endpoint # dataDirectory config parameter for storage of persistent data
+        ecpKeystoreLocation: /var/lib/ecp-endpoint/keystore.jks # ecp.keystore.location
+        ecpKeystorePassword: password # password for the keystore.jks # ecp.keystore.password
+        ecpAuthKeystoreLocation: /var/lib/ecp-endpoint/authKeystore.jks #  ecp.authKeystore.location
+        ecpAuthKeystorePassword: password # ecp.authKeystore.password
 
-#        journal: # parent for Artemis journal configuration
-#          persistenceEnabled: # persistence-enabled
-#          maxRedeliveryRecords: # max-redelivery-records
-#          type: # journal-type
-#          dataSync: # journal-datasync
-#          minFiles: # journal-min-files
-#          poolFiles: # journal-pool-files
-#          deviceBlockSize: # journal-device-block-size
-#          fileSize: # journal-file-size
-#          bufferTimeout: # journal-buffer-timeout
-#          maxIO: # journal-max-io
-#          pagingDirectory: # paging-directory
-#          bindingsDirectory: # bindings-directory
-#          journalDirectory: # journal-directory
-#          largeMessagesDirectory: # large-messages-directory
+        # Uncomment desired DB configuration section if external DB is used. Change value of parameters as needed.
 
-#        criticalAnalyzer: # parent for Artemis critical analyzer configuration
-#          enabled: # critical-analyzer
-#          timeout: # critical-analyzer-timeout
-#          checkPeriod: # critical-analyzer-check-period
-#          policy: # critical-analyzer-policy
+        # ------ mysql -------
+#        springProfilesActive: ecp-ha # high-availibility profile of the application - configuration of external database
+#        ecpDBUrl: jdbc:mariadb://1.2.3.4:3306/ep1?characterEncoding=UTF-8&useSSL=false&autoReconnect=true # database connection string
+#        ecpDBUsername: ep1 # username of the user of the external database
+#        ecpDBPassword: password # password of the user of the external database
+#        ecpDBHostname: 1.2.3.4 # required for readiness check, server hostname or IP
+#        ecpDBName: ep1 # required for readiness check, external database name
+#        springDatasourceValidationQuery: select 1 # database query, that is called once in a while to maintain the db <-> app connection active
+#        springDatasourceDriverClassName: org.mariadb.jdbc.Driver # database driver
 
-#        acceptor: # configuration of Artemis AMQP acceptor
-#          ip: # IP where Artemis is listening on
-#          port: # port where Artemis is listening on
-#          protocols: # protocols
-#          enabledProtocols: # enabledProtocols
-#          enabledCipherSuites: # enabledCipherSuites
-#          properties: # parent for acceptor attributes/values configuration
-#            - parameterName: # name of acceptor attribute
-#              value: # value of acceptor attribute
-#            - parameterName: # name of acceptor attribute
-#              value: # value of acceptor attribute
+        # ------ mssql -------
+#        springProfilesActive: ecp-ha
+#        ecpDBUrl: jdbc:sqlserver://1.2.3.4:1433;databaseName=ep1
+#        ecpDBUsername: ep1
+#        ecpDBPassword: password
+#        ecpDBHostname: 1.2.3.4 # Required for readiness check
+#        ecpDBName: ep1 # Required for readiness check
+#        springDatasourceValidationQuery: select 1
+#        springDatasourceDriverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
-        addressSettings: # parent for Artemis address settings configuration
-          defaultConfigurationEnabled: true # if true, default address settings configuration is enabled
-#          match: # possibility to add configuration parameters
-#            - ecp.queue.receive: # queue name, wildcard, you want to configure
-#              - parameterName: "page-size-bytes" # name of queue attribute
-#                value: "10M" # value of queue attribute
-#            - ecp.queue.send: # queue name, wildcard, you want to configure
-#              - parameterName: "page-size-bytes" # name of queue attribute
-#                value: "20M" # value of queue attribute
-# Artemis HA is configured via Shared Store approach. First node in the cluster, is always selected as master. Any other nodes are selected as backups/slaves. Details for internal communication are filled in automatically during deployment.
-#        highAvailability: # parent for Artemis HA configuration
-#          user: eccosp-artemis # HA cluster user
-#          password: eccosp-artemis-cluster-password # HA cluster password
-#          connectionName: ha-cluster # HA connection name
-#          acceptor: # parent for Artemis HA configuration acceptor
-#            ip: 0.0.0.0 # IP where Artemis HA acceptor is listening on
-#            port: 61616 # port where Artemis HA acceptor is listening on
-#            tcpSendBufferSize: # tcpSendBufferSize
-#            tcpReceiveBufferSize: # tcpReceiveBufferSize
-#            protocols: # protocols
-#            enabledProtocols: # enabledProtocols
-#            enabledCipherSuites: # enabledCipherSuites
-#            properties: # parent for acceptor attributes/values configuration
-#              - parameterName: # name of acceptor attribute
-#                value: # value of acceptor attribute
-#              - parameterName: # name of acceptor attribute
-#                value: # value of acceptor attribute
-      env:  # stands for env file
-#        heapDumpPath: # path to java heap dump file
-        resourcesJvm: # memory allocation for Artemis component
+        # ------ postgres -------
+        springProfilesActive: ecp-ha
+        ecpDBUrl: jdbc:postgresql://ecp-db-cluster-rw.cloudnative-pg.svc.cluster.local:5432/ep1
+        ecpDBUsername: ep1
+        ecpDBPassword: password
+        ecpDBHostname: ecp-db-cluster-rw.cloudnative-pg.svc.cluster.local # Required for readiness check
+        ecpDBName: ep1 # Required for readiness check
+        springDatasourceValidationQuery: select 1
+        springDatasourceDriverClassName: org.postgresql.Driver
+
+        # ------ oracle -------
+#        springProfilesActive: ecp-ha
+#        ecpDBUrl: jdbc:oracle:thin:@1.2.3.4:1521/ORACLE05PDB
+#        ecpDBUsername: ep1
+#        ecpDBPassword: password
+#        ecpDBHostname: 1.2.3.4 # Required for readiness check
+#        ecpDBName: ep1 # Required for readiness check
+#        springDatasourceValidationQuery: select 1 from dual
+#        springDatasourceDriverClassName: oracle.jdbc.OracleDriver
+
+        internalBrokerHost: eccosp-eccosp-artemis-artemis-eptb1-svc # internalBroker.amqp.host
+        internalBrokerAmqpPort: 5672 # internalBroker.amqp.port
+        internalBrokerUseAuthentication: true # internalBroker.useAuthentication
+        internalBrokerAuthUser: endpoint # internalBroker.auth.user
+        internalBrokerAuthPassword: password # internalBroker.auth.password
+        internalBrokerKeystoreLocation: ${dataDirectory}/authKeystore.jks # internalBroker.keystore.location
+        internalBrokerKeystorePassword: password # internalBroker.keystore.password
+        internalBrokerKeystoreAuthAlias: ecp_module_auth # internalBroker.keystore.authAlias
+        internalBrokerUrls: amqps://eccosp-eccosp-artemis-artemis-eptb1-svc:5672 # internalBroker.urls
+
+        loggingFileName: /var/log/ecp-endpoint/ecp.log # logging.file.name
+        loggingFilePath: /var/log/ecp-endpoint # logging.file.path
+        loggingConfig: /etc/ecp-endpoint/ecp-logback.xml # logging.config
+        loggingLevelOrgApacheQpid: WARN # logging.level.org.apache.qpid
+
+#        ecpContentStorageRoot: ${dataDirectory}/content # ecp.content.storage.root
+#        ecpContentStorageStorageId: 1 # ecp.content.storage.storageId
+
+        springJmxEnabled: false # spring.jmx.enabled
+        serverErrorWhiteLabelEnabled: false # server.error.whitelabel.enabled
+
+        ecpDBKeystorePassword: password # ecp.db.keystore.password
+
+        ecpEndpointAmqpApiEnabled: true # ecp.endpoint.amqpApiEnabled
+        ecpEndpointAmqpApiSendHandlerEnabled: true # enable AMQP API Send Handler
+        sendHandlerBeanName: amqpApiSendHandler # ecp.endpoint.sendHandler[0].beanName
+        sendHandlertypeName: "*" # ecp.endpoint.sendHandler[0].typeName
+
+#        ecpNatEnabled: false # NAT is disabled by default - equals to  ecp.natEnabled
+#        ecpNatTable: # additional parameter for NAT array. Array values are divided by ' - '
+#          - network: internet # ecp.natTable[0].network
+#            sourceIp: 1.2.3.4 # ecp.natTable[0].sourceIp
+#            sourcePort: 8443 # ecp.natTable[0].sourcePort
+#            destinationIp: 5.6.7.8 # ecp.natTable[0].destinationIp
+#            destinationPort: 8443 # ecp.natTable[0].destinationPort
+#          - network: ATOM # ecp.natTable[1].network
+#            sourceIp: 1.1.1.1 # ecp.natTable[1].sourceIp
+#            sourcePort: 5671 # ecp.natTable[1].sourcePort
+#            destinationIp: 2.2.2.2 # ecp.natTable[1].destinationIp
+#            destinationPort: 5671 # ecp.natTable[1].destinationPort
+
+#        ecpSecurityProxyEnabled: false # ecp.security.proxy.enabled
+#        ecpSecurityProxyHost: socks-host # ecp.security.proxy.host
+#        ecpSecurityProxyProxyPort: 1081 # ecp.security.proxy.port
+#        ecpSecurityProxyNonProxyHosts: 127.0.0.1,0.0.0.0 # ecp.security.proxy.nonProxyHosts
+#        ecpSecurityProxyUsername: sockssuser # ecp.security.proxy.username
+#        ecpSecurityProxyPassword: sockspassword # ecp.security.proxy.password
+
+#        jasyptEncryptorAlgorithm: PBEWithHMACSHA512AndAES_256 # jasypt.encryptor.algorithm
+#        prometheusMonitoringEnabled: false # management.endpoints.web.exposure.include=info,health,readiness,prometheus
+
+#        ecpMaxRequestSize: 2097152 # ecp.maxRequestSize
+
+#        ecpHealthExclude: connectedBrokers,waitingToDeliver,waitingToReceive,isReloading,endpointStatus,certificatesStatus,invalidMessagePath,withoutValidMessagePath,synchronizationStatus,internalBrokerConnected
+
+#        ecpHealthThresholdConnectedBrokers: # ecp.healthThreshold.connectedBrokers
+#        ecpHealthThresholdWaitingToDeliver: # ecp.healthThreshold.waitingToDeliver
+#        ecpHealthThresholdWaitingToReceive: # ecp.healthThreshold.waitingToReceive
+#        ecpHealthThresholdInvalidMessagePath: # ecp.healthThreshold.invalidMessagePath
+
+        ## Spring Release 2024
+        ecpCsrfSecret: P9CkNis9r5Pn00RFZwN9oZgi # ecp.csrf.secret
+#        internalBrokerQueuePrefix: ecp-endpoint #internalBroker.queuePrefix
+#        messagingDelayHours: 480 # ecp.automaticUpdate.messagingDelayHours
+#        brokerConnectionDelayHours: 480 # ecp.authKeystore.brokerConnectionDelayHours
+
+      envConf: # stands for env.conf file
+        resourcesJvm: # memory allocation for ECP component
           xms: 128M # lower bound of java heap memory size
-          xmx: 4G # upper bound of java heap memory size
+          xmx: 1G # upper bound of java heap memory size
+#        ecpLogFullStackTrace: false # ecp.logFullStackTrace
 
-      artemisUsers: # artemis-users.properties
-        - login: endpoint # username for Artemis console
-          password: password # password for Artemis console
-        - login: toolbox # username for Artemis console
-          password: password # password for Artemis console
+      ecpUsersProperties: # stands for ecp-users.properties
+        ecpEndpointUsers: # array of users
+          - login: admin # ecp.endpoint.users[0].login
+            password: password # ecp.endpoint.users[0].password
+            role: admin # ecp.endpoint.users[0].role
+          - login: tester # ecp.endpoint.users[1].login
+            password: passwordtester # ecp.endpoint.users[1].password
+            role: user # ecp.endpoint.users[1].login
 
-#      volumeMounts:  # volume mounts - can be used for mapping config files or storages
-#        - name: config  # name of volume mounts for config
-#          subPath: login.config  # name of configuration file
-#          mountPath: /opt/eccosp-artemis/etc/login.config # path where config file will be mounted
+#      ecpPasswordProperties: # ecp-password.properties
+#        encryptionPassword: encryptionPassword # encryption password for Jasypt
 
-#      configMap: # config maps array
-#        - subPath: login.config # name of config file/volume mount
-#          content: |- # content is shifted by two spaces
-#            /*
-#              * Licensed to the Apache Software Foundation (ASF) under one or more
-#              * contributor license agreements.  See the NOTICE file distributed with
-#              * this work for additional information regarding copyright ownership.
-#              * The ASF licenses this file to You under the Apache License, Version 2.0
-#              * (the "License"); you may not use this file except in compliance with
-#              * the License.  You may obtain a copy of the License at
-#              *
-#              * http://www.apache.org/licenses/LICENSE-2.0
-#              *
-#              * Unless required by applicable law or agreed to in writing, software
-#              * distributed under the License is distributed on an "AS IS" BASIS,
-#              * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#              * See the License for the specific language governing permissions and
-#              * limitations under the License.
-#              */
+#      jmxRemoteProperties: # jmxremote.properties
+#        comSunManagementJmxRemote: true # com.sun.management.jmxremote
+#        comSunManagementJmxRemotePort: 2099 # com.sun.management.jmxremote.port
+#        comSunManagementJmxRemoteRmiPort: 2098 # com.sun.management.jmxremote.rmi.port
+#        comSunManagementJmxRemotePasswordFile: /etc/ecp-endpoint/jmxremote.password # com.sun.management.jmxremote.password.file
+#        comSunManagementJmxRemoteAccessFile: /etc/ecp-endpoint/jmxremote.access # com.sun.management.jmxremote.access.file
+#        comSunManagementJmxRemoteSsl: true # com.sun.management.jmxremote.ssl
+#        comSunManagementJmxRegistrySsl: true # com.sun.management.jmxremote.registry.ssl
+#        comSunManagementJmxRemoteSslConfigFile: /etc/ecp-endpoint/jmxremote.ssl # com.sun.management.jmxremote.ssl.config.file
+#        comSunManagementJmxRemoteAuthenticate: true # com.sun.management.jmxremote.authenticate
 
-#             activemq {
-#                org.apache.activemq.artemis.spi.core.security.jaas.PropertiesLoginModule required
-#                    debug=false
-#                    reload=true
-#                    org.apache.activemq.jaas.properties.user="artemis-users.properties"
-#                    org.apache.activemq.jaas.properties.role="artemis-roles.properties";
-#             };
+#      jmxRemoteSsl: # jmxremote.ssl
+#        javaxNetSslKeystore: /path/to/keystore.jks # javax.net.ssl.keyStore
+#        javaxNetSslKeystorePassword: keystore_password # javax.net.ssl.keyStorePassword
+#        javaxNetSslTrustStore: /path/to/truststore.jks # javax.net.ssl.trustStore
+#        javaxNetSslTrustStorePassword: truststore_password # javax.net.ssl.trustStorePassword
 
-# See ECP Kubernetes Guide, Shared Folder Configuration – Custom Volume Mounts
+#      jmxRemotePassword: # jmxremote.password
+#        jmxRemoteUsers: # array of JMX users
+#          - login: jmxuser # login for the first JMX user
+#            password: jmxpassword # password for the first JMX user
+#            access: readonly # access role for the first JMX user
+#          - login: jmxadmin # login for second JMX user
+#            password: jmxadminpassword # password for second JMX user
+#            access: readwrite # access role for the second JMX user
+
+      volumeMounts: # volume mounts - can be used for mapping config files or storages
+        - name: config # name of volume mounts for config
+          subPath: bootstrap.xml # name of configuration file
+          mountPath: /etc/ecp-endpoint/jms/ssl-jks/bootstrap.xml # path where config file will be mounted
+
+      configMap: # config maps array
+        - subPath: bootstrap.xml # name of config file/volume mount
+          content: |- # content is shifted by two spaces
+           <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+           <!--
+             ~ Licensed to the Apache Software Foundation (ASF) under one or more
+             ~ contributor license agreements. See the NOTICE file distributed with
+             ~ this work for additional information regarding copyright ownership.
+             ~ The ASF licenses this file to You under the Apache License, Version 2.0
+             ~ (the "License"); you may not use this file except in compliance with
+             ~ the License. You may obtain a copy of the License at
+             ~
+             ~     http://www.apache.org/licenses/LICENSE-2.0
+             ~
+             ~ Unless required by applicable law or agreed to in writing, software
+             ~ distributed under the License is distributed on an "AS IS" BASIS,
+             ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+             ~ See the License for the specific language governing permissions and
+             ~ limitations under the License.
+             -->
+
+           <broker xmlns="http://activemq.apache.org/schema">
+
+              <jaas-security domain="activemq"/>
+
+              <!-- artemis.URI.instance is parsed from artemis.instance by the CLI startup.
+                   This is to avoid situations where you could have spaces or special characters on this URI -->
+              <server configuration="file:/opt/eccosp-artemis/etc/broker.xml"/>
+
+              <!-- The web server is only bound to localhost by default -->
+              <web path="web" rootRedirectLocation="console">
+                  <binding name="artemis" uri="http://localhost:8161">
+                      <app name="branding" url="activemq-branding" war="activemq-branding.war"/>
+                      <app name="plugin" url="artemis-plugin" war="artemis-plugin.war"/>
+                      <app name="console" url="console" war="console.war"/>
+                      <app url="metrics" war="metrics.war"/>
+                  </binding>
+              </web>
+           </broker>
+
+#  See ECP Kubernetes Guide, chapter ECP Endpoint Shared Folder configuration
       volumeClaimTemplates:
         - metadata:
-            name: cd # volume name
+            name: fssf # volume name
           spec:
             accessModes: [ "ReadWriteMany" ] # storage of type ReadWriteMany
-            storageClassName: longhorn # name of storage class - needs to be provided by Kubernetes administrator
+            storageClassName: nfs-storage # name of storage class - needs to be provided by Kubernetes administrator
             resources:
               requests:
-                storage: 512Mi # request for storage size
+                storage: 512Mi # request for shared storage size
 
 # global config
 global: # global config

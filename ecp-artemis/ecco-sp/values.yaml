@@ -6,17 +6,17 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
   instance: # array of ECCoSP Artemis instances - one values file can hold multiple instances
     - name: artemis-eptb1 # name of kubernetes instance
       image: # section for information about Docker image
-        name: usyentsoe/eccosp-artemis # URL to docker image.
-        tag: 4.14.0.2026 # Docker image tag - version or 'latest'
+        name: ondrej337/eccosp # URL to docker image.
+        tag: eccosp-artemis-4.14.0.2026 #ecp-endpoint-4.14.0.2026 #4.14.0.2026 # Docker image tag - version or 'latest'
 #        pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
-      replicaCount: 1 # number of replicas - ECCoSP Artemis cluster
+      replicaCount: 2 # number of replicas - ECCoSP Artemis cluster
       resourcesK8s: # section for CPU and memory specification
         requests: # minimum guaranteed amount of a resource that is reserved for a container
           cpu: 500m # minimum CPU - one CPU = 1000m or 1
-          memory: 500Mi # minimum memory for container - 1Gi is equal to 1024 Mi
+          memory: 1Gi # minimum memory for container - 1Gi is equal to 1024 Mi
         limits: # maximum amount of a resource to be used by a container. Should be always higher than application can allocate (xmx)
           cpu: 1000m # maximum CPU
-          memory: 1Gi # maximum memory for container - 5Gi is equal to 5120 Mi
+          memory: 2Gi # maximum memory for container - 5Gi is equal to 5120 Mi
 
       storageData: 1Gi # certificates # storage certificates.
       storageLogs: 256Mi # logs # storage for logs
@@ -50,7 +50,7 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
         contextPath: / # context path for ingress, default value '/'
         host: artemis.koval.top # URL on which the ECCoSP Artemis is exposed. Address needs to be aligned with hosting.
         tls: # section for TLS definition for HTTPS connection to ingress
-          secretName: eccosp-artemis  # secret where TLS certificate is stored
+          secretName: tls-koval-top  # secret where TLS certificate is stored
         annotations: # ingress annotations section
           kubernetes.io/ingressClassName: nginx # ingress annotations - use nginx
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
@@ -190,5 +190,5 @@ eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, 
 global: # global config
   storage: # storage section
     class: longhorn # storage class – needs to be provided by Kubernetes cluster administrator
-#  imagePullSecrets: # secrets which hold information about login to docker repository
-#    - name: regcred # name of secret – name is defined by Kubernetes cluster administrator
+  imagePullSecrets: # secrets which hold information about login to docker repository
+    - name: regcred # name of secret – name is defined by Kubernetes cluster administrator
