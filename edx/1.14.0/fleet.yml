@@ -15,6 +15,8 @@ helm:
 
   # Used if repo is set to look up the version of the chart
   version: "4.14.0"
+  valuesFiles:
+    - values.yaml
 
   # Force recreate resource that can not be updated
   force: false
