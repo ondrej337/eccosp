@@ -14,7 +14,7 @@ helm:
   repo: "https://ondrej337.github.io/my-charts/"
 
   # Used if repo is set to look up the version of the chart
-  version: "4.14.0"
+  version: "1.14.0"
   valuesFiles:
     - values.yaml
 
