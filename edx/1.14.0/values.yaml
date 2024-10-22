@@ -9,7 +9,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
         name: ondrej337/eccosp #usyentsoe/edx-toolbox # URL to docker image.
         tag: edx-toolbox-1.14.0.1521 #1.14.0.1521 # Docker image tag - version or 'latest'
         # pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
-      replicaCount: 3 # number of replicas - EDX cluster
+      replicaCount: 1 # number of replicas - EDX cluster
       resourcesK8s: # section for CPU and memory specification
         requests: # minimum guaranteed amount of a resource that is reserved for a container
           cpu: 500m # minimum CPU - one CPU = 1000m or 1
@@ -20,7 +20,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
       storageData: # Storage for embedded database and certificates. If external DB is used, the value can be lower.
       storageLogs: 256Mi # logs # storage for logs
       sharedStorageSize: 5Gi # Storage size shared between toolbox replicas of this instance. Storage for DMS and pull, located at /opt/shared-storage.
-      sharedStorageClass: longhorn-rwx # Storage class to allocate shared storage resources. ReadWriteMany access mode is required.
+      sharedStorageClass: longhorn # Storage class to allocate shared storage resources. ReadWriteMany access mode is required.
       keepLogsAfterRestart: true # boolean flag - indicates if EDX logs are persisted after pod restart, default value false
       livenessProbe: false # automatic restart if pod is not in health state, default value false
       readinessProbe: true # EDX pod will not started before readiness probe is fulfilled - check of availability of external DB
@@ -133,7 +133,10 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
         springProfilesActive: edx-ha
         edxDBUrl: jdbc:postgresql://edx-db-cluster-rw.cloudnative-pg.svc.cluster.local:5432/tb1
         edxDBUsername: tb1
-        edxDBPassword: password
+        edxDBPassword:
+          secretKeyRef:
+            name: ecco-secret
+            key: password
         edxDBHostname: edx-db-cluster-rw.cloudnative-pg.svc.cluster.local
         edxDBName: tb1
 
