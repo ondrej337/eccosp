@@ -15,6 +15,16 @@ dependencies:
   repository: file://./charts/ecp-broker
   condition: ecp-broker.enabled
 
+- name: edx-catalogue
+  version: 1.14.0
+  repository: file://./charts/edx-catalogue
+  condition: edx-catalogue.enabled
+
+- name: edx-toolbox
+  version: 1.14.0
+  repository: file://./charts/edx-toolbox
+  condition: edx-toolbox.enabled
+
 - name: eccosp-artemis
   version: 4.14.0
   repository: file://./charts/eccosp-artemis
