@@ -134,7 +134,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
         edxDBUrl: jdbc:postgresql://edx-db-cluster-rw.cloudnative-pg.svc.cluster.local:5432/tb1
         edxDBUsername: tb1
         edxDBPassword
-          -name: ecco-secret
+          - name: ecco-secret
         edxDBHostname: edx-db-cluster-rw.cloudnative-pg.svc.cluster.local
         edxDBName: tb1
 
