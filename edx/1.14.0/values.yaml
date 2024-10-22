@@ -101,7 +101,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
 #        edxToolboxPullDmsStorageMaxDirectories: 10000 # edx.toolbox.pull.dms.storage.maxDirectories
 #        edxToolboxPullDmsStorageCacheValidityDuration: 30 # edx.toolbox.pull.dms.storage.cacheValidityDuration
 
-        springProfilesActive: edx-ha # spring.profiles.active
+#        springProfilesActive: edx-ha # spring.profiles.active
 
         # Uncomment desired DB configuration section if external DB is used. Change value of parameters as needed.
 

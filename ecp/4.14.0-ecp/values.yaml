@@ -43,7 +43,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
       # The naming convention for configuration files name and parameters is camelCase instead of 'dot case format'.
       # Mapping of Helm values to ECP configuration file is available in config map ./ecp-endpoint/templates/configMap.yaml
       ecpProperties: # stands for ecp.properties file
-        springProfilesActive: ecp-ha #stands for parameter spring.profiles.active
+#        springProfilesActive: ecp-ha #stands for parameter spring.profiles.active
         dataDirectory: /var/lib/ecp-endpoint # dataDirectory config parameter for storage of persistent data
         ecpKeystoreLocation: /var/lib/ecp-endpoint/keystore.jks # ecp.keystore.location
         ecpKeystorePassword: password # password for the keystore.jks # ecp.keystore.password
