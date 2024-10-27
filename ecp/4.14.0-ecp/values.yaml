@@ -250,15 +250,15 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
            </broker>
 
 #  See ECP Kubernetes Guide, chapter ECP Endpoint Shared Folder configuration
-#      volumeClaimTemplates:
-#        - metadata:
-#            name: fssf # volume name
-#          spec:
-#            accessModes: [ "ReadWriteMany" ] # storage of type ReadWriteMany
-#            storageClassName: longhorn # name of storage class - needs to be provided by Kubernetes administrator
-#            resources:
-#              requests:
-#                storage: 1512Mi # request for shared storage size
+      volumeClaimTemplates:
+        - metadata:
+            name: fssf # volume name
+          spec:
+            accessModes: [ "ReadWriteMany" ] # storage of type ReadWriteMany
+            storageClassName: longhorn # name of storage class - needs to be provided by Kubernetes administrator
+            resources:
+              requests:
+                storage: 1512Mi # request for shared storage size
 
 # global config
 global: # global config
