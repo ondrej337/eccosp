@@ -255,7 +255,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
             name: fssf # volume name
           spec:
             accessModes: [ "ReadWriteMany" ] # storage of type ReadWriteMany
-            storageClassName: nfs-client # name of storage class - needs to be provided by Kubernetes administrator
+            storageClassName: longhorn-rwx # name of storage class - needs to be provided by Kubernetes administrator
             resources:
               requests:
                 storage: 1Gi # request for shared storage size
