@@ -258,7 +258,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
             storageClassName: longhorn-rwx # name of storage class - needs to be provided by Kubernetes administrator
             resources:
               requests:
-                storage: 1Gi # request for shared storage size
+                storage: 1512Mi # request for shared storage size
 
 # global config
 global: # global config
