@@ -167,11 +167,12 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
       ecpUsersProperties: # stands for ecp-users.properties
         ecpEndpointUsers: # array of users
           - login: admin # ecp.endpoint.users[0].login
-            password:
-              valueFrom:
-                secretKeyRef:
-                  name: eccosp-secret
-                  key: password # ecp.endpoint.users[0].password
+            env:
+            name: password
+            valueFrom:
+              secretKeyRef:
+                name: eccosp-secret
+                key: password # ecp.endpoint.users[0].password
             role: admin # ecp.endpoint.users[0].role
           - login: tester # ecp.endpoint.users[1].login
             password: passwordtester # ecp.endpoint.users[1].password
