@@ -9,7 +9,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
         name: ondrej337/eccosp #usyentsoe/ecp-endpoint # URL to docker image.
         tag: ecp-endpoint-4.14.0.2026 # Docker image tag - version or 'latest'
         # pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
-      replicaCount: 3 # number of replicas - ECP cluster
+      replicaCount: 2 # number of replicas - ECP cluster
       resourcesK8s: # section for CPU and memory specification
         requests: # minimum guaranteed amount of a resource that is reserved for a container
           cpu: 500m # minimum CPU - one CPU = 1000m or 1
@@ -167,11 +167,18 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
       ecpUsersProperties: # stands for ecp-users.properties
         ecpEndpointUsers: # array of users
           - login: admin # ecp.endpoint.users[0].login
-            password: password
+#            password: password
+          - name: PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: my-secret
+                key: password
 #            valueFrom:
 #              secretKeyRef:
 #                name: eccosp-secret
-#                key: heslo # ecp.endpoint.users[0].password
+#- name: USERNAME valueFrom: secretKeyRef: name: my-secret key: username - name: PASSWORD valueFrom: secretKeyRef: name: my-secret key: password
+#                key: heslo 
+# ecp.endpoint.users[0].password
             role: admin # ecp.endpoint.users[0].role
           - login: tester # ecp.endpoint.users[1].login
             password: passwordtester # ecp.endpoint.users[1].password
