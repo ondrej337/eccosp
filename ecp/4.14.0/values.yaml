@@ -168,6 +168,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
         ecpEndpointUsers: # array of users
           - login: admin # ecp.endpoint.users[0].login
 #            password: password
+            role: admin # ecp.endpoint.users[0].role
           - name: password
             valueFrom:
               secretKeyRef:
@@ -179,7 +180,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 #- name: USERNAME valueFrom: secretKeyRef: name: my-secret key: username - name: PASSWORD valueFrom: secretKeyRef: name: my-secret key: password
 #                key: heslo 
 # ecp.endpoint.users[0].password
-            role: admin # ecp.endpoint.users[0].role
+
           - login: tester # ecp.endpoint.users[1].login
             password: passwordtester # ecp.endpoint.users[1].password
             role: user # ecp.endpoint.users[1].login
