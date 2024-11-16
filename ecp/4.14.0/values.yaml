@@ -169,12 +169,6 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
           - login: admin # ecp.endpoint.users[0].login
 #            password: password
             role: admin # ecp.endpoint.users[0].role
-            env:
-              - name: password
-                valueFrom:
-                  secretKeyRef:
-                    name: my-secret
-                    key: password
 #            valueFrom:
 #              secretKeyRef:
 #                name: eccosp-secret
@@ -279,3 +273,9 @@ global: # global config
     class: longhorn # storage class – needs to be provided by Kubernetes cluster administrator
   imagePullSecrets: # secrets which hold information about login to docker repository
     - name: regcred # name of secret – name is defined by Kubernetes cluster administrator
+  env:
+    - name: password
+      valueFrom:
+        secretKeyRef:
+          name: my-secret
+          key: password
