@@ -170,6 +170,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 #            password: password
             role: admin # ecp.endpoint.users[0].role
 #            valueFrom:
+            password:
             secretKeyRef:
               name: eccosp-secret
               key: password
