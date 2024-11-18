@@ -1,0 +1,11 @@
+defaultNamespace: eccosp
+helm:
+  name: edx-toolbox-repo
+  repo: https://ondrej337.github.io/my-charts/
+  releaseName: cnpg
+  chart: edx-toolbox
+  version: "1.14.0"
+  valuesFiles:
+    - values.yaml
+  namespace: eccosp
+
