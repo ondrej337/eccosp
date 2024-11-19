@@ -3,8 +3,8 @@ helm:
   name: edx-toolbox-repo
   repo: https://ondrej337.github.io/my-charts/
   releaseName: edx-toolbox
-  chart: edx-toolbox
-  version: "1.14.0"
+  chart: ecco-sp
+  version: "4.14.0"
   valuesFiles:
     - values.yaml
   namespace: eccosp
