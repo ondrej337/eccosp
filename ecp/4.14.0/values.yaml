@@ -20,7 +20,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
       storageData: 1Gi # Storage for embedded database and certificates. If external DB is used, the value can be lower.
       storageLogs: 256Mi # storage for logs
       keepLogsAfterRestart: true # boolean flag - indicates if ECP logs are persisted after pod restart, default value false
-      livenessProbe: false # automatic restart if pod is not in health state, default value false
+      livenessProbe: true # automatic restart if pod is not in health state, default value false
       readinessProbe: true # ECP pod will not started before readiness probe is fulfilled - check of availability of external DB
 
       service: # section for definition of services exposed within kubernetes environment
