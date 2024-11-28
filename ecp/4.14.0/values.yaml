@@ -273,7 +273,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 # global config
 global: # global config
   storage: # storage section
-    class: longhorn # storage class – needs to be provided by Kubernetes cluster administrator
+    class: longhorn-rwx # storage class – needs to be provided by Kubernetes cluster administrator
   imagePullSecrets: # secrets which hold information about login to docker repository
     - name: regcred # name of secret – name is defined by Kubernetes cluster administrator
   env:
