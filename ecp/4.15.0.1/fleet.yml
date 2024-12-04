@@ -1,8 +1,8 @@
 namespace: eccosp
 helm:
   releaseName: ecp-415
-  chart: "ecp-endpoint"
+  chart: "https://ondrej337.github.io/my-charts/ecp-endpoint"
 #  repo: "https://ondrej337.github.io/my-charts"
-#  version: "4.15.0"
+  version: "4.15.0"
 
   
