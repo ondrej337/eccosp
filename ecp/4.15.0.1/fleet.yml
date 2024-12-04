@@ -2,23 +2,9 @@ namespace: eccosp
 helm:
   releaseName: ecp
   chart: ""
-  repo: ""
+  repo: "https://ondrej337.github.io/my-charts"
   version: ""
   force: false
   timeoutSeconds: 0
-  
-  dependencies:
-
-  - name: ecp-endpoint
-    version: 4.15.0
-    repository: https://ondrej337.github.io/my-charts/
-    condition: ecp-endpoint.enabled
-  
-
-  # Custom values that will be passed as values.yaml to the installation
-#  values:
-#    replicas: 2
-#  valuesFiles:
-#    - values-artemis.yaml
 
   
