@@ -1,9 +1,9 @@
 namespace: eccosp
 helm:
   releaseName: ecp
-  chart: ""
+  chart: "ecp-endpoint"
   repo: "https://ondrej337.github.io/my-charts"
-  version: ""
+  version: "4.15.0"
   force: false
   timeoutSeconds: 0
   disableDependencyUpdate: false
