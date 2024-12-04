@@ -1,0 +1,573 @@
+---
+# Source: ecco-sp/charts/ecp-endpoint/templates/configMap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cattle-system-ecp-endpoint-ep1-cm
+  labels:
+    backup.component.name: ecp
+data:
+  ecp.properties: |-
+    # Defines persistent strategy for ECP
+    # Available options:
+    #  ecp-ha       high availability mode with external db
+    #  ecp-nonha    for persistent store inside dataDirectory
+    spring.profiles.active=ecp-nonha
+    ecp.description=ECP Endpoint
+
+    # Directory for persistent data
+    dataDirectory=/var/lib/ecp-endpoint
+    ecp.content.storage.root=${dataDirectory}/content
+    ecp.content.storage.storageId=1
+
+    ecp.keystore.location=/var/lib/ecp-endpoint/keystore.jks
+    ecp.keystore.password=password
+
+    ecp.authKeystore.location=/var/lib/ecp-endpoint/authKeystore.jks
+    ecp.authKeystore.password=password
+
+    ## HA Configuration ##
+    # Set and uncomment these keys to complete HA setup
+    # Database
+    #ecp.db.url=
+    #ecp.db.username=
+    #ecp.db.password=
+    #spring.datasource.validation-query=select 1
+    #spring.datasource.driver-class-name=
+    # Internal broker
+    internalBroker.urls=amqps://eccosp-eccosp-artemis-artemis-eptb1-svc:5672
+    internalBroker.host=eccosp-eccosp-artemis-artemis-eptb1-svc
+    internalBroker.amqp.port=5672
+
+    # AMQPS authentication
+    internalBroker.useAuthentication=true
+    internalBroker.auth.user=endpoint
+    internalBroker.auth.password=password
+    internalBroker.keystore.location=${dataDirectory}/authKeystore.jks
+    internalBroker.keystore.password=password
+    internalBroker.keystore.authAlias=ecp_module_auth
+
+    # Log file location
+    # Both relative and absolute paths are supported
+
+    logging.file.name=/var/log/ecp-endpoint/ecp.log
+    logging.file.path=/var/log/ecp-endpoint
+
+    logging.config=/etc/ecp-endpoint/ecp-logback.xml
+    logging.level.org.apache.qpid=WARN
+
+    # Health Actuator Parameters
+    spring.activemq.user=${internalBroker.auth.user}
+    spring.activemq.password=${internalBroker.auth.password}
+
+    ## Disabled JMX protocol for internal broker
+    #NOTE: warning when enabled the property then will be accessible JMX remote on port 1099
+    spring.jmx.enabled=false
+    server.error.whitelabel.enabled=false
+    
+    # enable AMQP API
+    ecp.endpoint.amqpApiEnabled=true
+    ecp.endpoint.sendHandler[0].beanName=amqpApiSendHandler
+    ecp.endpoint.sendHandler[0].typeName=*
+
+    # JKS Password for private keys stored in DB
+    ecp.db.keystore.password=password
+
+    ecp.csrf.secret=P9CkNis9r5Pn00RFZwN9oZgi
+    
+    # JASYPT encryption
+    jasypt.encryptor.algorithm=PBEWITHHMACSHA512ANDAES_256
+    management.endpoints.web.exposure.include=info,health,readiness
+    management.endpoint.health.show-details=ALWAYS
+
+
+    ecp.healthExclude=connectedBrokers,waitingToDeliver,waitingToReceive,isReloading,endpointStatus,certificatesStatus,invalidMessagePath,withoutValidMessagePath,synchronizationStatus,internalBrokerConnected
+
+  ecp-users.properties: |-
+    ecp.endpoint.users[0].login=admin
+    ecp.endpoint.users[0].password=password
+    ecp.endpoint.users[0].role=admin
+    
+    ecp.endpoint.users[1].login=tester
+    ecp.endpoint.users[1].password=passwordtester
+    ecp.endpoint.users[1].role=user
+    
+
+  jmxremote.properties: |-
+    ## JMX is disabled for default
+    ## bellow is example for JMX settings with SSL
+    com.sun.management.jmxremote=false
+    #com.sun.management.jmxremote.port=1099
+    #com.sun.management.jmxremote.rmi.port=1098
+    #com.sun.management.jmxremote.password.file=/path/to/jmxremote.password
+    #com.sun.management.jmxremote.access.file=/path/to/jmxremote.access
+    #com.sun.management.jmxremote.ssl=false
+    #com.sun.management.jmxremote.registry.ssl=true
+    #com.sun.management.jmxremote.ssl.config.file=/etc/ecp-endpoint/jmxremote.ssl
+    #com.sun.management.jmxremote.authenticate=true
+
+  jmxremote.password: |-
+
+  jmxremote.access: |-
+
+  jmxremote.ssl: |-
+    #javax.net.ssl.keyStore=/path/to/keystore.jks
+    #javax.net.ssl.keyStorePassword=keystore_password
+    #javax.net.ssl.trustStore=/path/to/truststore.jks
+    #javax.net.ssl.trustStorePassword=truststore_password
+
+  env.conf: |-
+    [Service]
+    Environment='CATALINA_HOME=/usr/share/ecp-endpoint'
+    Environment='CATALINA_BASE=/usr/share/ecp-endpoint'
+    Environment='CATALINA_PID=/usr/share/ecp-endpoint/catalina.pid'
+    Environment='CATALINA_OPTS=-Xms128M -Xmx1G\
+        -XX:+HeapDumpOnOutOfMemoryError\
+        -XX:HeapDumpPath=/var/log/ecp-endpoint/ecp-dump.hprof\
+        -Dspring.config.additional-location=/etc/ecp-endpoint/ecp.properties,/etc/ecp-endpoint/ecp-users.properties\
+        -Dbroker.internal.auth.settings.location=/etc/ecp-endpoint\
+        -Decp.password.location=/etc/ecp-endpoint/ecp-password.properties\
+        -Decp.endpoint.jms.directory=/etc/ecp-endpoint/jms\
+        -Decp.cluster.manager.localInstanceID=$HOSTNAME\
+        -Dcom.sun.management.config.file=/etc/ecp-endpoint/jmxremote.properties'
+
+  setenv.sh: |-
+    #!/bin/bash
+
+    ## This file will be copied into tomcat_base/bin/setenv.sh
+    ## Setup LOG file location for tomcat
+    export CATALINA_OUT=/var/log/ecp-endpoint/catalina.out
+    export CATALINA_HOME=/usr/share/ecp-endpoint
+    export CATALINA_BASE=/usr/share/ecp-endpoint
+    export CATALINA_PID=/usr/share/ecp-endpoint/catalina.pid
+    export CATALINA_OPTS="-Xms128M -Xmx1G\
+     -XX:+HeapDumpOnOutOfMemoryError\
+     -XX:HeapDumpPath=/var/log/ecp-endpoint/ecp-dump.hprof\
+     -Dspring.config.additional-location=/etc/ecp-endpoint/ecp.properties,/etc/ecp-endpoint/ecp-users.properties\
+     -Dbroker.internal.auth.settings.location=/etc/ecp-endpoint\
+     -Decp.password.location=/etc/ecp-endpoint/ecp-password.properties\
+     -Decp.endpoint.jms.directory=/etc/ecp-endpoint/jms\
+     -Decp.cluster.manager.localInstanceID=$HOSTNAME\
+     -Decp.logFullStackTrace=false\
+     -Dcom.sun.management.config.file=/etc/ecp-endpoint/jmxremote.properties"
+
+  ecp-logback.xml: |-
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration>
+
+        <!--http://docs.spring.io/spring-boot/docs/1.2.8.RELEASE/reference/html/howto-logging.html-->
+        <!--http://docs.spring.io/spring-boot/docs/1.2.8.RELEASE/reference/html/boot-features-logging.html-->
+
+        <!--Common logger config and log file path-->
+        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+        <property name="AUDIT_LOG_FILE" value="${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/ecp-audit.log"/>
+        <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}ecp.log}"/>
+        <!-- owasp-a1 log message sanitized for CRLF to prevent logger injection -->
+        <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS,Etc/GMT} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %replace(%m){'[\r\n]', ''}%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+        <property name="LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE" value="50MB"/>
+        <property name="LOGBACK_ROLLINGPOLICY_MAX_HISTORY" value="7"/>
+        <property name="LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP" value="70MB"/>
+
+
+        <!-- ECP Audit Log file appender and logger -->
+        <springProfile name="ecp-audit">
+            <appender name="EcpAuditAppender"
+                      class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <encoder>
+                    <!-- owasp-a1 log message sanitized for CRLF to prevent logger injection -->
+                    <pattern>
+                        %d{yyyy-MM-dd HH:mm:ss.SSS,Etc/GMT} %logger{5} - %replace(%msg){'[\r\n]', ''}%n
+                    </pattern>
+                </encoder>
+                <file>${AUDIT_LOG_FILE}</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+                    <fileNamePattern>${AUDIT_LOG_FILE}.%i</fileNamePattern>
+                </rollingPolicy>
+                <triggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                    <MaxFileSize>10MB</MaxFileSize>
+                </triggeringPolicy>
+            </appender>
+
+            <logger name="EcpAuditLog" level="INFO" additivity="false">
+                <appender-ref ref="EcpAuditAppender"/>
+            </logger>
+        </springProfile>
+
+        <springProfile name="ecp-inmemory">
+            <!--Console appender definition-->
+            <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+            <root level="INFO">
+                <appender-ref ref="CONSOLE"/>
+            </root>
+        </springProfile>
+
+        <springProfile name="!ecp-inmemory">
+            <!--Show hibernate errors only - resolving err msg for warnings takes too much time-->
+            <logger name="org.hibernate" level="ERROR"/>
+
+            <!--File appender definition-->
+            <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
+
+            <springProfile name="console-logging">
+                <!--Console appender definition-->
+              <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+              <root level="INFO">
+                  <appender-ref ref="FILE"/>
+                  <appender-ref ref="CONSOLE"/>
+              </root>
+          </springProfile>
+
+          <springProfile name="!console-logging">
+              <root level="INFO">
+                  <appender-ref ref="FILE"/>
+              </root>
+          </springProfile>
+      </springProfile>
+    </configuration>
+
+  server.xml: |-
+    <?xml version='1.0' encoding='utf-8'?>
+    <!--
+      Licensed to the Apache Software Foundation (ASF) under one or more
+      contributor license agreements.  See the NOTICE file distributed with
+      this work for additional information regarding copyright ownership.
+      The ASF licenses this file to You under the Apache License, Version 2.0
+      (the "License"); you may not use this file except in compliance with
+      the License.  You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+    -->
+    <!-- Note:  A "Server" is not itself a "Container", so you may not
+         define subcomponents such as "Valves" at this level.
+         Documentation at /docs/config/server.html
+     -->
+    <Server port="8005" shutdown="SHUTDOWN">
+        <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
+        <!-- Security listener. Documentation at /docs/config/listeners.html
+        <Listener className="org.apache.catalina.security.SecurityListener" />
+        -->
+        <!--APR library loader. Documentation at /docs/apr.html -->
+        <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
+        <!-- Prevent memory leaks due to use of particular java/javax APIs-->
+        <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+        <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+        <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
+
+        <!-- Global JNDI resources
+             Documentation at /docs/jndi-resources-howto.html
+        -->
+        <GlobalNamingResources>
+            <!-- Editable user database that can also be used by
+                 UserDatabaseRealm to authenticate users
+            -->
+            <Resource name="UserDatabase" auth="Container"
+                      type="org.apache.catalina.UserDatabase"
+                      description="User database that can be updated and saved"
+                      factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+                      pathname="conf/tomcat-users.xml" />
+        </GlobalNamingResources>
+
+        <!-- A "Service" is a collection of one or more "Connectors" that share
+             a single "Container" Note:  A "Service" is not itself a "Container",
+             so you may not define subcomponents such as "Valves" at this level.
+             Documentation at /docs/config/service.html
+         -->
+        <Service name="Catalina">
+
+            <!--The connectors can use a shared executor, you can define one or more named thread pools-->
+            <!--
+            <Executor name="tomcatThreadPool" namePrefix="catalina-exec-"
+                maxThreads="150" minSpareThreads="4"/>
+            -->
+
+
+            <!-- A "Connector" represents an endpoint by which requests are received
+                 and responses are returned. Documentation at :
+                 Java HTTP Connector: /docs/config/http.html (blocking & non-blocking)
+                 Java AJP  Connector: /docs/config/ajp.html
+                 APR (HTTP/AJP) Connector: /docs/apr.html
+                 Define a non-SSL/TLS HTTP/1.1 Connector on port 8080
+            -->
+            <!--
+            <Connector port="8080" protocol="HTTP/1.1"
+                       connectionTimeout="20000"
+                       redirectPort="8443" />
+            -->
+            <!-- A "Connector" using the shared thread pool-->
+            <!-- Define a SSL/TLS HTTP/1.1 Connector on port 8443
+                 This connector uses the NIO implementation that requires the JSSE
+                 style configuration. When using the APR/native implementation, the
+                 OpenSSL style configuration is required as described in the APR/native
+                 documentation -->
+
+            <Connector port="8443" protocol="eu.entsoe.ecp.connector.protocol.EcpHttp11NioProtocol"
+                       sslImplementationName="org.apache.tomcat.util.net.jsse.JSSEImplementation"
+                       maxThreads="150" SSLEnabled="true" maxParameterCount="1000" >
+            <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
+
+            <SSLHostConfig protocols="TLSv1.3" ciphers="TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_AES_128_GCM_SHA256" >
+              <Certificate certificateKeystoreFile="/var/lib/ecp-endpoint/authKeystore.jks" certificateKeystorePassword="password" type="RSA" />
+            </SSLHostConfig>
+
+            </Connector>
+
+            <!-- Define an AJP 1.3 Connector on port 8009
+            <Connector port="8009" protocol="AJP/1.3" redirectPort="8443" />-->
+
+
+            <!-- An Engine represents the entry point (within Catalina) that processes
+                 every request.  The Engine implementation for Tomcat stand alone
+                 analyzes the HTTP headers included with the request, and passes them
+                 on to the appropriate Host (virtual host).
+                 Documentation at /docs/config/engine.html -->
+
+            <!-- You should set jvmRoute to support load-balancing via AJP ie :
+            <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
+            -->
+            <Engine name="Catalina" defaultHost="localhost">
+
+                <!--For clustering, please take a look at documentation at:
+                    /docs/cluster-howto.html  (simple how to)
+                    /docs/config/cluster.html (reference documentation) -->
+                <!--
+                <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>
+                -->
+
+                <!-- Use the LockOutRealm to prevent attempts to guess user passwords
+                     via a brute-force attack -->
+                <Realm className="org.apache.catalina.realm.LockOutRealm">
+                    <!-- This Realm uses the UserDatabase configured in the global JNDI
+                         resources under the key "UserDatabase".  Any edits
+                         that are performed against this UserDatabase are immediately
+                         available for use by the Realm.  -->
+                    <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+                           resourceName="UserDatabase"/>
+                </Realm>
+
+                <Host name="localhost"  appBase="webapps"
+                      unpackWARs="true" autoDeploy="true">
+
+                    <!-- SingleSignOn valve, share authentication between web applications
+                         Documentation at: /docs/config/valve.html -->
+                    <!--
+                    <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
+                    -->
+
+                    <Valve className="org.apache.catalina.valves.RemoteIpValve" internalProxies="" />
+                    <!-- Access log processes all example.
+                         Documentation at: /docs/config/valve.html
+                         Note: The pattern used is equivalent to using pattern="common" -->
+                    <Valve className="eu.entsoe.ecp.valve.EcpAccessLogValve" directory="/var/log/ecp-endpoint"
+                           prefix="localhost_access_log" suffix=".txt" rotatable="false"
+                           pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+                    <Valve className="org.apache.catalina.valves.ErrorReportValve" showReport="false" showServerInfo="false"/>
+
+                </Host>
+            </Engine>
+        </Service>
+    </Server>
+  ecp-password.properties: |-
+
+  users.properties: |-
+    endpoint=password
+
+  groups.properties: |-
+    admins=endpoint
+    tempDestinationAdmins=endpoint
+    users=endpoint
+
+  
+  bootstrap.xml: |-
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <!--
+      ~ Licensed to the Apache Software Foundation (ASF) under one or more
+      ~ contributor license agreements. See the NOTICE file distributed with
+      ~ this work for additional information regarding copyright ownership.
+      ~ The ASF licenses this file to You under the Apache License, Version 2.0
+      ~ (the "License"); you may not use this file except in compliance with
+      ~ the License. You may obtain a copy of the License at
+      ~
+      ~     http://www.apache.org/licenses/LICENSE-2.0
+      ~
+      ~ Unless required by applicable law or agreed to in writing, software
+      ~ distributed under the License is distributed on an "AS IS" BASIS,
+      ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      ~ See the License for the specific language governing permissions and
+      ~ limitations under the License.
+      -->
+    
+    <broker xmlns="http://activemq.apache.org/schema">
+    
+       <jaas-security domain="activemq"/>
+    
+       <!-- artemis.URI.instance is parsed from artemis.instance by the CLI startup.
+            This is to avoid situations where you could have spaces or special characters on this URI -->
+       <server configuration="file:/opt/eccosp-artemis/etc/broker.xml"/>
+    
+       <!-- The web server is only bound to localhost by default -->
+       <web path="web" rootRedirectLocation="console">
+           <binding name="artemis" uri="http://localhost:8161">
+               <app name="branding" url="activemq-branding" war="activemq-branding.war"/>
+               <app name="plugin" url="artemis-plugin" war="artemis-plugin.war"/>
+               <app name="console" url="console" war="console.war"/>
+               <app url="metrics" war="metrics.war"/>
+           </binding>
+       </web>
+    </broker>
+---
+# Source: ecco-sp/charts/ecp-endpoint/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: cattle-system-ecp-endpoint-ep1-svc
+  labels:
+    backup.component.name: ecp
+    app: cattle-system-ecp-endpoint-ep1
+spec:
+  type: ClusterIP
+  ports:
+    - name: https
+      port: 8443
+      protocol: TCP
+
+  selector:
+    app: cattle-system-ecp-endpoint-ep1
+---
+# Source: ecco-sp/charts/ecp-endpoint/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cattle-system-ecp-endpoint-ep1
+  labels:
+    app: cattle-system-ecp-endpoint-ep1
+spec:
+  serviceName: cattle-system-ecp-endpoint-ep1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cattle-system-ecp-endpoint-ep1
+  template:
+    metadata:
+      annotations:
+        checksum/config: 28b74d2a22ce2bbcd06a494522e6f0d4a92e7c045b6b0aba4ac21096eeee4a43
+      labels:
+        app: cattle-system-ecp-endpoint-ep1
+    spec:
+      imagePullSecrets:
+        - name: regcred
+
+      securityContext:
+        fsGroup: 2000
+
+      initContainers:
+        - name: ensure-persistent-volume-sync-with-image-data
+          image: "ondrej337/eccosp:ecp-endpoint-4.15.0.2128"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh","-c"]
+          args:
+            - cp -Rn /var/lib/ecp-endpoint/* /tmp/ecp-endpoint-dir/
+          volumeMounts:
+          - name: data
+            mountPath: "/tmp/ecp-endpoint-dir"
+        - name: pgsql-data-permission-fix-and-livenessprobe-script
+          image: "busybox"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh","-c"]
+          args:
+            - /bin/chmod 777 -R /data;
+              /bin/chmod 400 -R /config;
+              /bin/chmod 777 -R /logs;
+          volumeMounts:
+          - name: data
+            mountPath: /data
+          - name: logs
+            mountPath: /logs
+
+      containers:
+        - name: ecp
+          image: "ondrej337/eccosp:ecp-endpoint-4.15.0.2128"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 2000
+            runAsGroup: 2000
+          ports:
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+
+          volumeMounts:
+            - name: config
+              subPath: ecp.properties
+              mountPath: /etc/ecp-endpoint/ecp.properties
+            - name: config
+              subPath: ecp-users.properties
+              mountPath: /etc/ecp-endpoint/ecp-users.properties
+            - name: data
+              mountPath: /var/lib/ecp-endpoint
+            - name: logs
+              mountPath: /var/log/ecp-endpoint
+            - name: config
+              subPath: ecp-logback.xml
+              mountPath: /etc/ecp-endpoint/ecp-logback.xml
+            - name: config
+              subPath: server.xml
+              mountPath: /usr/share/ecp-endpoint/conf/server.xml
+            - name: config
+              subPath: ecp-password.properties
+              mountPath: /etc/ecp-endpoint/ecp-password.properties
+            - name: config
+              subPath: env.conf
+              mountPath: /etc/systemd/system/ecp-endpoint.service.d/env.conf
+            - name: config
+              subPath: setenv.sh
+              mountPath: /usr/share/ecp-endpoint/bin/setenv.sh
+            - name: config
+              subPath: users.properties
+              mountPath: /etc/ecp-endpoint/users.properties
+            - name: config
+              subPath: groups.properties
+              mountPath: /etc/ecp-endpoint/groups.properties
+            -
+              mountPath: /etc/ecp-endpoint/jms/ssl-jks/bootstrap.xml
+              name: config
+              subPath: bootstrap.xml
+          resources:
+            requests:
+              cpu: 500m # Minimum CPU allocation for pod
+              ephemeral-storage: 256Mi # Minimum ephemeral storage allocation for pod
+              memory: 1Gi # Minimum memory allocation for pod
+            limits:
+              cpu: 1000m # Maximum CPU limit for pod
+              memory: 1512Mi # Maximum memory limit for pod
+
+      volumes:
+        - name: config
+          configMap:
+            name: cattle-system-ecp-endpoint-ep1-cm
+
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: longhorn
+      resources:
+        requests:
+          storage: 1Gi
+  - metadata:
+      name: logs
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: longhorn
+      resources:
+        requests:
+          storage: 256Mi
