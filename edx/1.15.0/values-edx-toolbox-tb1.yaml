@@ -1,0 +1,493 @@
+# The commented parameters have default values but these defaults can be overridden when enabled
+
+edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
+  enabled: true # boolean flag which defines whether the component will be deployed or not
+
+  instance: # array of EDX toolbox instances - one values file can hold multiple instances
+    - name: tb1 # name of kubernetes instance
+      image: # section for information about Docker image
+        name: entsoe/edx-toolbox # URL to docker image.
+        tag: 1.15.0 # Docker image tag - version or 'latest'
+#        pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
+      replicaCount: 1 # number of replicas - EDX cluster
+      resourcesK8s: # section for CPU and memory specification
+        requests: # minimum guaranteed amount of a resource that is reserved for a container
+          cpu: 500m # minimum CPU - one CPU = 1000m or 1
+          ephemeralStorage: 256Mi # minimum ephemeral storage for application
+          memory: 512Mi # minimum memory for container
+        limits: # maximum amount of a resource to be used by a container. Should be always higher than application can allocate (xmx)
+          cpu: 1000m # maximum CPU - two CPUs = 2000m or 2
+          memory: 1Gi # maximum memory for container - 1Gi is equal to 1024 Mi
+      storageData: # Storage for embedded database and certificates. If external DB is used, the value can be lower.
+      storageLogs: 256Mi # logs # storage for logs
+      sharedStorageSize: 5Gi # Storage size shared between toolbox replicas of this instance. Storage for DMS and pull, located at /opt/shared-storage.
+      sharedStorageClass: nfs-client # Storage class to allocate shared storage resources. ReadWriteMany access mode is required.
+      keepLogsAfterRestart: true # boolean flag - indicates if EDX logs are persisted after pod restart, default value false
+      livenessProbe: false # automatic restart if pod is not in health state, default value false
+      readinessProbe: true # EDX pod will not started before readiness probe is fulfilled - check of availability of external DB
+      #sharedStorageAccessMode: ReadWriteMany # sharedStorageAccessMode class
+      service: # section for definition of services exposed within kubernetes environment
+#        type: NodePort # Type of the network service - NodePort/LoadBalancer/ClusterIP
+        https: # protocol used for accessing GUI - can be http or https
+          port: 8443 # port used for exposing HTTP(S) service
+#          nodePort: 30443  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
+      ingress: # an object that allows access to Kubernetes services from outside the Kubernetes cluster.
+        enabled: false # boolean flag for enable/disable ingress, default value false
+#        apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
+#        contextPath: / # context path for ingress, default value '/'
+#        host: edx-toolbox.tb1.eccosp # URL on which the ECP Endpoint is exposed. Address needs to be aligned with hosting.
+#        tls: # section for TLS definition for HTTPS connection to ingress
+#          secretName: tls-secret  # secret where TLS certificate is stored
+#        annotations: # ingress annotations section
+#          kubernetes.io/ingress.class: nginx # ingress controller definition
+#          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
+#          nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
+
+      edxProperties: # stands for edx.properties file
+        edxToolboxCode: ecp-endpoint-1 # edx.toolbox.code
+        edxServiceCatalogueCode: ecp-endpoint-catalogue # edx.serviceCatalogue.code
+#        edxToolboxNodeId: edx-01 # edx.toolbox.node.id - if not filled, HOSTNAME of pod is used - unique for each pod of replica
+
+#        edxConfigurationDuplicatesFilterMessageTypes: test1, test2
+        edxConfigurationDuplicatesFilterEnabled: false
+#
+        edxToolboxPullPublicUrls: # additional parameter for Public Pull URLs array. Array values are divided by ' - '
+          - network: Internet # EDX network 1
+            url: https://localhost:8443/api/rest/pull/download/ # Pull URL 1
+#          - network: DefaultNetwork # EDX network 1
+#            url: https://localhost:8443/api/rest/pull/download/ # Pull URL 2
+
+        edxToolboxPullAutopullEnabledTypes: "*" # edx.toolbox.pull.autopull.enabled.types
+
+#        edxToolboxNatNatEnabled: false # NAT is disabled by default - equals to  edx.toolbox.nat.natEnabled
+#        edxToolboxNatNatTable: # additional parameter for NAT array. Array values are divided by ' - '
+#          - network: internet # edx.toolbox.nat.natTable[0].network
+#            sourceIp: 1.2.3.4 # edx.toolbox.nat.natTable[0].sourceIp
+#            sourcePort: 8443 # edx.toolbox.nat.natTable[0].sourcePort
+#            destinationIp: 5.6.7.8 # edx.toolbox.nat.natTable[0].destinationIp
+#            destinationPort: 8443 # edx.toolbox.nat.natTable[0].destinationPort
+#          - network: ATOM # edx.toolbox.nat.natTable[1].network
+#            sourceIp: 1.1.1.1 # edx.toolbox.nat.natTable[1].sourceIp
+#            sourcePort: 5671 # edx.toolbox.nat.natTable[1].sourcePort
+#            destinationIp: 2.2.2.2 # edx.toolbox.nat.natTable[1].destinationIp
+#            destinationPort: 5671 # edx.toolbox.nat.natTable[1].destinationPort
+
+        edxToolboxDeletingDeleteOlderThan: 168 #  edx.toolbox.deleting.deleteOlderThan
+        edxToolboxDeletingDeleteJobDelay: 60000 # edx.toolbox.deleting.deleteJobDelay
+#        edxToolboxDmsDeletingDeleteOlderThan: 168 #     edx.toolbox.deleting.dms.deleteOlderThan
+
+        edxToolboxClusterNetcfgUpdateJobPeriod: 5000 # edx.toolbox.cluster.netcfg.updateJobPeriod
+
+#        edxToolboxDmsStorageStorageId: node1  # edx.toolbox.dms.storage.storageId
+        edxToolboxDmsStorageMaxFiles: 10000 # edx.toolbox.dms.storage.maxFiles
+        edxToolboxDmsStorageMaxDirectories: 10000 # edx.toolbox.dms.storage.maxDirectories
+        edxToolboxDmsStorageCacheValidityDuration: 30 #edx.toolbox.dms.storage.cacheValidityDuration
+
+        edxToolboxDataDirectory: /var/lib/edx-toolbox # edx.toolbox.data.directory
+
+#        edxToolboxPullRetryJobDelay: 240000 # edxToolboxPullRetryJobDelay
+#        edxToolboxPullExpireOlderThan: 48 # edx.toolbox.pull.expireOlderThan
+#        edxToolboxPullExpireJobDelay: 120000 # edx.toolbox.pull.expireJobDelay
+#        edxToolboxPullTruststoreLocation: /var/lib/edx-toolbox/keystore.jks # edx.toolbox.pull.truststore.location=
+#        edxToolboxPullTruststorePassword: password # edx.toolbox.pull.truststore.password
+
+        edxToolboxPullSlicingEnabled: true # edx.toolbox.pull.slicing.enabled
+        edxToolboxPullSlicingSize: 1024 # edx.toolbox.pull.slicing.size
+        edxToolboxPullSlicingTimeout: 60000 # edx.toolbox.pull.slicing.timeout
+        edxToolboxPullSlicingCompressionDisabledTypes: "*" # edx.toolbox.pull.slicing.compression.disabled.types
+        edxToolboxPullSlicingCompressionDisabledWildcard: "*" # edx.toolbox.pull.slicing.compression.disabled.wildcard
+
+#        edxToolboxPullDmsStorageStorageId: node1 # edx.toolbox.pull.dms.storage.storageId
+#        edxToolboxPullDmsStorageMaxFiles: 10000 # edx.toolbox.pull.dms.storage.maxFiles
+#        edxToolboxPullDmsStorageMaxDirectories: 10000 # edx.toolbox.pull.dms.storage.maxDirectories
+#        edxToolboxPullDmsStorageCacheValidityDuration: 30 # edx.toolbox.pull.dms.storage.cacheValidityDuration
+
+        springProfilesActive: edx-nonha # spring.profiles.active
+
+        # Uncomment desired DB configuration section if external DB is used. Change value of parameters as needed.
+
+        # ----- mysql -----
+#        springProfilesActive: edx-ha # high-availibility profile of the application - configuration of external database
+#        edxDBUrl: jdbc:mariadb://1.2.3.4:3306/tb1?characterEncoding=UTF-8&useSSL=false&autoReconnect=true # database connection string
+#        edxDBUsername: tb1 # username of the user of the external database
+#        edxDBPassword: password # password of the user of the external database
+#        edxDBHostname: 1.2.3.4 # required for readiness check, server hostname or IP
+#        edxDBName: tb1 # Required for readiness check, external database name
+
+#        springDatasourceValidationQuery: select 1 # spring.datasource.validation-query
+#        springDatasourceTestOnBorrow: false # spring.datasource.test-on-borrow
+#        springDatasourceDriverClassName: org.mariadb.jdbc.Driver #spring.datasource.driver-class-name
+
+        # ------ mssql -------
+#        springProfilesActive: edx-ha
+#        edxDBUrl: jdbc:sqlserver://1.2.3.4:1433;databaseName=tb1
+#        edxDBUsername: tb1
+#        edxDBPassword: password
+#        edxDBHostname: 1.2.3.4
+#        edxDBName: tb1
+
+#        springDatasourceValidationQuery: select 1
+#        springDatasourceTestOnBorrow: false
+#        springDatasourceDriverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+        # ------ postgres -------
+#        springProfilesActive: edx-ha
+#        edxDBUrl: jdbc:postgresql://1.2.3.4:5432/tb1
+#        edxDBUsername: tb1
+#        edxDBPassword: password
+#        edxDBHostname: 1.2.3.4
+#        edxDBName: tb1
+
+#        springDatasourceValidationQuery: select 1
+#        springDatasourceTestOnBorrow: false
+#        springDatasourceDriverClassName: org.postgresql.Driver
+
+        # ------ oracle -------
+#        springProfilesActive: edx-ha
+#        edxDBUrl: jdbc:oracle:thin:@1.2.3.4:1521/my_namespace
+#        edxDBUsername: tb1
+#        edxDBPassword: password
+#        edxDBHostname: 1.2.3.4
+#        edxDBName: tb1
+
+#        springDatasourceValidationQuery: select 1 from dual
+#        springDatasourceTestOnBorrow: false
+#        springDatasourceDriverClassName: oracle.jdbc.OracleDriver
+
+        springServletMultipartMaxFileSize: 64MB # spring.servlet.multipart.max-file-size
+        springServletMultipartMaxRequestSize: 64MB # spring.servlet.multipart.max-request-size
+
+        serverErrorWhitelabelEnabled: false # server.error.whitelabel.enabled
+        hawtioAuthenticationEnabled: false # hawtio.authenticationEnabled
+        endpointsJolokiaSensitive: false #  endpoints.jolokia.sensitive
+
+        springJmxEnabled: false # spring.jmx.enabled
+
+        internalBrokerUseAuthentication: true # internalBroker.useAuthentication
+        internalBrokerAuthUser: toolbox # internalBroker.auth.user
+        internalBrokerAuthPassword: password # internalBroker.auth.password
+        internalBrokerKeystoreLocation: /var/lib/edx-toolbox/keystore.jks
+        internalBrokerKeystorePassword: password # internalBroker.keystore.location
+        internalBrokerKeystoreAuthAlias: eccosp_artemis_installer_cert # internalBroker.keystore.password
+        internalBrokerAmqpPort: 5672 # internalBroker.amqp.port
+        edxBrokerUrl: amqps://eccosp-eccosp-artemis-artemis-eptb1-svc:${internalBroker.amqp.port:5672} #edx.broker.url
+
+        ecpBrokerAmqpPort: 5672 # ecpBroker.amqp.port
+        ecpBrokerAmqpHost: eccosp-eccosp-artemis-artemis-eptb1-svc # ecpBroker.amqp.host
+        ecpBrokerKeystoreLocation: /var/lib/edx-toolbox/keystore.jks # ecpBroker.keystore.location
+        ecpBrokerKeystorePassword: password #  ecpBroker.keystore.password
+        ecpBrokerKeystoreAuthAlias: eccosp_artemis_installer_cert # ecpBroker.keystore.authAlias
+        ecpBrokerAuthUser: endpoint # ecpBroker.auth.user
+        ecpBrokerAuthPassword: password # ecpBroker.auth.password
+        ecpBrokerUrl: amqps://${ecpBroker.amqp.host}:${ecpBroker.amqp.port} # ecp.broker.url
+
+
+        ecpReceiveQueue: ecp.endpoint.inbox # ecp.receiveQueue
+        ecpSendQueue: ecp.endpoint.outbox #  ecp.sendQueue
+        ecpSendResponseQueue: ecp.endpoint.outbox.reply # ecp.sendResponseQueue
+        ecpStatusQueue: ecp.endpoint.send.event # ecp.statusQueue
+
+        loggingFileName: /var/log/edx-toolbox/edx.log # logging.file.name
+        loggingFilePath: /var/log/edx-toolbox # logging.file.path
+#        loggingConfig: /usr/share/edx-toolbox/ecp-logback.xml # logging.config
+
+        loggingLevels: # additional parameter for logging Levels array. Array values are divided by ' - '
+          - package: eu.unicorn.edx # logging.level.<package>
+            level: INFO # Logging severity
+          - package: eu.unicorn.eip
+            level: ERROR
+          - package: org.apache.camel
+            level: INFO
+
+#        edxLoginLockAttempts: 5 # edx.loginLock.attempts
+#        edxLoginLockLockTime: 300 # edx.loginLock.lockTime
+#        edxEcpAmqpClientMaxRedeliveries: 5 # edx.ecp.amqp.client.maxRedeliveries
+
+#        jasyptEncryptorAlgorithm: PBEWithHMACSHA512AndAES_256 # jasypt.encryptor.algorithm
+
+        prometheusMonitoringEnabled: false # management.endpoints.web.exposure.include=info,health,readiness,prometheus
+
+#        internalBrokerEnabled: true # internalBroker.enabled
+
+        edxToolboxProjectName: k8s # edx.toolbox.projectName
+        edxToolboxEnvName: eccosp # edx.toolbox.envName
+
+        transportTrustStoreLocation: /var/lib/edx-toolbox/keystore.jks # transport.trustStoreLocation
+        transportTrustStorePassword: password # transport.trustStorePassword
+        transportVerifyHost: false # transport.verifyHost
+
+#        edxToolboxAntivirusAntivirusEnabled: false # edx.toolbox.antivirus.antivirusEnabled
+#        edxToolboxAntivirusAntivirusClient: clamav # edx.toolbox.antivirus.antivirusClient
+#        edxToolboxAntivirusAntivirusIp: 127.0.0.1 # edx.toolbox.antivirus.antivirusIp
+#        edxToolboxAntivirusAntivirusPort: 1024 # edx.toolbox.antivirus.antivirusPort
+#        edxToolboxAntivirusAntivirusTimeout: 20000 # edx.toolbox.antivirus.antivirusTimeout
+#        edxToolboxAntivirusQuarantinePath: /tmp # edx.toolbox.antivirus.quarantinePath
+
+#        edxClusterManagerScheduleInterval: 5000 # edx.cluster.manager.scheduleInterval
+#        edxToolboxNodeClusterManagerLockValidity: 15000 # edx.toolbox.node.cluster.manager.lockValidity
+
+#        edxToolboxSignalOrange: 30 # edx.toolbox.signal.orange
+#        edxToolboxSignalRed: 90 # edx.toolbox.signal.red
+#        edxToolboxFssfDefaultExtension: dat # edx.toolbox.fssf.defaultExtension
+
+#        edxSecurityProxyEnabled: false # edx.security.proxy.enabled
+#        edxSecurityProxyHost: 192.168.1.1 #  edx.security.proxy.host
+#        edxSecurityProxyPort: 8888 # edx.security.proxy.port
+#        edxSecurityProxyNonProxyHosts: 127.0.0.1 # edx.security.proxy.nonProxyHosts=
+#        edxSecurityProxyUsername: socks1username # edx.security.proxy.username
+#        edxSecurityProxyPassword: socks1password # edx.security.proxy.password
+
+#        edxToolboxPullIncomingDirectories: # It is possible to define incoming pull directory per message type.
+#          - messageTypes: TEST-MESSAGE-TYPE1,TEST-MESSAGE1 # edx.toolbox.pull.incomingDirectory[0].messageTypes
+#            incomingDirectory: /tmp/FSSF-MSG1 # edx.toolbox.pull.incomingDirectory[0].incomingDirectory
+#          - messageTypes: TEST-MESSAGE-TYPE2,TEST-MESSAGE2 # edx.toolbox.pull.incomingDirectory[1].messageTypes
+#            incomingDirectory: /tmp/FSSF-MSG2 # edx.toolbox.pull.incomingDirectory[1].incomingDirectory
+
+#        edxMaxRequestSize: 2097152 # edx.maxRequestSize
+
+#        edxHealthExclude: oldMessages,internalBrokerConnected
+  
+#        edxHealthThresholdOldMessages: # edx.healthThreshold.oldMessages
+#        edxHealthThresholdOldMessagesOlderThan: # edx.healthThreshold.oldMessages.olderThan
+
+        edxCsrfSecret: kAxFNLmNVlvpirUswMvXXFbx # edx.csrf.secret
+#        internalBrokerToolboxQueuePrefix: edx.internal # internalBroker.queuePrefix
+#        ecpBrokerQueuePrefix: a # ecpBroker.queuePrefix - It is recommended to use the same prefix for both ECP Endpoint and EDX Toolbox, therefore it is not necessary to specify this parameter. By default, no value is specified.
+
+#        edxPasswordProperties: # ecp-password.properties
+#        encryptionPassword: encryptionPassword #encryption password for Jasypt
+        ## Fall Release 2024
+#        internalBrokerBAQueuePrefix: # internalBroker.baQueuePrefix
+        # DBCP2 connection pool configuration
+#        springDatasourceDbcp2MaxTotal: 8 # spring.datasource.dbcp2.maxTotal
+#        springDatasourceDbcp2MaxIdle: 8 # spring.datasource.dbcp2.maxIdle
+#        springDatasourceDbcp2TimeBetweenEvictionRunsMillis: 1800000 # spring.datasource.dbcp2.timeBetweenEvictionRunsMillis
+#        springDatasourceDbcp2MinEvictableIdleTimeMillis: 60000 # spring.datasource.dbcp2.minEvictableIdleTimeMillis
+#        springDatasourceDbcp2NumTestsPerEvictionRun: 3 # spring.datasource.dbcp2.numTestsPerEvictionRun
+#        springDatasourceDbcp2TestOnBorrow: true # spring.datasource.dbcp2.testOnBorrow
+#        springDatasourceDbcp2ValidationQuery: values 1 # spring.datasource.dbcp2.validationQuery
+#        springDatasourceDbcp2ValidationQueryTimeout: -1 # spring.datasource.dbcp2.validationQueryTimeout
+#        springDatasourceDbcp2PoolPreparedStatements: false # spring.datasource.dbcp2.poolPreparedStatements
+
+#        edxToolboxPullRootOut: /opt/data/edx-toolbox/out # edx.toolbox.pull.root.out
+#        edxToolboxPullRootIn: /opt/data/edx-toolbox/in # edx.toolbox.pull.root.in
+
+      edxYml: # edx.yml - routing configuration
+        ################################### EDX Routing Configuration Example #######################################
+
+        ################################### Integration channels ####################################################
+        integrationChannels:
+
+          # Integration channels - general settings
+          # code - each endpoint shall have its unique code
+          # direction is "in" for input channels (from business applications to the toolbox) or out for output channels (from the toolbox to business applications)
+          # redeliveryAttemps is number of message delivery attempts, after these attempts message fails, default is 10, use -1 for unlimited redelivery attempts
+          # redeliveryDelay is delay between redelivery attempts, default is 5 seconds
+
+          ### AMQP channels settings
+          # queueName is the name of input or output queue
+          # replyQueueName is mandatory for input AMQP endpoints, it is used for acknowledgements when message reaches its final state
+          # connectionURI is URI of the AMQP broker, when not specified EDX internal broker is used
+
+          amqpEndpoints:
+            - {direction: in,  queueName: edx.endpoint.outbox, replyQueueName: edx.endpoint.reply, code: edx-endpoint-outbox}
+            - {direction: out,  queueName: edx.endpoint.inbox, code: default-in-queue, redeliveryAttempts: 100}
+
+        ### FTP channels settings
+        # protocol may be ftp, ftps or sftp
+        # hostname - hostname of the FTP server
+        # port - port number that should be used for FTP communication
+        # directory - directory under the FTP root that should be used as input or output message directory
+        # replyDirectory - used for input channels to deliver acknowledgements for sent messages, default is ".reply"
+        # failDirectory - used to store failed messages (e.g. messages that does not match naming convetions), default is ".failed"
+        # username - username used for FTP connection
+        # password - password used for FTP connection
+        # connectionParams - additional Camel connection parameters for special cases, see http://camel.apache.org/ftp.html for details
+
+        #  ftpEndpoints:
+        #    - {direction: in, protocol: ftp, hostname: 192.168.80.208, port: 21, directory: in-folder, replyDirectory: in/reply, username: user, password: password, code: my-ftp-endpoint-in, connectionParams: {stepwise: true, separator: UNIX}}
+        #    - {direction: out, hostname: 192.168.80.208, port: 21, directory: out-folder,  code: my-ftp-endpoint}
+
+        ### FSSF channels settings
+        # directory - local directory under that should be used as input or output message directory
+        # replyDirectory - used for input channels to deliver acknowledgements for sent messages, default is ".reply"
+        # failDirectory - used to store failed messages (e.g. messages that does not match naming convetions), default is ".failed"
+
+        #  fssfEndpoints:
+        #     Example with absolute path on unix system
+        #    - {direction: in, directory: "/opt/data/fssf/in", code: fssf-endpoint-1}
+        #    - {direction: out, directory: "/opt/data/fssf/out/MT1", code: fssf-endpoint-2}
+        #     Example with absolute path on windows system
+        #    - {direction: out, directory: "c:/Program Files/EDX Toolbox/data/fssf/out/MT2", code: fssf-endpoint-3}
+
+        ### Kafka channels settings
+        # topicName - topic name
+        # replyTopicName - reply topic name for acknowledgements
+        # connectionURI - connection URI to Kafka broker(s), list can be a subset of brokers or a VIP pointing to a subset of brokers
+        # options - Kafka consumer or producer options, see http://camel.apache.org/kafka.html for details
+        # partitionKeyMadesHeaders - When Apache Kafka Topic is partitioned the EDX Toolbox nodes must use some partitioning strategy to distribute messages across partitions.
+        #                            Default Round Robin strategy or partition key may be used. The Partition key can be composed from values of selected MADES message headers.
+
+        #  kafkaEndpoints:
+        #    -{direction: in, topicName: edx.endpoint.outbox.my-topic, replyTopicName: edx.endpoint.reply.my-reply-topic, connectionURI: "127.0.0.1: 9092", options: "groupId=edxGroup", code: my-kafka-in-endpoint}
+        #    -{direction: out, topicName: edx.endpoint.inbox.another-topic, connectionURI: "127.0.0.1: 9092", partitionKeyMadesHeaders:[businessType, receiverCode], code: kafka-out-endpoint}
+
+        ### ECP webservice endpoint is started automatically and can be also used in routing rules
+        # ECP webservice endpoint code for use as route start or end is "ecp-endpoint"
+
+        ################################### Routing rules ############################################################
+        # Routing rules for specific part of EDX processing
+
+        # Components to be used in defined routes, one or more codes of these components may be used as routing steps
+        components:
+          # validate against xsd
+          validations: []
+          #  - {code: my-validation-1, xsd: "file:c:/Program Files/EDX Toolbox/custom/xsd/person.xsd"}
+          #  - {code: my-validation-2, xsd: "file:/opt/edx/custom/xsd/person.xsd"}
+
+          # transform via xslt
+          transformations: []
+          #  - {code: my-transformation-1, xslt: "file:c:/Program Files/EDX Toolbox/custom/xslt/person.xslt"}
+          #  - {code: my-transformation-2, xslt: "file:/opt/edx/custom/xslt/person.xslt"}
+
+          # let message be processed by external system
+          externalProcessing: []
+        #  - {code: ext-processing-by-qap, in: edx.queue.qap.in, out: edx.queue.qap.out}
+        #  - {code: ext-processing-by-ba1, in: edx.queue.ba1.in, out: edx.queue.ba1.out}
+
+        # For all routing rules, it is possible to specify: messageType, service, sender, receiver or any combination of these attributes.
+        # Service attribute consists of three values: serviceCode, domainCode and serviceCatalogueCode.
+        # Start of the route is receiving endpoint code, "*" for all input endpoints or "toolbox-gateway" for messages from another toolboxes.
+        # End of the route is one or more output endpoint's code(s) (including "ecp-endpoint" for ECP WS interface) or "toolbox-gateway" for messages that should be delivered to another toolbox/toolboxes.
+        # Fail endpoint is output endpoint used to deliver failure notification message.
+        # Steps are custom processing steps composed of components defined above. After the last step, message is passed to delivery.
+
+        # When route starts by "toolbox-gateway", it is incoming message from another toolbox for business application.
+        # When route starts by an endpoint code (defined in integrationChannels section), it is route for messages from an endpoint that can be routed to another toolbox using "toolbox-gateway" as end.
+        # Route that starts with an input endpoint code can also end with another output endpoint (message is not send to another toolbox) - receiver should be local toolbox.
+
+        routing:
+          routes: []
+          # messages incoming from another toolbox with message type "a" will be delivered to endpoint fssf-endpoint-2, possible state notification will be also delivered to this endpoint
+          #  - {code: route-a, messageType: a, start: toolbox-gateway, end: fssf-endpoint-2, fail: fssf-endpoint-2, steps: [] }
+
+          # messages with message type "a" from fssf-ednpoint-1 will be delivered to another local endpoint fssf-endpoint-2 after XSLT transformation
+          #  - {code: a-fssf, messageType: a, start: fssf-endpoint-1, end: fssf-endpoint-2, fail: fssf-endpoint-2, steps: [my-transformation-1] }
+
+          # send messages with message type "b" from default-out-queue to another toolbox after two external processings and XSLT transformation, in case of failure, deliver notification to FTP
+          #  - {code: b-out, messageType: b, start: default-out-queue, end: toolbox-gateway, fail: my-ftp-endpoint, steps: [ext-processing-by-qap, my-transformation-2] }
+
+          # deliver messages received in OPDE service context and message type "b" to fssf-endpoint-2 after XSD validation and external processing
+          #  - {code: b-opde, messageType: b, service: {serviceCode: OPDE, domainCode: OPDE_DOMAIN, serviceCatalogueCode: OPDE_CATALOGUE}, start: toolbox-gateway, end: [fssf-endpoint-2], fail: my-ftp-endpoint, steps: [my-validation-1, ext-processing-by-ba1] }
+
+          # default routes for outgoing messages (from business applications to anoter toolboxes) and incoming messages (from another toolboxes for business applications)
+          sendProcessDefaultRoute: {start: "*", end: toolbox-gateway, fail: ecp-endpoint, steps: [] }
+          receiveProcessDefaultRoute: {start: toolbox-gateway, end: ecp-endpoint, fail: ecp-endpoint, steps: [] }
+
+      envConf: # env.conf file
+        resourcesJvm: # configuration of Java Virtual Machine (JVM) resources
+          xms: 128M # initial memory allocation pool for JVM
+          xmx: 512M # maximum memory allocation pool for JVM
+        #edxToolboxTomcatPortShutdown: 8005 # edx.toolbox.tomcat.port.shutdown
+        #edxToolboxTomcatPortHttp: 8080 # edx.toolbox.tomcat.port.http
+        #edxToolboxTomcatPortAjp: 8009 # edx.toolbox.tomcat.port.ajp
+        #edxToolboxTomcatPortAjpRedirect: 8443 # edx.toolbox.tomcat.port.ajp.redirect
+        #edxToolboxTomcatPortHttpRedirect: 8443 # edx.toolbox.tomcat.port.http.redirect
+        #edxLogFullStackTrace: false # edx.logFullStackTrace
+
+      edxUsersProperties: # stands for edx-users.properties
+        edxTooboxUsers: # array of users
+          - login: admin # edx.toolbox.users[0].login
+            password: password # edx.toolbox.users[0].password
+            role: serviceManager # edx.toolbox.users[0].role
+          - login: user # edx.toolbox.users[1].login
+            password: password # edx.toolbox.users[1].password
+            role: user # edx.toolbox.users[1].role
+
+#      edxLockBack: edx-logback.xml
+#        jmxConfigurator: true # enable configure EDX logback via JMX when EDX Toolbox is running
+
+#      jmxRemoteProperties:  # jmxremote.properties
+#        comSunManagementJmxRemote: true # com.sun.management.jmxremote
+#        comSunManagementJmxRemotePort: 2099 # com.sun.management.jmxremote.port
+#        comSunManagementJmxRemoteRmiPort: 2098 # com.sun.management.jmxremote.rmi.port # com.sun.management.jmxremote.password.file
+#        comSunManagementJmxRemotePasswordFile: /etc/edx-toolbox/jmxremote.password
+#        comSunManagementJmxRemoteAccessFile: /etc/edx-toolbox/jmxremote.access # com.sun.management.jmxremote.access.file
+#        comSunManagementJmxRemoteSsl: true  # com.sun.management.jmxremote.ssl
+#        comSunManagementJmxRegistrySsl: true # com.sun.management.jmxremote.registry.ssl
+#        comSunManagementJmxRemoteSslConfigFile: /etc/edx-toolbox/jmxremote.ssl # com.sun.management.jmxremote.ssl.config.file
+#        comSunManagementJmxRemoteAuthenticate: true  # com.sun.management.jmxremote.authenticate
+
+#      jmxRemoteSsl: # jmxremote.ssl
+#        javaxNetSslKeystore: /path/to/keystore.jks # javax.net.ssl.keyStore
+#        javaxNetSslKeystorePassword: keystore_password # javax.net.ssl.keyStorePassword
+#        javaxNetSslTrustStore: /path/to/truststore.jks # javax.net.ssl.trustStore
+#        javaxNetSslTrustStorePassword: truststore_password # javax.net.ssl.trustStorePassword
+
+#      jmxRemotePassword: # jmxremote.password
+#        jmxRemoteUsers: # array of JMX users
+#          - login: jmxuser # login for the first JMX user
+#            password: jmxpassword # password for the first JMX user
+#            access: readonly # access role for the first JMX user
+#          - login: jmxadmin # login for second JMX user
+#            password: jmxadminpassword # password for second JMX user
+#            access: readwrite # access role for the second JMX user
+
+      serverXml: # server.xml
+#        jvmRoute: route # Engine name="Catalina" defaultHost="localhost" jvmRoute=<route>
+        connectorHttpDisable: true # HTTP communication is disabled by default
+#        connectorHttpsDisable: false # HTTPS communication is enabled by default
+        connectorAjpDisable: true # AJP connector is disbled by default
+        # internalProxies: 127.0.0.1 # internalProxies
+
+
+#      volumeMounts: # volume mounts - can be used for mapping config files or storages
+#        - name: config
+#          subPath: bootstrap.xml
+#          mountPath: /etc/edx-toolbox/jms/bootstrap.xml
+
+#        - subPath: bootstrap.xml
+#          content: |-
+#            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+#             <!--
+#               ~ Licensed to the Apache Software Foundation (ASF) under one or more
+#               ~ contributor license agreements. See the NOTICE file distributed with
+#               ~ this work for additional information regarding copyright ownership.
+#               ~ The ASF licenses this file to You under the Apache License, Version 2.0
+#               ~ (the "License"); you may not use this file except in compliance with
+#               ~ the License. You may obtain a copy of the License at
+#               ~
+#               ~     http://www.apache.org/licenses/LICENSE-2.0
+#               ~
+#               ~ Unless required by applicable law or agreed to in writing, software
+#               ~ distributed under the License is distributed on an "AS IS" BASIS,
+#               ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#               ~ See the License for the specific language governing permissions and
+#               ~ limitations under the License.
+#               -->
+
+#             <broker xmlns="http://activemq.apache.org/schema">
+
+#                <jaas-security domain="activemq"/>
+
+#                <!-- artemis.URI.instance is parsed from artemis.instance by the CLI startup.
+#                     This is to avoid situations where you could have spaces or special characters on this URI -->
+#                <server configuration="file:/opt/eccosp-artemis/etc/broker.xml"/>
+
+#                <!-- The web server is only bound to localhost by default -->
+#                <web path="web" rootRedirectLocation="console">
+#                    <binding name="artemis" uri="http://localhost:8161">
+#                        <app name="branding" url="activemq-branding" war="activemq-branding.war"/>
+#                        <app name="plugin" url="artemis-plugin" war="artemis-plugin.war"/>
+#                        <app name="console" url="console" war="console.war"/>
+#                        <app url="metrics" war="metrics.war"/>
+#                    </binding>
+#                </web>
+#             </broker>
+
+# global config
+global: # storage section
+  storage:
+    class: standard # storage class – needs to be provided by Kubernetes cluster administrator
+  imagePullSecrets: # secrets which hold information about login to docker repository
+    - name: regcred # name of secret – name is defined by Kubernees cluster administrator

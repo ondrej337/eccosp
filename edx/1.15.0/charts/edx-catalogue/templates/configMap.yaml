@@ -1,0 +1,611 @@
+{{- range $i, $instance := .Values.instance }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{$.Release.Namespace}}-{{ $.Chart.Name }}-{{$instance.name}}-cm
+  labels:
+    backup.component.name: {{ $.Release.Name }}
+data:
+  catalogue.properties: |-
+    # EDX Catalogue configuration
+    ## Service catalogue ECP code
+    edx.catalogue.code={{ $instance.catalogueProperties.edxCatalogueCode | default "CHANGE-ME-SC-CODE" }}
+
+    # Database configuration
+    edx.catalogue.directory={{ $instance.catalogueProperties.edxCatalogueDataDirectory | default "/var/lib/edx-catalogue" }}
+    edx.db.url={{ $instance.catalogueProperties.edxDBUrl | default "jdbc:derby:${edx.catalogue.directory}/db;databaseName=edx;create=true" }}
+    edx.db.username={{ $instance.catalogueProperties.edxDBUsername | default "edx" }}
+    edx.db.password={{ $instance.catalogueProperties.edxDBPassword | default "password" }}
+    spring.datasource.validation-query={{ $instance.catalogueProperties.springDatasourceValidationQuery | default "values 1" }}
+    spring.datasource.test-on-borrow={{ $instance.catalogueProperties.springDatasourceTestOnBorrow | default "true" }}
+    {{- if $instance.catalogueProperties.springDatasourceDriverClassName }}
+    spring.datasource.driver-class-name={{ $instance.catalogueProperties.springDatasourceDriverClassName }}
+    {{- end }}
+    # Basic server configuration
+    security.basic.enabled={{ $instance.catalogueProperties.securityBasicEnabled | default "false" }}
+    server.error.whitelabel.enabled= {{ $instance.catalogueProperties.serverErrorWhiteLabelEnabled | default "false" }}
+
+    ## Disabled JMX protocol for internal broker
+    #NOTE: warning when enabled the property then will be accessible JMX remote on port 1099
+    spring.jmx.enabled={{ $instance.catalogueProperties.springJmxEnabled | default "false" }}
+
+    internalBroker.useAuthentication={{ $instance.catalogueProperties.internalBrokerUseAuthentication | default "false" }}
+    internalBroker.auth.user={{ $instance.catalogueProperties.internalBrokerAuthUser | default "catalogue" }}
+    internalBroker.auth.password={{ $instance.catalogueProperties.internalBrokerAuthPassword | default "password" }}
+    internalBroker.keystore.location={{ $instance.catalogueProperties.internalBrokerKeystoreLocation | default "${edx.catalogue.directory}/keystore.jks" }}
+    internalBroker.keystore.password={{ $instance.catalogueProperties.internalBrokerKeystorePassword | default "password" }}
+    internalBroker.keystore.authAlias={{ $instance.catalogueProperties.internalBrokerKeystoreAuthAlias | default "eccosp_artemis_installer_cert" }}
+    internalBroker.amqp.port={{ $instance.catalogueProperties.internalBrokerAmqpPort | default "5672" }}
+    internalBroker.amqp.host={{ $instance.catalogueProperties.internalBrokerAmqpHost | default "127.0.0.1" }}
+    edx.broker.url={{ $instance.catalogueProperties.edxBrokerUrl | default "amqps://${internalBroker.amqp.host:127.0.0.1}:${internalBroker.amqp.port:5672}" }}
+
+    {{- if (($instance).catalogueProperties).internalBrokerCatalogueQueuePrefix }}
+    internalBroker.queuePrefix={{ (($instance).catalogueProperties).internalBrokerCatalogueQueuePrefix }}
+    {{- end }}
+    ecpBroker.amqp.port={{ $instance.catalogueProperties.ecpBrokerAmqpPort | default "5672" }}
+    ecpBroker.amqp.host={{ $instance.catalogueProperties.ecpBrokerAmqpHost | default "127.0.0.1" }}
+    ecpBroker.keystore.location={{ $instance.catalogueProperties.ecpBrokerKeystoreLocation | default "${edx.catalogue.directory}/keystore.jks" }}
+    ecpBroker.keystore.password={{ $instance.catalogueProperties.ecpBrokerKeystorePassword | default "password" }}
+    ecpBroker.keystore.authAlias={{ $instance.catalogueProperties.ecpBrokerKeystoreAuthAlias | default "eccosp_artemis_installer_cert" }}
+    ecpBroker.auth.user={{ $instance.catalogueProperties.ecpBrokerAuthUser | default "catalogue" }}
+    ecpBroker.auth.password={{ $instance.catalogueProperties.ecpBrokerAuthPassword | default "password" }}
+    ecp.broker.url={{ $instance.catalogueProperties.ecpBrokerUrl | default "amqps://${ecpBroker.amqp.host}:${ecpBroker.amqp.port}" }}
+    {{- if (($instance).catalogueProperties).ecpBrokerQueuePrefix }}
+    ecpBroker.queuePrefix={{ $instance.catalogueProperties.ecpBrokerQueuePrefix }}
+    {{- end }}
+
+    # ECP queues
+    ## Queue for receiving incoming messages from ECP
+    ecp.receiveQueue={{ $instance.catalogueProperties.ecpReceiveQueue | default "ecp.endpoint.inbox" }}
+
+    ## Queue for sending outgoing messages by ECP
+    ecp.sendQueue={{ $instance.catalogueProperties.ecpSendQueue | default "ecp.endpoint.outbox" }}
+
+    ## Queue for receiving responses about sent messages
+    ecp.sendResponseQueue={{ $instance.catalogueProperties.ecpSendResponseQueue | default "ecp.endpoint.outbox.reply" }}
+
+    ## Queue for ECP states propagation
+    ecp.statusQueue={{ $instance.catalogueProperties.ecpStatusQueue | default "ecp.endpoint.send.event" }}
+
+    spring.profiles.active={{ $instance.catalogueProperties.springProfilesActive | default "edx-nonha" }}
+
+    logging.file.name={{ $instance.catalogueProperties.loggingFileName | default "/var/log/edx-catalogue/edx.log" }}
+    logging.file.path={{ $instance.catalogueProperties.loggingFilePath | default "/var/log/edx-catalogue" }}
+
+    # Health Actuator Parameters
+    spring.activemq.user=${internalBroker.auth.user}
+    spring.activemq.password=${internalBroker.auth.password}
+
+    logging.config={{ $instance.catalogueProperties.loggingConfig | default "/etc/edx-catalogue/edx-logback.xml" }}    
+    {{- if $instance.catalogueProperties.loggingLevels }}
+    {{- range $i, $item := $instance.catalogueProperties.loggingLevels }}
+    logging.level.{{.package}}={{.level}}
+    {{- end }}
+    {{- else }}
+    logging.level.eu.unicorn.edx=INFO
+    logging.level.eu.unicorn.eip=ERROR
+    logging.level.org.apache.camel=INFO
+    {{- end }}
+
+    {{- if $instance.catalogueProperties.springJpaPropertiesHibernateDialect }}
+
+    spring.jpa.properties.hibernate.dialect={{ $instance.catalogueProperties.springJpaPropertiesHibernateDialect }}
+    {{- end }}
+    {{- if $instance.catalogueProperties.edxNetworkManagementEnabled }}
+
+    ##Enables (true) or disables (false) processing of Network Management requests
+    edx.networkManagementEnabled={{ $instance.catalogueProperties.edxNetworkManagementEnabled | default "true" }}
+    {{- end }}
+    {{- if $instance.catalogueProperties.edxLoginLockAttempts }}
+
+    edx.loginLock.attempts={{ $instance.catalogueProperties.edxLoginLockAttempts | default "3" }}
+    {{- end }}
+    {{- if $instance.catalogueProperties.edxLoginLockLockTime }}
+
+    edx.loginLock.lockTime={{ $instance.catalogueProperties.edxLoginLockLockTime | default "900" }}
+    {{- end }}
+    {{- if $instance.catalogueProperties.edxEcpAmqpClientMaxRedeliveries }}
+
+    edx.ecp.amqp.client.maxRedeliveries={{ $instance.catalogueProperties.edxEcpAmqpClientMaxRedeliveries | default "10" }}
+    {{- end }}
+
+    {{- if $instance.catalogueProperties.jasyptEncryptorAlgorithm }}
+
+    # JASYPT encryption
+    jasypt.encryptor.algorithm={{ $instance.catalogueProperties.jasyptEncryptorAlgorithm | default "PBEWITHHMACSHA512ANDAES_256" }}
+
+    {{- end }}
+    {{- if $instance.catalogueProperties.prometheusMonitoringEnabled }}
+
+    # Prometheus monitoring
+    management.endpoints.web.exposure.include=info,health,readiness,prometheus
+    endpoints.prometheus.sensitive=false
+    {{- else }}
+    management.endpoints.web.exposure.include=info,health,readiness
+    {{- end }}
+    edx.csrf.secret={{ (($instance).catalogueProperties).edxCsrfSecret | default "kAxFNLmNVlvpirUswMvXXFbx"}}
+
+
+    edx.catalogue.projectName={{ $instance.catalogueProperties.edxCatalogueProjectName | default "" }}
+    edx.catalogue.envName={{ $instance.catalogueProperties.edxCatalogueEnvName | default "" }}
+
+    {{- if $instance.catalogueProperties.springDatasourceDbcp2MaxTotal }}
+    spring.datasource.dbcp2.maxTotal={{ $instance.catalogueProperties.springDatasourceDbcp2MaxTotal | int64}}
+    {{- end }}
+    {{- if $instance.catalogueProperties.springDatasourceDbcp2MaxIdle }}
+    spring.datasource.dbcp2.maxIdle={{ $instance.catalogueProperties.springDatasourceDbcp2MaxIdle | int64}}
+    {{- end }}
+    {{- if $instance.catalogueProperties.springDatasourceDbcp2TimeBetweenEvictionRunsMillis }}
+    spring.datasource.dbcp2.timeBetweenEvictionRunsMillis={{ $instance.catalogueProperties.springDatasourceDbcp2TimeBetweenEvictionRunsMillis | int64}}
+    {{- end }}
+    {{- if $instance.catalogueProperties.springDatasourceDbcp2MinEvictableIdleTimeMillis }}
+    spring.datasource.dbcp2.minEvictableIdleTimeMillis={{ $instance.catalogueProperties.springDatasourceDbcp2MinEvictableIdleTimeMillis | int64}}
+    {{- end }}
+    {{- if $instance.catalogueProperties.springDatasourceDbcp2NumTestsPerEvictionRun }}
+    spring.datasource.dbcp2.numTestsPerEvictionRun={{ $instance.catalogueProperties.springDatasourceDbcp2NumTestsPerEvictionRun | int64}}
+    {{- end }}
+    {{- if (hasKey $instance.catalogueProperties "springDatasourceDbcp2TestOnBorrow") }}
+    spring.datasource.dbcp2.testOnBorrow={{ $instance.catalogueProperties.springDatasourceDbcp2TestOnBorrow }}
+    {{- end }}
+    {{- if $instance.catalogueProperties.springDatasourceDbcp2ValidationQuery }}
+    spring.datasource.dbcp2.validationQuery={{ $instance.catalogueProperties.springDatasourceDbcp2ValidationQuery }}
+    {{- end }}
+    {{- if $instance.catalogueProperties.springDatasourceDbcp2ValidationQueryTimeout }}
+    spring.datasource.dbcp2.validationQueryTimeout={{ $instance.catalogueProperties.springDatasourceDbcp2ValidationQueryTimeout | int64}}
+    {{- end }}
+    {{- if (hasKey $instance.catalogueProperties "springDatasourceDbcp2PoolPreparedStatements") }}
+    spring.datasource.dbcp2.poolPreparedStatements={{ $instance.catalogueProperties.springDatasourceDbcp2PoolPreparedStatements }}
+    {{- end }}
+    
+    {{- if $instance.catalogueProperties.edxEcpAmqpClientConcurrentConsumers }}
+    edx.ecp.amqp.client.concurrentConsumers={{ $instance.catalogueProperties.edxEcpAmqpClientConcurrentConsumers }}
+    {{- end }}
+
+    {{- if $instance.catalogueProperties.edxEcpAmqpClientPrefetch }}
+    edx.ecp.amqp.client.prefetch={{ $instance.catalogueProperties.edxEcpAmqpClientPrefetch }}
+    {{- end }}
+    
+    {{- if $instance.catalogueProperties.edxAmqpClientConcurrentConsumers }}
+    edx.amqp.client.concurrentConsumers={{ $instance.catalogueProperties.edxAmqpClientConcurrentConsumers }}
+    {{- end }}
+
+    {{- if $instance.catalogueProperties.edxAmqpClientPrefetch }}
+    edx.amqp.client.prefetch={{ $instance.catalogueProperties.edxAmqpClientPrefetch }}
+    {{- end }}
+
+    {{- if $instance.catalogueProperties.edxLdapUrl }}
+    # LDAP configuration
+    edx.ldap.url={{ $instance.catalogueProperties.edxLdapUrl }}
+    {{- end}}
+    {{- if $instance.catalogueProperties.edxLdapTruststoreLocation }}
+    edx.ldap.truststoreLocation={{ $instance.catalogueProperties.edxLdapTruststoreLocation }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapTruststorePassword }}
+    edx.ldap.truststorePassword={{ $instance.catalogueProperties.edxLdapTruststorePassword }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapKeystoreLocation }}
+    edx.ldap.keystoreLocation={{ $instance.catalogueProperties.edxLdapKeystoreLocation }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapKeystorePassword }}
+    edx.ldap.keystorePassword={{ $instance.catalogueProperties.edxLdapKeystorePassword }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapKeyPassword }}
+    edx.ldap.keyPassword={{ $instance.catalogueProperties.edxLdapKeyPassword }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapVerifyHost }}
+    edx.ldap.verifyHost={{ $instance.catalogueProperties.edxLdapVerifyHost }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapRoleAdmin }}
+    edx.ldap.roleAdmin={{ $instance.catalogueProperties.edxLdapRoleAdmin }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapRoleUser }}
+    edx.ldap.roleUser={{ $instance.catalogueProperties.edxLdapRoleUser }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapDomain }}
+    edx.ldap.domain={{ $instance.catalogueProperties.edxLdapDomain }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapBase }}
+    edx.ldap.base={{ $instance.catalogueProperties.edxLdapBase }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapUsername }}
+    edx.ldap.username={{ $instance.catalogueProperties.edxLdapUsername }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapPassword }}
+    edx.ldap.password={{ $instance.catalogueProperties.edxLdapPassword }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapPattern }}
+    edx.ldap.pattern={{ $instance.catalogueProperties.edxLdapPattern }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapGroupBase }}
+    edx.ldap.groupBase={{ $instance.catalogueProperties.edxLdapGroupBase }}
+    {{- end}}
+	{{- if $instance.catalogueProperties.edxLdapPasswordAttribute }}
+    edx.ldap.passwordAttribute={{ $instance.catalogueProperties.edxLdapPasswordAttribute }}
+    {{- end}}
+
+    {{- if $instance.catalogueProperties.edxMaxRequestSize }}{{ printf "\n" }}
+    edx.maxRequestSize={{ $instance.catalogueProperties.edxMaxRequestSize | int }}
+    {{- end}}
+    management.endpoint.health.show-details={{ $instance.catalogueProperties.healthShowDetails | default "ALWAYS" }}
+    edx.healthExclude={{- $instance.catalogueProperties.edxHealthExclude | default "internalBrokerConnected" }}
+
+  edx-users.properties: |-
+    # Defines the list of users allowed to access application
+    # Changing default user and his password is strongly recommended    
+    {{ if $instance.edxUsersProperties }}
+    {{- range $i, $item := $instance.edxUsersProperties.edxCatalogueUsers }}
+    edx.catalogue.users[{{$i}}].login={{.login}}
+    edx.catalogue.users[{{$i}}].password={{.password}}
+    {{ end }}
+    {{- else }}
+    edx.catalogue.users[0].login=admin
+    edx.catalogue.users[0].password=password
+    {{- end }}
+
+  jmxremote.properties: |-
+    ## JMX is disabled for default
+    ## bellow is example for JMX settings with SSL  
+    {{ if $instance.jmxRemoteProperties }}
+    com.sun.management.jmxremote={{ $instance.jmxRemoteProperties.comSunManagementJmxRemote | default "false" }}
+    com.sun.management.jmxremote.port={{ $instance.jmxRemoteProperties.comSunManagementJmxRemotePort | default "1099" }}
+    com.sun.management.jmxremote.rmi.port={{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteRmiPort | default "1098" }}
+    com.sun.management.jmxremote.password.file={{ $instance.jmxRemoteProperties.comSunManagementJmxRemotePasswordFile | default "/etc/edx-catalogue/jmxremote.password" }}
+    com.sun.management.jmxremote.access.file={{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteAccessFile | default "/etc/edx-catalogue/jmxremote.access" }}
+    com.sun.management.jmxremote.ssl={{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteSsl | default "false" }}
+    com.sun.management.jmxremote.registry.ssl={{ $instance.jmxRemoteProperties.comSunManagementJmxRegistrySsl | default "false" }}
+    com.sun.management.jmxremote.ssl.config.file={{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteSslConfigFile | default "/etc/edx-catalogue/jmxremote.ssl" }}
+    com.sun.management.jmxremote.authenticate={{ $instance.jmxRemoteProperties.comSunManagementJmxRemoteAuthenticate | default "true" }}
+    {{- else }}
+    com.sun.management.jmxremote=false
+    #com.sun.management.jmxremote.port=1099
+    #com.sun.management.jmxremote.rmi.port=1098
+    #com.sun.management.jmxremote.password.file=/path/to/jmxremote.password
+    #com.sun.management.jmxremote.access.file=/path/to/jmxremote.access
+    #com.sun.management.jmxremote.ssl=false
+    #com.sun.management.jmxremote.registry.ssl=true
+    #com.sun.management.jmxremote.ssl.config.file=/etc/edx-catalogue/jmxremote.ssl
+    #com.sun.management.jmxremote.authenticate=true
+    {{- end }}
+
+  jmxremote.password: |-
+    {{- if $instance.jmxRemotePassword }}
+    {{- range $i, $item := $instance.jmxRemotePassword.jmxRemoteUsers }}
+    {{.login}} {{.password}}
+    {{- end }}
+    {{- end }}
+
+  jmxremote.access: |-
+    {{- if $instance.jmxRemotePassword }}
+    {{- range $i, $item := $instance.jmxRemotePassword.jmxRemoteUsers }}
+    {{.login}} {{.access}}
+    {{- end }}
+    {{- end }}
+
+  jmxremote.ssl: |-
+    {{- if $instance.jmxRemoteSsl }}
+    javax.net.ssl.keyStore={{ $instance.jmxRemoteSsl.javaxNetSslKeystore | default "/path/to/keystore.jks" }}
+    javax.net.ssl.keyStorePassword={{ $instance.jmxRemoteSsl.javaxNetSslKeystorePassword | default "keystore_password" }}
+    javax.net.ssl.trustStore={{ $instance.jmxRemoteSsl.javaxNetSslTrustStore | default "/path/to/truststore.jks" }}
+    javax.net.ssl.trustStorePassword={{ $instance.jmxRemoteSsl.javaxNetSslTrustStorePassword | default "truststore_password" }}
+    {{- else }}
+    #javax.net.ssl.keyStore=/path/to/keystore.jks
+    #javax.net.ssl.keyStorePassword=keystore_password
+    #javax.net.ssl.trustStore=/path/to/truststore.jks
+    #javax.net.ssl.trustStorePassword=truststore_password
+    {{- end }}
+
+  env.conf: |-
+    [Service]
+    Environment='CATALINA_HOME=/usr/share/edx-catalogue'
+    Environment='CATALINA_BASE=/usr/share/edx-catalogue'
+    Environment='CATALINA_PID=/usr/share/edx-catalogue/catalina.pid'
+    Environment='CATALINA_OPTS=-Xms{{($instance.envConf).resourcesJvm.xms | default "64M"}} -Xmx{{($instance.envConf).resourcesJvm.xmx | default "1G"}}\
+    			-XX:+HeapDumpOnOutOfMemoryError\
+                -XX:HeapDumpPath="{{ ($instance.catalogueProperties).loggingFilePath | default "/var/log/edx-catalogue" }}/edx-dump.hprof"\
+                -Dspring.config.additional-location=/etc/edx-catalogue/catalogue.properties,/etc/edx-catalogue/edx-users.properties\
+                -Dbroker.internal.auth.settings.location=/etc/edx-catalogue\
+                -Dedx.catalogue.jms.directory=/etc/edx-catalogue/jms\
+                -Dedx.catalogue.tomcat.port.shutdown={{ ($instance.envConf).edxCatalogueTomcatPortShutdown | default "8005" }}\
+                -Dedx.catalogue.tomcat.port.http={{ ($instance.envConf).edxCatalogueTomcatPortHttp | default "8080" }}\
+                -Dedx.catalogue.tomcat.port.ajp={{ ($instance.envConf).edxCatalogueTomcatPortAjp | default "8009" }}\
+                -Dedx.catalogue.tomcat.port.ajp.redirect={{ ($instance.envConf).edxCatalogueTomcatPortAjpRedirect | default "8443" }}\
+                -Dedx.catalogue.tomcat.port.http.redirect={{ ($instance.envConf).edxCatalogueTomcatPortHttpRedirect | default "8443" }}\
+                -Dedx.password.location=/etc/edx-catalogue/edx-password.properties\
+                -Dcom.sun.management.config.file=/etc/edx-catalogue/jmxremote.properties'
+
+  setenv.sh: |-
+    #!/bin/bash
+
+    ## This file will be copied into tomcat_base/bin/setenv.sh
+    ## Setup LOG file location for tomcat
+    export CATALINA_OUT=/var/log/edx-catalogue/catalina.out
+    export CATALINA_HOME=/usr/share/edx-catalogue
+    export CATALINA_BASE=/usr/share/edx-catalogue
+    export CATALINA_PID=/usr/share/edx-catalogue/catalina.pid
+    export CATALINA_OPTS="-Xms{{- (($instance.envConf).resourcesJvm).xms | default "64M" }} -Xmx{{- (($instance.envConf).resourcesJvm).xmx | default "1G" }}\
+     -XX:+HeapDumpOnOutOfMemoryError\
+     -XX:HeapDumpPath="{{ ($instance.catalogueProperties).loggingFilePath | default "/var/log/edx-catalogue" }}/edx-dump.hprof"\
+     -Dspring.config.additional-location=/etc/edx-catalogue/catalogue.properties,/etc/edx-catalogue/edx-users.properties\
+     -Dbroker.internal.auth.settings.location=/etc/edx-catalogue\
+     -Dedx.catalogue.jms.directory=/etc/edx-catalogue/jms\
+     -Dedx.catalogue.tomcat.port.shutdown={{ ($instance.envConf).edxCatalogueTomcatPortShutdown | default "8005" }}\
+     -Dedx.catalogue.tomcat.port.http={{ ($instance.envConf).edxCatalogueTomcatPortHttp | default "8080" }}\
+     -Dedx.catalogue.tomcat.port.ajp={{ ($instance.envConf).edxCatalogueTomcatPortAjp | default "8009" }}\
+     -Dedx.catalogue.tomcat.port.ajp.redirect={{ ($instance.envConf).edxCatalogueTomcatPortAjpRedirect | default "8443" }}\
+     -Dedx.catalogue.tomcat.port.http.redirect={{ ($instance.envConf).edxCatalogueTomcatPortHttpRedirect | default "8443" }}\
+     -Dedx.password.location=/etc/edx-catalogue/edx-password.properties\
+     -Dedx.logFullStackTrace={{ ($instance.envConf).edxLogFullStackTrace | default "false" }}\
+     -Dcom.sun.management.config.file=/etc/edx-catalogue/jmxremote.properties"
+
+  edx-logback.xml: |-
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration>
+  
+        {{- if $instance.edxLockBack }}
+        {{- if $instance.edxLockBack.jmxConfigurator }}
+        <jmxConfigurator />
+        {{- end}}
+        {{- end}}
+  
+        <!--http://docs.spring.io/spring-boot/docs/current/reference/html/howto-logging.html-->
+        <!--http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-logging.html-->
+
+        <!--Common logger config and log file path-->
+        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+        <property name="AUDIT_LOG_FILE" value="${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/edx-audit.log"/>
+        <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}edx-default.log}"/>
+        <!-- owasp-a1 log message sanitized for CRLF to prevent logger injection -->
+        <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS,Etc/GMT} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %replace(%m){'[\r\n]', ''}%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+        <property name="LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE" value="50MB"/>
+        <property name="LOGBACK_ROLLINGPOLICY_MAX_HISTORY" value="7"/>
+        <property name="LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP" value="70MB"/>
+
+        <!--By default include file appender only-->
+        <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
+
+        <springProfile name="console-logging">
+            <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+            <root level="INFO">
+                <appender-ref ref="FILE"/>
+                <appender-ref ref="CONSOLE"/>
+            </root>
+        </springProfile>
+
+        <springProfile name="!console-logging">
+            <root level="INFO">
+                <appender-ref ref="FILE"/>
+            </root>
+        </springProfile>
+
+        <springProfile name="edx-audit">
+
+            <appender name="EdxAuditAppender"
+                      class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <encoder>
+                    <!-- owasp-a1 log message sanitized for CRLF to prevent logger injection -->
+                    <pattern>
+                        %d{yyyy-MM-dd HH:mm:ss.SSS,Etc/GMT} %logger{5} - %replace(%msg){'[\r\n]', ''}%n
+                    </pattern>
+                </encoder>
+                <file>${AUDIT_LOG_FILE}</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+                    <fileNamePattern>${AUDIT_LOG_FILE}.%i</fileNamePattern>
+                </rollingPolicy>
+                <triggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                    <MaxFileSize>10MB</MaxFileSize>
+                </triggeringPolicy>
+            </appender>
+
+            <logger name="EdxAuditLog" level="INFO" additivity="false">
+                <appender-ref ref="EdxAuditAppender"/>
+            </logger>
+
+        </springProfile>
+
+    </configuration>
+
+  server.xml: |-
+    <?xml version='1.0' encoding='utf-8'?>
+    <!--
+      Licensed to the Apache Software Foundation (ASF) under one or more
+      contributor license agreements.  See the NOTICE file distributed with
+      this work for additional information regarding copyright ownership.
+      The ASF licenses this file to You under the Apache License, Version 2.0
+      (the "License"); you may not use this file except in compliance with
+      the License.  You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+    -->
+    <!-- Note:  A "Server" is not itself a "Container", so you may not
+         define subcomponents such as "Valves" at this level.
+         Documentation at /docs/config/server.html
+     -->
+    <Server port="${edx.catalogue.tomcat.port.shutdown}" shutdown="SHUTDOWN">
+        <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
+        <!-- Security listener. Documentation at /docs/config/listeners.html
+        <Listener className="org.apache.catalina.security.SecurityListener" />
+        -->
+        <!--APR library loader. Documentation at /docs/apr.html -->
+        <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
+        <!-- Prevent memory leaks due to use of particular java/javax APIs-->
+        <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+        <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+        <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
+
+        <!-- Global JNDI resources
+             Documentation at /docs/jndi-resources-howto.html
+        -->
+        <GlobalNamingResources>
+            <!-- Editable user database that can also be used by
+                 UserDatabaseRealm to authenticate users
+            -->
+            <Resource name="UserDatabase" auth="Container"
+                      type="org.apache.catalina.UserDatabase"
+                      description="User database that can be updated and saved"
+                      factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+                      pathname="conf/tomcat-users.xml" />
+        </GlobalNamingResources>
+
+        <!-- A "Service" is a collection of one or more "Connectors" that share
+             a single "Container" Note:  A "Service" is not itself a "Container",
+             so you may not define subcomponents such as "Valves" at this level.
+             Documentation at /docs/config/service.html
+         -->
+        <Service name="Catalina">
+
+            <!--The connectors can use a shared executor, you can define one or more named thread pools-->
+            <!--
+            <Executor name="tomcatThreadPool" namePrefix="catalina-exec-"
+                maxThreads="150" minSpareThreads="4"/>
+            -->
+
+
+            <!-- A "Connector" represents an endpoint by which requests are received
+                 and responses are returned. Documentation at :
+                 Java HTTP Connector: /docs/config/http.html (blocking & non-blocking)
+                 Java AJP  Connector: /docs/config/ajp.html
+                 APR (HTTP/AJP) Connector: /docs/apr.html
+                 Define a non-SSL/TLS HTTP/1.1 Connector on port 8080
+            -->
+            {{- if $instance.serverXml }}
+            {{- if $instance.serverXml.connectorHttpDisable }}
+            <!--
+            {{- end }}
+            {{- end }}
+            <Connector port="${edx.catalogue.tomcat.port.http}" protocol="HTTP/1.1"
+                       connectionTimeout="20000"
+                       redirectPort="${edx.catalogue.tomcat.port.http.redirect}" />
+            {{- if $instance.serverXml }}
+            {{- if $instance.serverXml.connectorHttpDisable }}
+            -->
+            {{- end }}            
+            {{- end }}
+            <!-- A "Connector" using the shared thread pool-->
+            <!--
+            <Connector executor="tomcatThreadPool"
+                       port="8080" protocol="HTTP/1.1"
+                       connectionTimeout="20000"
+                       redirectPort="8443" />
+            -->
+            <!-- Define a SSL/TLS HTTP/1.1 Connector on port 8443
+                 This connector uses the NIO implementation that requires the JSSE
+                 style configuration. When using the APR/native implementation, the
+                 OpenSSL style configuration is required as described in the APR/native
+                 documentation -->
+            {{- if $instance.serverXml }}
+            {{- if $instance.serverXml.connectorHttpsDisable }}
+            <!--
+            {{- end }}
+            {{- end }}
+            <Connector port="${edx.catalogue.tomcat.port.http.redirect}" protocol="eu.entsoe.edx.connector.protocol.EdxHttp11NioProtocol"
+                       sslImplementationName="org.apache.tomcat.util.net.jsse.JSSEImplementation"
+                       maxThreads="150" SSLEnabled="true" maxParameterCount="1000" >
+                       <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
+
+                    <SSLHostConfig protocols="TLSv1.3" ciphers="TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_AES_128_GCM_SHA256" >
+                        <Certificate certificateKeystoreFile="{{- if $instance.catalogueProperties -}}{{- $instance.catalogueProperties.internalBrokerKeystoreLocation | default "/var/lib/edx-catalogue/keystore.jks" -}}{{- else -}}/var/lib/edx-catalogue/keystore.jks{{- end -}}" certificateKeystorePassword="{{- if $instance.catalogueProperties -}}{{- $instance.catalogueProperties.internalBrokerKeystorePassword | default "password" -}}{{- else -}}password{{- end -}}" type="RSA" />
+                    </SSLHostConfig>
+            </Connector>
+
+            />
+            {{- if $instance.serverXml }}
+            {{- if $instance.serverXml.connectorHttpsDisable }}
+            -->
+            {{- end }}
+            {{- end }}
+
+            <!-- Define an AJP 1.3 Connector on port 8009 -->
+            {{- if $instance.serverXml }}
+            {{- if $instance.serverXml.connectorAjpDisable }}
+            <!--
+            {{- end }}
+            {{- end }}
+            <Connector port="${edx.catalogue.tomcat.port.ajp}" protocol="AJP/1.3" redirectPort="${edx.catalogue.tomcat.port.ajp.redirect}" />
+            {{- if $instance.serverXml }}
+            {{- if $instance.serverXml.connectorAjpDisable }}
+            -->
+            {{- end }}
+            {{- end }}
+
+
+            <!-- An Engine represents the entry point (within Catalina) that processes
+                 every request.  The Engine implementation for Tomcat stand alone
+                 analyzes the HTTP headers included with the request, and passes them
+                 on to the appropriate Host (virtual host).
+                 Documentation at /docs/config/engine.html -->
+
+            <!-- You should set jvmRoute to support load-balancing via AJP ie :
+            <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
+            -->
+            <Engine name="Catalina" defaultHost="localhost"{{- if $instance.serverXml -}}{{- if $instance.serverXml.jvmRoute -}} jvmRoute="{{- $instance.serverXml.jvmRoute -}}"{{- end -}}{{- end -}}>
+
+                <!--For clustering, please take a look at documentation at:
+                    /docs/cluster-howto.html  (simple how to)
+                    /docs/config/cluster.html (reference documentation) -->
+                <!--
+                <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>
+                -->
+
+                <!-- Use the LockOutRealm to prevent attempts to guess user passwords
+                     via a brute-force attack -->
+                <Realm className="org.apache.catalina.realm.LockOutRealm">
+                    <!-- This Realm uses the UserDatabase configured in the global JNDI
+                         resources under the key "UserDatabase".  Any edits
+                         that are performed against this UserDatabase are immediately
+                         available for use by the Realm.  -->
+                    <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+                           resourceName="UserDatabase"/>
+                </Realm>
+
+                <Host name="localhost"  appBase="webapps"
+                      unpackWARs="true" autoDeploy="true">
+
+                    <!-- SingleSignOn valve, share authentication between web applications
+                         Documentation at: /docs/config/valve.html -->
+                    <!--
+                    <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
+                    -->
+
+                    <Valve className="org.apache.catalina.valves.RemoteIpValve" internalProxies="{{- if $instance.serverXml -}}{{- $instance.serverXml.internalProxies | default "" -}}{{- end -}}" />
+                    <!-- Access log processes all example.
+                         Documentation at: /docs/config/valve.html
+                         Note: The pattern used is equivalent to using pattern="common" -->
+                    <Valve className="org.apache.catalina.valves.AccessLogValve" directory="{{- if $instance.catalogueProperties -}}{{- $instance.catalogueProperties.loggingFilePath | default "/var/log/edx-catalogue" -}}{{- else -}}/var/log/edx-catalogue{{- end -}}"
+                           prefix="localhost_access_log" suffix=".txt" rotatable="false"
+                           pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+                    <Valve className="org.apache.catalina.valves.ErrorReportValve" showReport="false" showServerInfo="false"/>
+
+                </Host>
+            </Engine>
+        </Service>
+    </Server>
+
+  edx-password.properties: |-
+    {{- if ($instance.edxPasswordProperties).encryptionPassword }}
+    {{$instance.edxPasswordProperties.encryptionPassword}}
+    {{- end }}
+
+  users.properties: |-
+    {{ ($instance.catalogueProperties).internalBrokerAuthUser | default "catalogue" }}={{ ($instance.catalogueProperties).internalBrokerAuthPassword | default "password" }}
+    {{- range $j, $item := ($instance.usersProperties).users }}
+    {{ .login }}={{ .password }}
+    {{- end }}
+
+  groups.properties: |-
+    admins={{ ($instance.catalogueProperties).internalBrokerAuthUser | default "catalogue" }}
+    tempDestinationAdmins={{ ($instance.catalogueProperties).internalBrokerAuthUser | default "catalogue" }}
+    users={{ ($instance.catalogueProperties).internalBrokerAuthUser | default "catalogue" }}{{- range $j, $item := ($instance.usersProperties).users }},{{- .login }}{{- end }}
+
+  {{ range $i, $item := $instance.configMap }}
+  {{ .subPath }}: |-
+  {{- .content | nindent 4 }}
+  {{ end }}
+---
+{{ end }}
