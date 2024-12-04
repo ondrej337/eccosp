@@ -8,5 +8,5 @@ dependencies:
 
 - name: ecp-endpoint
   version: 4.15.0
-  repository: https://ondrej337.github.io/my-charts/
+#  repository: https://ondrej337.github.io/my-charts/
   condition: ecp-endpoint.enabled
