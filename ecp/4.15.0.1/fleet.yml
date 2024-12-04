@@ -6,6 +6,14 @@ helm:
   version: ""
   force: false
   timeoutSeconds: 0
+  
+  dependencies:
+
+- name: ecp-endpoint
+  version: 4.15.0
+  repository: https://ondrej337.github.io/my-charts/
+  condition: ecp-endpoint.enabled
+  
 
   # Custom values that will be passed as values.yaml to the installation
 #  values:
