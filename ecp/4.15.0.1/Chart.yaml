@@ -6,7 +6,7 @@ version: 4.15.0
 
 #dependencies:
 
-#- name: ecp-endpoint
-#  version: 4.15.0
-#  repository: https://ondrej337.github.io/my-charts/
-#  condition: ecp-endpoint.enabled
+- name: ecp-endpoint
+  version: 4.15.0
+  repository: https://ondrej337.github.io/my-charts/
+  condition: ecp-endpoint.enabled
