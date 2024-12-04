@@ -6,5 +6,6 @@ helm:
   version: ""
   force: false
   timeoutSeconds: 0
+  disableDependencyUpdate: false
 
   
