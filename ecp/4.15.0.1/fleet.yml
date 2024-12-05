@@ -1,7 +1,7 @@
 namespace: eccosp 
 helm:   
   releaseName: ecp-endpoint   
-  chart: https://github.com/ondrej337/my-charts/raw/refs/heads/gh-pages/ecco-sp-4.15.0.tgz   
+  chart: https://ondrej337.github.io/my-charts/ecp-endpoint-4.15.0.tgz   
   version: 4.15.0 
   valuesFiles:     
     - values.yaml
