@@ -3,6 +3,6 @@ helm:
   releaseName: ecp-endpoint   
   chart: https://github.com/ondrej337/my-charts/raw/refs/heads/gh-pages/ecp-new-4.15.0/charts/ecp-endpoint-4.15.0.tgz
   version: 4.15.0 
-  valuesFiles:
-    - values.yaml
+#  valuesFiles:
+#    - values.yaml
 
