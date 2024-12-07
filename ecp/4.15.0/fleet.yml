@@ -1,5 +1,1 @@
 namespace: eccosp
-helm: 
-
-  valuesFiles:
-  - values-ecp.yaml
