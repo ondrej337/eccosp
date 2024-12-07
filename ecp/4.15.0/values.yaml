@@ -4,7 +4,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
   enabled: true # boolean flag which defines whether the component will be deployed or not
   
   instance: # array of ECP endpoint instances - one values file can hold multiple instances
-    - name: ep1 # name of kubernetes instance
+    - name: ep1-local # name of kubernetes instance
       image: # section for information about Docker image
         name: ondrej337/eccosp # URL to docker image.
         tag: ecp-endpoint-4.15.0.2128 # Docker image tag - version or 'latest'
