@@ -1,4 +1,5 @@
 namespace: eccosp
 helm:
-valuesFiles:
-  - ./values/values-ecp.yaml
+  chart: "."
+  valuesFiles:
+    - ./values/values-ecp.yaml
