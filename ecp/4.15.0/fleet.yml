@@ -1,5 +1,4 @@
 namespace: eccosp
 helm:
   valuesFiles:
-    - values-ecp.yaml
-  force: false
+    - ./values/values-ecp.yaml
