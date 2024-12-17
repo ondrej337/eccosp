@@ -25,7 +25,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
       readinessProbe: true # ECP pod will not started before readiness probe is fulfilled - check of availability of external DB
 
       service: # section for definition of services exposed within kubernetes environment
-#        type: NodePort # Type of the network service - NodePort/LoadBalancer/ClusterIP
+        type: NodePort # Type of the network service - NodePort/LoadBalancer/ClusterIP
         https: # protocol used for accessing GUI - can be http or https
           port: 8443 # port used for exposing HTTP(S) service
           nodePort: 30100  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
