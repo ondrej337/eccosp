@@ -9,7 +9,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
         name: ondrej337/eccosp # URL to docker image.
         tag: ecp-endpoint-4.15.0.2128 # Docker image tag - version or 'latest'
 #        pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
-      replicaCount: 1 # number of replicas - ECP cluster
+      replicaCount: 3 # number of replicas - ECP cluster
       resourcesK8s: # section for CPU and memory specification
         requests: # minimum guaranteed amount of a resource that is reserved for a container
           cpu: 500m # minimum CPU - one CPU = 1000m or 1
@@ -21,14 +21,14 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
       storageData: 1Gi # Storage for embedded database and certificates. If external DB is used, the value can be lower.
       storageLogs: 256Mi # storage for logs
       keepLogsAfterRestart: true # boolean flag - indicates if ECP logs are persisted after pod restart, default value false
-      livenessProbe: false # automatic restart if pod is not in health state, default value false
+      livenessProbe: true # automatic restart if pod is not in health state, default value false
       readinessProbe: true # ECP pod will not started before readiness probe is fulfilled - check of availability of external DB
 
       service: # section for definition of services exposed within kubernetes environment
 #        type: NodePort # Type of the network service - NodePort/LoadBalancer/ClusterIP
         https: # protocol used for accessing GUI - can be http or https
           port: 8443 # port used for exposing HTTP(S) service
-#          nodePort: 30443  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
+          nodePort: 30100  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
       ingress: # an object that allows access to Kubernetes services from outside the Kubernetes cluster.
         enabled: false # boolean flag for enable/disable ingress, default value false
 #        apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
@@ -44,7 +44,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
       # The naming convention for configuration files name and parameters is camelCase instead of 'dot case format'.
       # Mapping of Helm values to ECP configuration file is available in config map ./ecp-endpoint/templates/configMap.yaml
       ecpProperties: # stands for ecp.properties file
-        springProfilesActive: ecp-nonha #stands for parameter spring.profiles.active
+        springProfilesActive: ecp-ha #stands for parameter spring.profiles.active
         dataDirectory: /var/lib/ecp-endpoint # dataDirectory config parameter for storage of persistent data
         ecpKeystoreLocation: /var/lib/ecp-endpoint/keystore.jks # ecp.keystore.location
         ecpKeystorePassword: password # password for the keystore.jks # ecp.keystore.password
@@ -74,14 +74,14 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 #        springDatasourceDriverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
         # ------ postgres -------
-#        springProfilesActive: ecp-ha
-#        ecpDBUrl: jdbc:postgresql://1.2.3.4:5432/ep1
-#        ecpDBUsername: ep1
-#        ecpDBPassword: password
-#        ecpDBHostname: 1.2.3.4 # Required for readiness check
-#        ecpDBName: ep1 # Required for readiness check
-#        springDatasourceValidationQuery: select 1
-#        springDatasourceDriverClassName: org.postgresql.Driver
+        springProfilesActive: ecp-ha
+        ecpDBUrl: jdbc:postgresql://ecp-db-cluster-rw:5432/ep1
+        ecpDBUsername: ep1
+        ecpDBPassword: password
+        ecpDBHostname: ecp-db-cluster-rw # Required for readiness check
+        ecpDBName: ep1 # Required for readiness check
+        springDatasourceValidationQuery: select 1
+        springDatasourceDriverClassName: org.postgresql.Driver
 
         # ------ oracle -------
 #        springProfilesActive: ecp-ha
