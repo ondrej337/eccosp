@@ -30,21 +30,21 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
           port: 8443 # port used for exposing HTTP(S) service
           nodePort: 30100  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
       ingress: # an object that allows access to Kubernetes services from outside the Kubernetes cluster.
-        enabled: false # boolean flag for enable/disable ingress, default value false
-#        apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
-#        contextPath: / # context path for ingress, default value '/'
-#        host: ecp-endpoint.ep1.eccosp # URL on which the ECP Endpoint is exposed. Address needs to be aligned with hosting.
-#        tls: # section for TLS definition for HTTPS connection to ingress
-#          secretName: tls-secret  # secret where TLS certificate is stored
-#        annotations: # ingress annotations section
-#          kubernetes.io/ingress.class: nginx  # ingress controller definition
-#          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
-#          nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
+        enabled: true # boolean flag for enable/disable ingress, default value false
+        apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
+        contextPath: / # context path for ingress, default value '/'
+        host: ecp.koval.top # URL on which the ECP Endpoint is exposed. Address needs to be aligned with hosting.
+        tls: # section for TLS definition for HTTPS connection to ingress
+          secretName: tls-ecp  # secret where TLS certificate is stored
+        annotations: # ingress annotations section
+          kubernetes.io/ingress.class: nginx  # ingress controller definition
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
+          nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
 
       # The naming convention for configuration files name and parameters is camelCase instead of 'dot case format'.
       # Mapping of Helm values to ECP configuration file is available in config map ./ecp-endpoint/templates/configMap.yaml
       ecpProperties: # stands for ecp.properties file
-        springProfilesActive: ecp-ha #stands for parameter spring.profiles.active
+#        springProfilesActive: ecp-ha #stands for parameter spring.profiles.active
         dataDirectory: /var/lib/ecp-endpoint # dataDirectory config parameter for storage of persistent data
         ecpKeystoreLocation: /var/lib/ecp-endpoint/keystore.jks # ecp.keystore.location
         ecpKeystorePassword: password # password for the keystore.jks # ecp.keystore.password
