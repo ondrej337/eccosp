@@ -121,7 +121,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
         sendHandlerBeanName: amqpApiSendHandler # ecp.endpoint.sendHandler[0].beanName
         sendHandlertypeName: "*" # ecp.endpoint.sendHandler[0].typeName
 
-#        ecpNatEnabled: false # NAT is disabled by default - equals to  ecp.natEnabled
+        ecpNatEnabled: false # NAT is disabled by default - equals to  ecp.natEnabled
 #        ecpNatTable: # additional parameter for NAT array. Array values are divided by ' - '
 #          - network: internet # ecp.natTable[0].network
 #            sourceIp: 1.2.3.4 # ecp.natTable[0].sourceIp
@@ -134,7 +134,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 #            destinationIp: 2.2.2.2 # ecp.natTable[1].destinationIp
 #            destinationPort: 5671 # ecp.natTable[1].destinationPort
 
-#        ecpSecurityProxyEnabled: false # ecp.security.proxy.enabled
+        ecpSecurityProxyEnabled: false # ecp.security.proxy.enabled
 #        ecpSecurityProxyHost: socks-host # ecp.security.proxy.host
 #        ecpSecurityProxyProxyPort: 1081 # ecp.security.proxy.port
 #        ecpSecurityProxyNonProxyHosts: 127.0.0.1,0.0.0.0 # ecp.security.proxy.nonProxyHosts
@@ -142,7 +142,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 #        ecpSecurityProxyPassword: sockspassword # ecp.security.proxy.password
 
 #        jasyptEncryptorAlgorithm: PBEWithHMACSHA512AndAES_256 # jasypt.encryptor.algorithm
-#        prometheusMonitoringEnabled: false # management.endpoints.web.exposure.include=info,health,readiness,prometheus
+        prometheusMonitoringEnabled: true # management.endpoints.web.exposure.include=info,health,readiness,prometheus
 
 #        ecpMaxRequestSize: 2097152 # ecp.maxRequestSize
 
@@ -173,8 +173,8 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 
       envConf: # stands for env.conf file
         resourcesJvm: # memory allocation for ECP component
-          xms: 128M # lower bound of java heap memory size
-          xmx: 1G # upper bound of java heap memory size
+          xms: 2G # lower bound of java heap memory size
+          xmx: 4G # upper bound of java heap memory size
 #        ecpLogFullStackTrace: false # ecp.logFullStackTrace
 
       ecpUsersProperties: # stands for ecp-users.properties
