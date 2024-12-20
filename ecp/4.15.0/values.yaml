@@ -143,6 +143,8 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 
 #        jasyptEncryptorAlgorithm: PBEWithHMACSHA512AndAES_256 # jasypt.encryptor.algorithm
         prometheusMonitoringEnabled: true # management.endpoints.web.exposure.include=info,health,readiness,prometheus
+        ecpEndpointProjectName: MY # edx.toolbox.projectName
+        ecpEndpointEnvName: DEV # edx.toolbox.envName
 
 #        ecpMaxRequestSize: 2097152 # ecp.maxRequestSize
 
