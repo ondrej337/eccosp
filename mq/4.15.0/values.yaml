@@ -1,15 +1,15 @@
 # The commented parameters have default values but these defaults can be overridden when enabled
 
-# config for ecp-broker
-ecp-broker: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-broker
+# config for eccosp-artemis
+eccosp-artemis: # type of ECCoSP component. Can be ecp-endpoint, ecp-directory, ecp-broker, ecp-artemis
   enabled: true # boolean flag which defines whether the component will be deployed or not
-  instance: # array of ECP broker instances - one values file can hold multiple instances
-    - name: br # name of kubernetes instance
+  instance: # array of ECCoSP Artemis instances - one values file can hold multiple instances
+    - name: artemis-eptb1 # name of kubernetes instance
       image: # section for information about Docker image
-        name: entsoe/ecp-broker # URL to docker image.
-        tag: 4.15.0 # Docker image tag - version or 'latest'
+        name: ondrej337/eccosp # URL to docker image.
+        tag: eccosp-artemis-4.15.0.2128 # Docker image tag - version or 'latest'
 #        pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
-      replicaCount: 1 # number of replicas - ECP cluster
+      replicaCount: 3 # number of replicas - ECCoSP Artemis cluster
       resourcesK8s: # section for CPU and memory specification
         requests: # minimum guaranteed amount of a resource that is reserved for a container
           cpu: 500m # minimum CPU - one CPU = 1000m or 1
@@ -19,37 +19,39 @@ ecp-broker: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-bro
           cpu: 1000m # maximum CPU
           memory: 5Gi # maximum memory for container - 5Gi is equal to 5120 Mi
 
-      storageData: 1Gi # embedded database and certificates # storage for embedded database and certificates. If external DB is used, the value can be lower
+      storageData: 1Gi # certificates # storage certificates.
       storageLogs: 256Mi # logs # storage for logs
-      sharedStorageSize: 100Mi # if SharedStorage for brokers is used, this amount of storage will be requested
-      sharedStorageSizeJournal: 100Mi # if SharedStorage for brokers journal is used, this amount of storage will be requested
-      sharedStorageClass: nfs-client # if SharedStorage for brokers is used, this storage class will be used to allocate shared storage resources
-      sharedStorageClassJournal: nfs-client # if SharedStorage for brokers journal is used, this storage class will be used to allocate shared storage resources
-      #sharedStorageAccessMode: ReadWriteMany # sharedStorageAccessMode class
-      #storageLogsSize: 64Mi # size of logs storage
-      keepLogsAfterRestart: false # boolean flag - indicates if ECP logs are persisted after pod restart, default value false
-      livenessProbe: false # automatic restart if pod is not in health state, default value false
-      readinessProbe: true # ECP pod will not started before readiness probe is fulfilled - check of availability of external DB
-      useSharedStorageForConfiguration: false # if enabled, all replicas of this pod will use shared storage for configs and certificates
+      sharedStorageSize: 100Mi # if SharedStorage for artemis is used, this amount of storage will be requested
+      sharedStorageSizeJournal: 100Mi # if SharedStorage for artemis journal is used, this amount of storage will be requested
+      sharedStorageClass: longhorn # if SharedStorage for artemis is used, this storage class will be used to allocate shared storage resources
+      sharedStorageClassJournal: longhorn # if SharedStorage for artemis journal is used, this storage class will be used to allocate shared storage resources
+      sharedStorageAccessMode: ReadWriteMany # sharedStorageAccessMode class
+      storageLogsSize: 1Gi # size of logs storage
+      keepLogsAfterRestart: true # boolean flag - indicates if Artemis logs are persisted after pod restart, default value false
+      livenessProbe: true # automatic restart if pod is not in health state, default value false
+      readinessProbe: true # Artemis pod will not started before readiness probe is fulfilled
+      useSharedStorageForConfiguration: true # if enabled, all replicas of this pod will use shared storage for configs and certificates
       useSharedStorageForJournal: true # if enabled, all replicas of this pod will use shared storage for journal
       prometheusEnabled: true #boolean flag - indicates if Prometheus metrics is enabled
 
+      artemisKeystoreLocation: /opt/eccosp-artemis/etc/keystore.jks
+      artemisKeystorePassword: password
+
       service: # section for definition of services exposed within kubernetes environment
-#        type: # Type of the network service - NodePort/LoadBalancer/ClusterIP
+        type: NodePort # Type of the network service - NodePort/LoadBalancer/ClusterIP
 #        http: # protocol used for accessing GUI - can be http or https
 #          port: 8162 # port used for exposing HTTP(S) service
-#          nodePort: 30162  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
         https: # protocol used for accessing GUI - can be http or https
           port: 8161 # port used for exposing HTTP(S) service
-#          nodePort: 30161  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
-        amqps: # protocol used for connection on AMQP interface of ECP Broker - can be AMQP or AMQPS
-          port: 5671 # port used for exposing AMQP(S) service
-#          nodePort: 30671  # port used for exposing AMQP(S) service as for external access. Range - 30000-32767
+          nodePort: 30102  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
+        amqps: # protocol used for connection on AMQP interface of Artemis - can be AMQP or AMQPS
+          port: 5672 # port used for exposing AMQP(S) service
+#          nodePort: 30672  # port used for exposing AMQP(S) service as for external access. Range - 30000-32767
       ingress: # an object that allows access to Kubernetes services from outside the Kubernetes cluster.
         enabled: false # boolean flag for enable/disable ingress, default value false
 #        apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
 #        contextPath: / # context path for ingress, default value '/'
-#        host: ecp-broker.br.eccosp # URL on which the ECP Broker is exposed. Address needs to be aligned with hosting.
+#        host: eccosp-artemis.eptb1.eccosp # URL on which the ECCoSP Artemis is exposed. Address needs to be aligned with hosting.
 #        tls: # section for TLS definition for HTTPS connection to ingress
 #          secretName: tls-secret  # secret where TLS certificate is stored
 #        annotations: # ingress annotations section
@@ -58,83 +60,17 @@ ecp-broker: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-bro
 #          nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
 
       # The naming convention for configuration files name and parameters is camelCase instead of 'dot case format'.
-      # Mapping of Helm values to ECP Broker configuration file is available in config map ./ecp-broker/templates/configMap.yaml
-      brokerProperties: # stands for broker.properties file
-        ecpBrokerContactPerson: Johnny Doe # ecp.broker.contactPerson
-        ecpBrokerContactEmail: johnny@email.com # ecp.broker.contactEmail
-        ecpBrokerContactPhone: "001111111111111" # ecp.broker.contactPhone
-        ecpBrokerOrganization: Doe Company # ecp.broker.organization
-        ecpBrokerUrls: amqps://eccosp-ecp-broker-br-svc:5671 # ecp.broker.urls
-        ecpBrokerNetworks: DefaultNetwork # ecp.broker.networks
-        # fill in value from broker.properties after registration is done
-        ecpBrokerregistrationDirectoryId: # ecp.broker.registrationDirectoryId
-        ecpBrokerCode: ecp-broker # ecp.broker.code
-
-        ecpBrokerFilterComponents: '*' # ecp.broker.filter.components
-        ecpBrokerFilterTypes: '*' # ecp.broker.filter.types
-
-        ecpKeystoreLocation: /opt/ecp-broker/config/keystore.jks # ecp.keystore.location
-        ecpKeystorePassword: password # ecp.keystore.password
-
-        ecpAuthKeystoreLocation: /opt/ecp-broker/config/authKeystore.jks # ecp.authKeystore.location
-        ecpAuthKeystorePassword: password # ecp.authKeystore.password
-
-        ecpDirectoryClientSynchronizationHomeComponentDirectoryPrimaryCode: ecp-directory # ecp.directory.client.synchronization.homeComponentDirectoryPrimaryCode
-        ecpDirectoryClientSynchronizationHomeComponentDirectoryPrimaryUrl: https://eccosp-ecp-directory-cd-svc:8443/ECP_MODULE # ecp.directory.client.synchronization.homeComponentDirectoryPrimaryUrl
-
-#        ecpNatEnabled: false # NAT is disabled by default - equals to  ecp.natEnabled
-#        ecpNatTable: # additional parameter for NAT array. Array values are divided by ' - '
-#          - network: internet # ecp.natTable[0].network
-#            sourceIp: 1.2.3.4 # ecp.natTable[0].sourceIp
-#            sourcePort: 8443 # ecp.natTable[0].sourcePort
-#            destinationIp: 5.6.7.8 # ecp.natTable[0].destinationIp
-#            destinationPort: 8443 # ecp.natTable[0].destinationPort
-#          - network: ATOM # ecp.natTable[1].network
-#            sourceIp: 1.1.1.1 # ecp.natTable[1].sourceIp
-#            sourcePort: 5671 # ecp.natTable[1].sourcePort
-#            destinationIp: 2.2.2.2 # ecp.natTable[1].destinationIp
-#            destinationPort: 5671 # ecp.natTable[1].destinationPort
-
-#        ecpSecurityProxyEnabled: false # ecp.security.proxy.enabled
-#        ecpSecurityProxyHost: socks-host # ecp.security.proxy.host
-#        ecpSecurityProxyProxyPort: 1081 # ecp.security.proxy.port
-#        ecpSecurityProxyNonProxyHosts: 127.0.0.1,0.0.0.0 # ecp.security.proxy.nonProxyHosts
-#        ecpSecurityProxyUsername: sockssuser # ecp.security.proxy.username
-#        ecpSecurityProxyPassword: sockspassword # ecp.security.proxy.password
-#        ecpDirectoryClientSynchronizationDirectorySynchronizationInterval: "0 */6 * * * *" ecp.directory.client.synchronization.directorySynchronizationInterval
-
-
-      env:  # stands for env file
-#        heapDumpPath: # path to java heap dump file
-        resourcesJvm: # memory allocation for ECP component
-          xms: 128M # lower bound of java heap memory size
-          xmx: 4G # upper bound of java heap memory size
-
-      artemisUsers: # artemis-users.properties
-        - login: admin # userneme for ActiveMQ console
-          password: password # password for ActiveMQ console
-      # The naming convention for configuration files name and parameters is camelCase instead of 'dot case format'.
       # Mapping of Helm values to ECCoSP Artemis configuration file is available in config map ./eccosp-artemis/templates/configMap.yaml
       brokerXml: # stands for broker.xml file
-#        default: # parent for default Artemis configuration
-
-#          componentType: # ECCoSP component type ie. ECP Broker for Audit logging
-#          ecpBrokerPropertiesLocation: # ecpBrokerPropertiesLocation
-#          beanConfigLocation: # beanConfigLocation
-#          passwordCodec: # passwordCodec
-#          clusterPassword: # clusterPassword
-#          clusterUser: # clusterUser
-#          ecpCacheReloadInterval: # ecpCacheReloadInterval
-#          ecpCacheDisabled: # ecpCacheDisabled
-#          dlq: DLQ
+        default: # parent for default Artemis configuration
+          ecpComponentCode: artemis-eptb1 # Artemis identification code in ECP network (EIC) for Audit logging
+#          componentType: # Artemis component type ie. ECCo SP Artemis Internal Broker for Audit logging
 #          artemisName: # Artemis name, value is shown in GUI
 #          diskScanPeriod: # disk-scan-period
 #          diskMaxUsage: # max-disk-usage
 #          pageSyncTimeout: # page-sync-timeout
 #          globalMaxSize: # global-max-size
 #          globalMaxMessages: # global-max-messages
-#          configurationFileRefreshPeriod: # configuration-file-refresh-period
-
 
 #        journal: # parent for Artemis journal configuration
 #          persistenceEnabled: # persistence-enabled
@@ -161,9 +97,9 @@ ecp-broker: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-bro
 #        acceptor: # configuration of Artemis AMQP acceptor
 #          ip: # IP where Artemis is listening on
 #          port: # port where Artemis is listening on
-#          protocols:
-#          enabledProtocols:
-#          enabledCipherSuites:
+#          protocols: # protocols
+#          enabledProtocols: # enabledProtocols
+#          enabledCipherSuites: # enabledCipherSuites
 #          properties: # parent for acceptor attributes/values configuration
 #            - parameterName: # name of acceptor attribute
 #              value: # value of acceptor attribute
@@ -187,11 +123,11 @@ ecp-broker: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-bro
 #          acceptor: # parent for Artemis HA configuration acceptor
 #            ip: 0.0.0.0 # IP where Artemis HA acceptor is listening on
 #            port: 61616 # port where Artemis HA acceptor is listening on
-#            tcpSendBufferSize:
-#            tcpReceiveBufferSize:
-#            protocols:
-#            enabledProtocols:
-#            enabledCipherSuites:
+#            tcpSendBufferSize: # tcpSendBufferSize
+#            tcpReceiveBufferSize: # tcpReceiveBufferSize
+#            protocols: # protocols
+#            enabledProtocols: # enabledProtocols
+#            enabledCipherSuites: # enabledCipherSuites
 #            properties: # parent for acceptor attributes/values configuration
 #              - parameterName: # name of acceptor attribute
 #                value: # value of acceptor attribute
@@ -203,13 +139,19 @@ ecp-broker: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-bro
           xms: 128M # lower bound of java heap memory size
           xmx: 4G # upper bound of java heap memory size
 
+      artemisUsers: # artemis-users.properties
+        - login: endpoint # username for Artemis console
+          password: password # password for Artemis console
+        - login: toolbox # username for Artemis console
+          password: password # password for Artemis console
+
 #      volumeMounts:  # volume mounts - can be used for mapping config files or storages
 #        - name: config  # name of volume mounts for config
 #          subPath: login.config  # name of configuration file
-#          mountPath: /opt/ecp-broker/broker/etc/login.config # path where config file will be mounted
+#          mountPath: /opt/eccosp-artemis/etc/login.config # path where config file will be mounted
 
 #      configMap: # config maps array
-#        - subPath: ecp-config.xml # name of config file/volume mount
+#        - subPath: login.config # name of config file/volume mount
 #          content: |- # content is shifted by two spaces
 #            /*
 #              * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -250,6 +192,6 @@ ecp-broker: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-bro
 # global config
 global: # global config
   storage: # storage section
-    class: standard # storage class – needs to be provided by Kubernetes cluster administrator
+    class: longhorn # storage class – needs to be provided by Kubernetes cluster administrator
   imagePullSecrets: # secrets which hold information about login to docker repository
     - name: regcred # name of secret – name is defined by Kubernetes cluster administrator

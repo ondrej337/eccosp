@@ -6,10 +6,10 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
   instance: # array of EDX toolbox instances - one values file can hold multiple instances
     - name: tb1 # name of kubernetes instance
       image: # section for information about Docker image
-        name: entsoe/edx-toolbox # URL to docker image.
-        tag: 1.15.0 # Docker image tag - version or 'latest'
+        name: ondrej337/eccosp # URL to docker image.
+        tag: edx-toolbox-1.15.0.1597 # Docker image tag - version or 'latest'
 #        pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
-      replicaCount: 1 # number of replicas - EDX cluster
+      replicaCount: 3 # number of replicas - EDX cluster
       resourcesK8s: # section for CPU and memory specification
         requests: # minimum guaranteed amount of a resource that is reserved for a container
           cpu: 500m # minimum CPU - one CPU = 1000m or 1
@@ -21,27 +21,27 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
       storageData: # Storage for embedded database and certificates. If external DB is used, the value can be lower.
       storageLogs: 256Mi # logs # storage for logs
       sharedStorageSize: 5Gi # Storage size shared between toolbox replicas of this instance. Storage for DMS and pull, located at /opt/shared-storage.
-      sharedStorageClass: nfs-client # Storage class to allocate shared storage resources. ReadWriteMany access mode is required.
+      sharedStorageClass: longhorn # Storage class to allocate shared storage resources. ReadWriteMany access mode is required.
       keepLogsAfterRestart: true # boolean flag - indicates if EDX logs are persisted after pod restart, default value false
-      livenessProbe: false # automatic restart if pod is not in health state, default value false
+      livenessProbe: true # automatic restart if pod is not in health state, default value false
       readinessProbe: true # EDX pod will not started before readiness probe is fulfilled - check of availability of external DB
       #sharedStorageAccessMode: ReadWriteMany # sharedStorageAccessMode class
       service: # section for definition of services exposed within kubernetes environment
-#        type: NodePort # Type of the network service - NodePort/LoadBalancer/ClusterIP
+        type: NodePort # Type of the network service - NodePort/LoadBalancer/ClusterIP
         https: # protocol used for accessing GUI - can be http or https
           port: 8443 # port used for exposing HTTP(S) service
-#          nodePort: 30443  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
+          nodePort: 30101  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
       ingress: # an object that allows access to Kubernetes services from outside the Kubernetes cluster.
-        enabled: false # boolean flag for enable/disable ingress, default value false
-#        apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
-#        contextPath: / # context path for ingress, default value '/'
-#        host: edx-toolbox.tb1.eccosp # URL on which the ECP Endpoint is exposed. Address needs to be aligned with hosting.
-#        tls: # section for TLS definition for HTTPS connection to ingress
-#          secretName: tls-secret  # secret where TLS certificate is stored
-#        annotations: # ingress annotations section
-#          kubernetes.io/ingress.class: nginx # ingress controller definition
-#          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
-#          nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
+        enabled: true # boolean flag for enable/disable ingress, default value false
+        apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
+        contextPath: / # context path for ingress, default value '/'
+        host: edx.koval.top # URL on which the ECP Endpoint is exposed. Address needs to be aligned with hosting.
+        tls: # section for TLS definition for HTTPS connection to ingress
+          secretName: tls-edx  # secret where TLS certificate is stored
+        annotations: # ingress annotations section
+          kubernetes.io/ingress.class: nginx # ingress controller definition
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
+          nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
 
       edxProperties: # stands for edx.properties file
         edxToolboxCode: ecp-endpoint-1 # edx.toolbox.code
@@ -102,7 +102,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
 #        edxToolboxPullDmsStorageMaxDirectories: 10000 # edx.toolbox.pull.dms.storage.maxDirectories
 #        edxToolboxPullDmsStorageCacheValidityDuration: 30 # edx.toolbox.pull.dms.storage.cacheValidityDuration
 
-        springProfilesActive: edx-nonha # spring.profiles.active
+#        springProfilesActive: edx-nonha # spring.profiles.active
 
         # Uncomment desired DB configuration section if external DB is used. Change value of parameters as needed.
 
@@ -131,16 +131,16 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
 #        springDatasourceDriverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
         # ------ postgres -------
-#        springProfilesActive: edx-ha
-#        edxDBUrl: jdbc:postgresql://1.2.3.4:5432/tb1
-#        edxDBUsername: tb1
-#        edxDBPassword: password
-#        edxDBHostname: 1.2.3.4
-#        edxDBName: tb1
+        springProfilesActive: edx-ha
+        edxDBUrl: jdbc:postgresql://edx-db-cluster-pooler-rw:5432/tb1
+        edxDBUsername: tb1
+        edxDBPassword: password
+        edxDBHostname: edx-db-cluster-pooler-rw
+        edxDBName: tb1
 
-#        springDatasourceValidationQuery: select 1
-#        springDatasourceTestOnBorrow: false
-#        springDatasourceDriverClassName: org.postgresql.Driver
+        springDatasourceValidationQuery: select 1
+        springDatasourceTestOnBorrow: false
+        springDatasourceDriverClassName: org.postgresql.Driver
 
         # ------ oracle -------
 #        springProfilesActive: edx-ha
@@ -205,12 +205,12 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
 
 #        jasyptEncryptorAlgorithm: PBEWithHMACSHA512AndAES_256 # jasypt.encryptor.algorithm
 
-        prometheusMonitoringEnabled: false # management.endpoints.web.exposure.include=info,health,readiness,prometheus
+        prometheusMonitoringEnabled: true # management.endpoints.web.exposure.include=info,health,readiness,prometheus
 
 #        internalBrokerEnabled: true # internalBroker.enabled
 
-        edxToolboxProjectName: k8s # edx.toolbox.projectName
-        edxToolboxEnvName: eccosp # edx.toolbox.envName
+        edxToolboxProjectName: DEV # edx.toolbox.projectName
+        edxToolboxEnvName: ECCOSP # edx.toolbox.envName
 
         transportTrustStoreLocation: /var/lib/edx-toolbox/keystore.jks # transport.trustStoreLocation
         transportTrustStorePassword: password # transport.trustStorePassword
@@ -386,8 +386,8 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
 
       envConf: # env.conf file
         resourcesJvm: # configuration of Java Virtual Machine (JVM) resources
-          xms: 128M # initial memory allocation pool for JVM
-          xmx: 512M # maximum memory allocation pool for JVM
+          xms: 2G # initial memory allocation pool for JVM
+          xmx: 4G # maximum memory allocation pool for JVM
         #edxToolboxTomcatPortShutdown: 8005 # edx.toolbox.tomcat.port.shutdown
         #edxToolboxTomcatPortHttp: 8080 # edx.toolbox.tomcat.port.http
         #edxToolboxTomcatPortAjp: 8009 # edx.toolbox.tomcat.port.ajp
@@ -488,6 +488,6 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
 # global config
 global: # storage section
   storage:
-    class: standard # storage class – needs to be provided by Kubernetes cluster administrator
+    class: longhorn # storage class – needs to be provided by Kubernetes cluster administrator
   imagePullSecrets: # secrets which hold information about login to docker repository
     - name: regcred # name of secret – name is defined by Kubernees cluster administrator

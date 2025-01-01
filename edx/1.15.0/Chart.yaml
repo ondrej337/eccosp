@@ -3,3 +3,9 @@ appVersion: "1.0"
 description: ecco-sp Helm chart for Kubernetes
 name: ecco-sp
 version: 4.15.0
+
+dependencies:
+- name: edx-toolbox
+  version: 1.15.0
+  repository: https://ondrej337.github.io/my-charts/
+  condition: edx-toolbox.enabled
