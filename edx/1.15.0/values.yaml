@@ -17,7 +17,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
           memory: 512Mi # minimum memory for container
         limits: # maximum amount of a resource to be used by a container. Should be always higher than application can allocate (xmx)
           cpu: 1000m # maximum CPU - two CPUs = 2000m or 2
-          memory: 1Gi # maximum memory for container - 1Gi is equal to 1024 Mi
+          memory: 3Gi # maximum memory for container - 1Gi is equal to 1024 Mi
       storageData: # Storage for embedded database and certificates. If external DB is used, the value can be lower.
       storageLogs: 256Mi # logs # storage for logs
       sharedStorageSize: 5Gi # Storage size shared between toolbox replicas of this instance. Storage for DMS and pull, located at /opt/shared-storage.
@@ -25,7 +25,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
       keepLogsAfterRestart: true # boolean flag - indicates if EDX logs are persisted after pod restart, default value false
       livenessProbe: true # automatic restart if pod is not in health state, default value false
       readinessProbe: true # EDX pod will not started before readiness probe is fulfilled - check of availability of external DB
-      #sharedStorageAccessMode: ReadWriteMany # sharedStorageAccessMode class
+      sharedStorageAccessMode: ReadWriteMany # sharedStorageAccessMode class
       service: # section for definition of services exposed within kubernetes environment
         type: NodePort # Type of the network service - NodePort/LoadBalancer/ClusterIP
         https: # protocol used for accessing GUI - can be http or https
