@@ -1,8 +1,0 @@
-namespace: eccosp 
-helm:   
-  releaseName: ecp-endpoint   
-  chart: https://ondrej337.github.io/my-charts/my-ecp-4.15.0.tgz
-  version: 4.15.0 
-#  valuesFiles:
-#    - values.yaml
-
