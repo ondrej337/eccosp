@@ -101,14 +101,14 @@ ecp-directory: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-
 #         springDatasourceDriverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
         # ------ postgres -------
-         springProfilesActive: ecp-ha
-         ecpDBUrl: jdbc:postgresql://ecp-directory-db-cluster-pooler-rw:5432/cd
-         ecpDBUsername: cd
-         ecpDBPassword: password
-         ecpDBHostname: ecp-directory-db-cluster-pooler-rw
-         ecpDBName: cd
-         springDatasourceValidationQuery: select 1
-         springDatasourceDriverClassName: org.postgresql.Driver
+        springProfilesActive: ecp-ha
+        ecpDBUrl: jdbc:postgresql://ecp-directory-db-cluster-pooler-rw:5432/cd
+        ecpDBUsername: cd
+        ecpDBPassword: password
+        ecpDBHostname: ecp-directory-db-cluster-pooler-rw
+        ecpDBName: cd
+        springDatasourceValidationQuery: select 1
+        springDatasourceDriverClassName: org.postgresql.Driver
 
         # ------ oracle -------
 #         springProfilesActive: ecp-ha
