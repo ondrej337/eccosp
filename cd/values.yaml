@@ -102,10 +102,10 @@ ecp-directory: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-
 
         # ------ postgres -------
         springProfilesActive: ecp-ha
-        ecpDBUrl: jdbc:postgresql://ecp-directory-db-cluster-pooler-rw:5432/cd
+        ecpDBUrl: jdbc:postgresql://cd-db-cluster-pooler-rw:5432/cd
         ecpDBUsername: cd
         ecpDBPassword: password
-        ecpDBHostname: ecp-directory-db-cluster-pooler-rw
+        ecpDBHostname: cd-db-cluster-pooler-rw
         ecpDBName: cd
         springDatasourceValidationQuery: select 1
         springDatasourceDriverClassName: org.postgresql.Driver
