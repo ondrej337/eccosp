@@ -7,7 +7,7 @@ ecp-directory: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-
     - name: cd # name of kubernetes instance
       image: # section for information about Docker image
         name: ondrej337/eccosp # URL to docker image.
-        tag: ecp-directory-4.15.0.2128 # Docker image tag - version or 'latest'
+        tag: ecp-endpoint-4.15.0.2128 # Docker image tag - version or 'latest'
 #        pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
       replicaCount: 3 # number of replicas - ECP cluster
       sessionReplication: true # Specifies if the session replication should be activated between ECP CD instances (login purposes)
