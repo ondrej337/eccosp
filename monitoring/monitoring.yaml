@@ -9,10 +9,22 @@ stringData:
     - job_name: 'eccosp-ecp'
       metrics_path: '/ECP_MODULE/actuator/prometheus'
       scheme: https
+      scrape_interval: 5s
       basic_auth:
-        username: '<%= lookup("secret", {"name":"basic-auth-secret", "key":"username"}) %>'
-        password: '<%= lookup("secret", {"name":"basic-auth-secret", "key":"password"}) %>'
+        username: '<%= lookup("secret", {"name":"ecp-secret", "key":"username"}) %>'
+        password: '<%= lookup("secret", {"name":"ecp-secret", "key":"password"}) %>'
       tls_config:
         insecure_skip_verify: true
       static_configs:
         - targets: ['eccosp-ecp-endpoint-ep1-local-svc.eccosp:8443']
+    - job_name: 'eccosp-edx'
+      metrics_path: '/actuator/prometheus'
+      scheme: https
+      scrape_interval: 5s
+      basic_auth:
+        username: '<%= lookup("secret", {"name":"ecp-secret", "key":"username"}) %>'
+        password: '<%= lookup("secret", {"name":"ecp-secret", "key":"password"}) %>'
+      tls_config:
+        insecure_skip_verify: true
+      static_configs:
+        - targets: ['eccosp-edx-toolbox-tb1-svc.eccosp:8443']
