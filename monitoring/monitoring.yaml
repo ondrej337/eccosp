@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: monitoring-secret
+  namespace: cattle-monitoring-system
+type: Opaque
+stringData:
+  monitoring.yaml: |
+    - job_name: 'eccosp-ecp'
+      metrics_path: '/ECP_MODULE/actuator/prometheus'
+      scheme: https
+      basic_auth:
+        username: '<%= lookup("secret", {"name":"basic-auth-secret", "key":"username"}) %>'
+        password: '<%= lookup("secret", {"name":"basic-auth-secret", "key":"password"}) %>'
+      tls_config:
+        insecure_skip_verify: true
+      static_configs:
+        - targets: ['eccosp-ecp-endpoint-ep1-local-svc.eccosp:8443']
