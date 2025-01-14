@@ -11,8 +11,8 @@ stringData:
       scheme: https
       scrape_interval: 5s
       basic_auth:
-        username: '<%= lookup("secret", {"name":"ecp-secret", "key":"username"}) %>'
-        password: '<%= lookup("secret", {"name":"ecp-secret", "key":"password"}) %>'
+        username: 'admin'
+        password: 'password'
       tls_config:
         insecure_skip_verify: true
       static_configs:
@@ -22,8 +22,8 @@ stringData:
       scheme: https
       scrape_interval: 5s
       basic_auth:
-        username: '<%= lookup("secret", {"name":"ecp-secret", "key":"username"}) %>'
-        password: '<%= lookup("secret", {"name":"ecp-secret", "key":"password"}) %>'
+        username: 'admin'
+        password: 'password'
       tls_config:
         insecure_skip_verify: true
       static_configs:

@@ -1,0 +1,695 @@
+# HELP application_ready_time_seconds Time taken for the application to be ready to service requests
+# TYPE application_ready_time_seconds gauge
+application_ready_time_seconds{main_application_class="eu.entsoe.ecp.endpoint.starter.EndpointLauncher"} 30.898
+application_ready_time_seconds{main_application_class="org.apache.catalina.startup.Bootstrap"} 62.82
+# HELP application_started_time_seconds Time taken to start the application
+# TYPE application_started_time_seconds gauge
+application_started_time_seconds{main_application_class="eu.entsoe.ecp.endpoint.starter.EndpointLauncher"} 30.741
+application_started_time_seconds{main_application_class="org.apache.catalina.startup.Bootstrap"} 62.805
+# HELP disk_free_bytes Usable space for path
+# TYPE disk_free_bytes gauge
+disk_free_bytes{path="/."} 1.7448869888E10
+# HELP disk_total_bytes Total space for path
+# TYPE disk_total_bytes gauge
+disk_total_bytes{path="/."} 5.2666433536E10
+# HELP ecp_endpoint_build_version Build version of the ECP EP
+# TYPE ecp_endpoint_build_version gauge
+ecp_endpoint_build_version 2128.0
+# HELP ecp_endpoint_certificate_closest_expiration Number of days until the next certificate expiration.
+# TYPE ecp_endpoint_certificate_closest_expiration gauge
+ecp_endpoint_certificate_closest_expiration 0.0
+# HELP ecp_endpoint_certificate_expire_soon Information if there is any endpoint which has certificate that expires in certain days or less
+# TYPE ecp_endpoint_certificate_expire_soon gauge
+ecp_endpoint_certificate_expire_soon 0.0
+# HELP ecp_endpoint_certificates_status Information if the certificate set is valid and complete.
+# TYPE ecp_endpoint_certificates_status gauge
+ecp_endpoint_certificates_status 0.0
+# HELP ecp_endpoint_connected_broken_brokers Number of brokers that have connectivity issues.
+# TYPE ecp_endpoint_connected_broken_brokers gauge
+ecp_endpoint_connected_broken_brokers 0.0
+# HELP ecp_endpoint_connected_brokers Number of brokers that the Endpoint is connected to.
+# TYPE ecp_endpoint_connected_brokers gauge
+ecp_endpoint_connected_brokers 0.0
+# HELP ecp_endpoint_is_valid_message_path Information if all message paths are valid.
+# TYPE ecp_endpoint_is_valid_message_path gauge
+ecp_endpoint_is_valid_message_path 1.0
+# HELP ecp_endpoint_is_without_valid_path Information if there is a component which has 1 or more invalid paths and 0 valid paths
+# TYPE ecp_endpoint_is_without_valid_path gauge
+ecp_endpoint_is_without_valid_path 0.0
+# HELP ecp_endpoint_job_end Information when last run of background job ended
+# TYPE ecp_endpoint_job_end gauge
+ecp_endpoint_job_end{job="Certificate Renewal"} 1.736848200048E12
+ecp_endpoint_job_end{job="Cluster Status Manager"} 1.736863282065E12
+ecp_endpoint_job_end{job="Configuration Reload"} 1.736863280283E12
+ecp_endpoint_job_end{job="Database Compression"} 1.736847015095E12
+ecp_endpoint_job_end{job="Database Message Compression"} 0.0
+ecp_endpoint_job_end{job="Directory Cache Reload"} 1.736863281935E12
+ecp_endpoint_job_end{job="Expired Certificates Cleaning"} 1.736845800071E12
+ecp_endpoint_job_end{job="Message Deleting"} 1.736861192128E12
+ecp_endpoint_job_end{job="Message Expiration"} 1.736861251983E12
+ecp_endpoint_job_end{job="Message Path Synchronization"} 1.736863200007E12
+ecp_endpoint_job_end{job="Registration Status Checker"} 1.736863260063E12
+ecp_endpoint_job_end{job="Routes Management"} 1.736863260026E12
+ecp_endpoint_job_end{job="Statistics Synchronization"} 1.736863200009E12
+ecp_endpoint_job_end{job="Synchronization"} 1.736863200046E12
+# HELP ecp_endpoint_job_start Information when last run of background job started
+# TYPE ecp_endpoint_job_start gauge
+ecp_endpoint_job_start{job="Certificate Renewal"} 1.7368482E12
+ecp_endpoint_job_start{job="Cluster Status Manager"} 1.736863282025E12
+ecp_endpoint_job_start{job="Configuration Reload"} 1.73686328E12
+ecp_endpoint_job_start{job="Database Compression"} 1.736847015005E12
+ecp_endpoint_job_start{job="Database Message Compression"} 0.0
+ecp_endpoint_job_start{job="Directory Cache Reload"} 1.736863281853E12
+ecp_endpoint_job_start{job="Expired Certificates Cleaning"} 1.73684580001E12
+ecp_endpoint_job_start{job="Message Deleting"} 1.736861192E12
+ecp_endpoint_job_start{job="Message Expiration"} 1.736861251875E12
+ecp_endpoint_job_start{job="Message Path Synchronization"} 1.736863200003E12
+ecp_endpoint_job_start{job="Registration Status Checker"} 1.73686326E12
+ecp_endpoint_job_start{job="Routes Management"} 1.736863260005E12
+ecp_endpoint_job_start{job="Statistics Synchronization"} 1.736863200003E12
+ecp_endpoint_job_start{job="Synchronization"} 1.736863200044E12
+# HELP ecp_endpoint_job_success Information if last run of background job was successful
+# TYPE ecp_endpoint_job_success gauge
+ecp_endpoint_job_success{job="Certificate Renewal"} 1.0
+ecp_endpoint_job_success{job="Cluster Status Manager"} 1.0
+ecp_endpoint_job_success{job="Configuration Reload"} 1.0
+ecp_endpoint_job_success{job="Database Compression"} 1.0
+ecp_endpoint_job_success{job="Database Message Compression"} 0.0
+ecp_endpoint_job_success{job="Directory Cache Reload"} 1.0
+ecp_endpoint_job_success{job="Expired Certificates Cleaning"} 1.0
+ecp_endpoint_job_success{job="Message Deleting"} 1.0
+ecp_endpoint_job_success{job="Message Expiration"} 1.0
+ecp_endpoint_job_success{job="Message Path Synchronization"} 1.0
+ecp_endpoint_job_success{job="Registration Status Checker"} 1.0
+ecp_endpoint_job_success{job="Routes Management"} 1.0
+ecp_endpoint_job_success{job="Statistics Synchronization"} 1.0
+ecp_endpoint_job_success{job="Synchronization"} 1.0
+# HELP ecp_endpoint_live_messages_in_store Number of messages in the Message Store that are not in the final state.
+# TYPE ecp_endpoint_live_messages_in_store gauge
+ecp_endpoint_live_messages_in_store 0.0
+# HELP ecp_endpoint_major_version Major version of the ECP EP
+# TYPE ecp_endpoint_major_version gauge
+ecp_endpoint_major_version 15.0
+# HELP ecp_endpoint_messages_in_store Number of messages in the message store.
+# TYPE ecp_endpoint_messages_in_store gauge
+ecp_endpoint_messages_in_store 0.0
+# HELP ecp_endpoint_messages_to_be_archived Number of messages in the Message Store that are in the final state and waiting to be archived.
+# TYPE ecp_endpoint_messages_to_be_archived gauge
+ecp_endpoint_messages_to_be_archived 0.0
+# HELP ecp_endpoint_minor_version Minor version of the ECP EP
+# TYPE ecp_endpoint_minor_version gauge
+ecp_endpoint_minor_version 0.0
+# HELP ecp_endpoint_number_of_invalid_message_paths Number of invalid message paths.
+# TYPE ecp_endpoint_number_of_invalid_message_paths gauge
+ecp_endpoint_number_of_invalid_message_paths 0.0
+# HELP ecp_endpoint_received_messages Number of messages received through this Endpoint by BAs since it was installed.
+# TYPE ecp_endpoint_received_messages gauge
+ecp_endpoint_received_messages 0.0
+# HELP ecp_endpoint_reloading Information if the Endpoint is reloading
+# TYPE ecp_endpoint_reloading gauge
+ecp_endpoint_reloading 0.0
+# HELP ecp_endpoint_sent_messages Number of messages sent through this Endpoint by BAs since it was installed.
+# TYPE ecp_endpoint_sent_messages gauge
+ecp_endpoint_sent_messages 0.0
+# HELP ecp_endpoint_synchronization_status Status of the synchronization with a Component Directory.
+# TYPE ecp_endpoint_synchronization_status gauge
+ecp_endpoint_synchronization_status 0.0
+# HELP ecp_endpoint_version Version of the ECP EP.
+# TYPE ecp_endpoint_version gauge
+ecp_endpoint_version 4.0
+# HELP ecp_endpoint_version_check Information if there is a newer version installed on the home Component Directory.
+# TYPE ecp_endpoint_version_check gauge
+ecp_endpoint_version_check 0.0
+# HELP ecp_endpoint_waiting_to_deliver_messages Number of messages waiting to be delivered to the receiver Endpoint.
+# TYPE ecp_endpoint_waiting_to_deliver_messages gauge
+ecp_endpoint_waiting_to_deliver_messages 0.0
+# HELP ecp_endpoint_waiting_to_receive_messages Number of messages waiting on the Endpoint to be received by a BA.
+# TYPE ecp_endpoint_waiting_to_receive_messages gauge
+ecp_endpoint_waiting_to_receive_messages 0.0
+# HELP executor_active_threads The approximate number of threads that are actively executing tasks
+# TYPE executor_active_threads gauge
+executor_active_threads{name="applicationTaskExecutor"} 0.0
+executor_active_threads{name="camelRouteManagement"} 0.0
+executor_active_threads{name="taskScheduler"} 0.0
+# HELP executor_completed_tasks_total The approximate total number of tasks that have completed execution
+# TYPE executor_completed_tasks_total counter
+executor_completed_tasks_total{name="applicationTaskExecutor"} 0.0
+executor_completed_tasks_total{name="camelRouteManagement"} 0.0
+executor_completed_tasks_total{name="taskScheduler"} 4070.0
+# HELP executor_pool_core_threads The core number of threads for the pool
+# TYPE executor_pool_core_threads gauge
+executor_pool_core_threads{name="applicationTaskExecutor"} 8.0
+executor_pool_core_threads{name="camelRouteManagement"} 1.0
+executor_pool_core_threads{name="taskScheduler"} 5.0
+# HELP executor_pool_max_threads The maximum allowed number of threads in the pool
+# TYPE executor_pool_max_threads gauge
+executor_pool_max_threads{name="applicationTaskExecutor"} 2.147483647E9
+executor_pool_max_threads{name="camelRouteManagement"} 1.0
+executor_pool_max_threads{name="taskScheduler"} 2.147483647E9
+# HELP executor_pool_size_threads The current number of threads in the pool
+# TYPE executor_pool_size_threads gauge
+executor_pool_size_threads{name="applicationTaskExecutor"} 0.0
+executor_pool_size_threads{name="camelRouteManagement"} 0.0
+executor_pool_size_threads{name="taskScheduler"} 5.0
+# HELP executor_queue_remaining_tasks The number of additional elements that this queue can ideally accept without blocking
+# TYPE executor_queue_remaining_tasks gauge
+executor_queue_remaining_tasks{name="applicationTaskExecutor"} 2.147483647E9
+executor_queue_remaining_tasks{name="camelRouteManagement"} 2.147483647E9
+executor_queue_remaining_tasks{name="taskScheduler"} 2.147483647E9
+# HELP executor_queued_tasks The approximate number of tasks that are queued for execution
+# TYPE executor_queued_tasks gauge
+executor_queued_tasks{name="applicationTaskExecutor"} 0.0
+executor_queued_tasks{name="camelRouteManagement"} 0.0
+executor_queued_tasks{name="taskScheduler"} 6.0
+# HELP http_server_requests_active_seconds  
+# TYPE http_server_requests_active_seconds summary
+http_server_requests_active_seconds_count{exception="none",method="GET",outcome="SUCCESS",status="200",uri="UNKNOWN"} 1
+http_server_requests_active_seconds_sum{exception="none",method="GET",outcome="SUCCESS",status="200",uri="UNKNOWN"} 1.735441543
+http_server_requests_active_seconds_count{exception="none",method="HEAD",outcome="SUCCESS",status="200",uri="UNKNOWN"} 0
+http_server_requests_active_seconds_sum{exception="none",method="HEAD",outcome="SUCCESS",status="200",uri="UNKNOWN"} 0.0
+http_server_requests_active_seconds_count{exception="none",method="POST",outcome="SUCCESS",status="200",uri="UNKNOWN"} 0
+http_server_requests_active_seconds_sum{exception="none",method="POST",outcome="SUCCESS",status="200",uri="UNKNOWN"} 0.0
+# HELP http_server_requests_active_seconds_max  
+# TYPE http_server_requests_active_seconds_max gauge
+http_server_requests_active_seconds_max{exception="none",method="GET",outcome="SUCCESS",status="200",uri="UNKNOWN"} 1.735477102
+http_server_requests_active_seconds_max{exception="none",method="HEAD",outcome="SUCCESS",status="200",uri="UNKNOWN"} 0.0
+http_server_requests_active_seconds_max{exception="none",method="POST",outcome="SUCCESS",status="200",uri="UNKNOWN"} 0.0
+# HELP http_server_requests_seconds  
+# TYPE http_server_requests_seconds summary
+http_server_requests_seconds_count{error="CloseNowException",exception="CloseNowException",method="GET",outcome="SUCCESS",status="200",uri="/actuator/health"} 15
+http_server_requests_seconds_sum{error="CloseNowException",exception="CloseNowException",method="GET",outcome="SUCCESS",status="200",uri="/actuator/health"} 32.710121428
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="CLIENT_ERROR",status="401",uri="/login"} 2
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="CLIENT_ERROR",status="401",uri="/login"} 1.011349639
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="REDIRECTION",status="302",uri="/"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="REDIRECTION",status="302",uri="/"} 0.029413787
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="REDIRECTION",status="302",uri="/actuator/prometheus"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="REDIRECTION",status="302",uri="/actuator/prometheus"} 0.015323793
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/"} 0.039577336
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/actuator/health"} 68
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/actuator/health"} 36.720726178
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/assets/**"} 5
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/assets/**"} 2.717277197
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/login/role"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/login/role"} 0.082856538
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/registration/rejectedRequest"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/registration/rejectedRequest"} 0.081217651
+http_server_requests_seconds_count{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/view/**"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/view/**"} 0.01409298
+http_server_requests_seconds_count{error="none",exception="none",method="HEAD",outcome="SUCCESS",status="200",uri="/actuator/prometheus"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="HEAD",outcome="SUCCESS",status="200",uri="/actuator/prometheus"} 9.793866744
+http_server_requests_seconds_count{error="none",exception="none",method="POST",outcome="REDIRECTION",status="302",uri="REDIRECTION"} 1
+http_server_requests_seconds_sum{error="none",exception="none",method="POST",outcome="REDIRECTION",status="302",uri="REDIRECTION"} 0.099032663
+# HELP http_server_requests_seconds_max  
+# TYPE http_server_requests_seconds_max gauge
+http_server_requests_seconds_max{error="CloseNowException",exception="CloseNowException",method="GET",outcome="SUCCESS",status="200",uri="/actuator/health"} 0.0
+http_server_requests_seconds_max{error="none",exception="none",method="GET",outcome="CLIENT_ERROR",status="401",uri="/login"} 0.132627682
+http_server_requests_seconds_max{error="none",exception="none",method="GET",outcome="REDIRECTION",status="302",uri="/"} 0.0
+http_server_requests_seconds_max{error="none",exception="none",method="GET",outcome="REDIRECTION",status="302",uri="/actuator/prometheus"} 0.015323793
+http_server_requests_seconds_max{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/"} 0.039577336
+http_server_requests_seconds_max{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/actuator/health"} 0.525188198
+http_server_requests_seconds_max{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/assets/**"} 1.28610586
+http_server_requests_seconds_max{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/login/role"} 0.082856538
+http_server_requests_seconds_max{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/registration/rejectedRequest"} 0.081217651
+http_server_requests_seconds_max{error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/view/**"} 0.01409298
+http_server_requests_seconds_max{error="none",exception="none",method="HEAD",outcome="SUCCESS",status="200",uri="/actuator/prometheus"} 0.0
+http_server_requests_seconds_max{error="none",exception="none",method="POST",outcome="REDIRECTION",status="302",uri="REDIRECTION"} 0.099032663
+# HELP jvm_info JVM version info
+# TYPE jvm_info gauge
+jvm_info{runtime="OpenJDK Runtime Environment",vendor="Red Hat, Inc.",version="17.0.12+7-LTS"} 1
+# HELP jvm_buffer_count_buffers An estimate of the number of buffers in the pool
+# TYPE jvm_buffer_count_buffers gauge
+jvm_buffer_count_buffers{id="direct"} 30.0
+jvm_buffer_count_buffers{id="mapped"} 0.0
+jvm_buffer_count_buffers{id="mapped - 'non-volatile memory'"} 0.0
+# HELP jvm_buffer_memory_used_bytes An estimate of the memory that the Java virtual machine is using for this buffer pool
+# TYPE jvm_buffer_memory_used_bytes gauge
+jvm_buffer_memory_used_bytes{id="direct"} 8787281.0
+jvm_buffer_memory_used_bytes{id="mapped"} 0.0
+jvm_buffer_memory_used_bytes{id="mapped - 'non-volatile memory'"} 0.0
+# HELP jvm_buffer_total_capacity_bytes An estimate of the total capacity of the buffers in this pool
+# TYPE jvm_buffer_total_capacity_bytes gauge
+jvm_buffer_total_capacity_bytes{id="direct"} 8787280.0
+jvm_buffer_total_capacity_bytes{id="mapped"} 0.0
+jvm_buffer_total_capacity_bytes{id="mapped - 'non-volatile memory'"} 0.0
+# HELP jvm_classes_loaded_classes The number of classes that are currently loaded in the Java virtual machine
+# TYPE jvm_classes_loaded_classes gauge
+jvm_classes_loaded_classes 26707.0
+# HELP jvm_classes_unloaded_classes_total The total number of classes unloaded since the Java virtual machine has started execution
+# TYPE jvm_classes_unloaded_classes_total counter
+jvm_classes_unloaded_classes_total 0.0
+# HELP jvm_compilation_time_ms_total The approximate accumulated elapsed time spent in compilation
+# TYPE jvm_compilation_time_ms_total counter
+jvm_compilation_time_ms_total{compiler="HotSpot 64-Bit Tiered Compilers"} 203976.0
+# HELP jvm_gc_live_data_size_bytes Size of long-lived heap memory pool after reclamation
+# TYPE jvm_gc_live_data_size_bytes gauge
+jvm_gc_live_data_size_bytes 7.647532E7
+# HELP jvm_gc_max_data_size_bytes Max size of long-lived heap memory pool
+# TYPE jvm_gc_max_data_size_bytes gauge
+jvm_gc_max_data_size_bytes 2.863333376E9
+# HELP jvm_gc_memory_allocated_bytes_total Incremented for an increase in the size of the (young) heap memory pool after one GC to before the next
+# TYPE jvm_gc_memory_allocated_bytes_total counter
+jvm_gc_memory_allocated_bytes_total 4.092177784E9
+# HELP jvm_gc_memory_promoted_bytes_total Count of positive increases in the size of the old generation memory pool before GC to after GC
+# TYPE jvm_gc_memory_promoted_bytes_total counter
+jvm_gc_memory_promoted_bytes_total 5.0230632E7
+# HELP jvm_gc_overhead An approximation of the percent of CPU time used by GC activities over the last lookback period or since monitoring began, whichever is shorter, in the range [0..1]
+# TYPE jvm_gc_overhead gauge
+jvm_gc_overhead 0.0
+# HELP jvm_gc_pause_seconds Time spent in GC pause
+# TYPE jvm_gc_pause_seconds summary
+jvm_gc_pause_seconds_count{action="end of major GC",cause="Metadata GC Threshold",gc="MarkSweepCompact"} 2
+jvm_gc_pause_seconds_sum{action="end of major GC",cause="Metadata GC Threshold",gc="MarkSweepCompact"} 1.007
+jvm_gc_pause_seconds_count{action="end of minor GC",cause="Allocation Failure",gc="Copy"} 6
+jvm_gc_pause_seconds_sum{action="end of minor GC",cause="Allocation Failure",gc="Copy"} 1.196
+# HELP jvm_gc_pause_seconds_max Time spent in GC pause
+# TYPE jvm_gc_pause_seconds_max gauge
+jvm_gc_pause_seconds_max{action="end of major GC",cause="Metadata GC Threshold",gc="MarkSweepCompact"} 0.0
+jvm_gc_pause_seconds_max{action="end of minor GC",cause="Allocation Failure",gc="Copy"} 0.0
+# HELP jvm_memory_committed_bytes The amount of memory in bytes that is committed for the Java virtual machine to use
+# TYPE jvm_memory_committed_bytes gauge
+jvm_memory_committed_bytes{area="heap",id="Eden Space"} 5.7278464E8
+jvm_memory_committed_bytes{area="heap",id="Survivor Space"} 7.1565312E7
+jvm_memory_committed_bytes{area="heap",id="Tenured Gen"} 1.431699456E9
+jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'non-nmethods'"} 2555904.0
+jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'"} 1.6646144E7
+jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'"} 3.4603008E7
+jvm_memory_committed_bytes{area="nonheap",id="Compressed Class Space"} 1.9791872E7
+jvm_memory_committed_bytes{area="nonheap",id="Metaspace"} 1.47521536E8
+# HELP jvm_memory_max_bytes The maximum amount of memory in bytes that can be used for memory management
+# TYPE jvm_memory_max_bytes gauge
+jvm_memory_max_bytes{area="heap",id="Eden Space"} 1.145372672E9
+jvm_memory_max_bytes{area="heap",id="Survivor Space"} 1.43130624E8
+jvm_memory_max_bytes{area="heap",id="Tenured Gen"} 2.863333376E9
+jvm_memory_max_bytes{area="nonheap",id="CodeHeap 'non-nmethods'"} 5828608.0
+jvm_memory_max_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'"} 1.22916864E8
+jvm_memory_max_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'"} 1.22912768E8
+jvm_memory_max_bytes{area="nonheap",id="Compressed Class Space"} 1.073741824E9
+jvm_memory_max_bytes{area="nonheap",id="Metaspace"} -1.0
+# HELP jvm_memory_usage_after_gc The percentage of long-lived heap pool used after the last GC event, in the range [0..1]
+# TYPE jvm_memory_usage_after_gc gauge
+jvm_memory_usage_after_gc{area="heap",pool="long-lived"} 0.03295459229124705
+# HELP jvm_memory_used_bytes The amount of used memory
+# TYPE jvm_memory_used_bytes gauge
+jvm_memory_used_bytes{area="heap",id="Eden Space"} 2.0708896E8
+jvm_memory_used_bytes{area="heap",id="Survivor Space"} 2.1686712E7
+jvm_memory_used_bytes{area="heap",id="Tenured Gen"} 9.4359984E7
+jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'non-nmethods'"} 1500416.0
+jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'"} 1.6611712E7
+jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'"} 3.35904E7
+jvm_memory_used_bytes{area="nonheap",id="Compressed Class Space"} 1.921736E7
+jvm_memory_used_bytes{area="nonheap",id="Metaspace"} 1.46408528E8
+# HELP jvm_threads_daemon_threads The current number of live daemon threads
+# TYPE jvm_threads_daemon_threads gauge
+jvm_threads_daemon_threads 28.0
+# HELP jvm_threads_live_threads The current number of live threads including both daemon and non-daemon threads
+# TYPE jvm_threads_live_threads gauge
+jvm_threads_live_threads 37.0
+# HELP jvm_threads_peak_threads The peak live thread count since the Java virtual machine started or peak was reset
+# TYPE jvm_threads_peak_threads gauge
+jvm_threads_peak_threads 45.0
+# HELP jvm_threads_started_threads_total The total number of application threads started in the JVM
+# TYPE jvm_threads_started_threads_total counter
+jvm_threads_started_threads_total 294.0
+# HELP jvm_threads_states_threads The current number of threads
+# TYPE jvm_threads_states_threads gauge
+jvm_threads_states_threads{state="blocked"} 0.0
+jvm_threads_states_threads{state="new"} 0.0
+jvm_threads_states_threads{state="runnable"} 9.0
+jvm_threads_states_threads{state="terminated"} 0.0
+jvm_threads_states_threads{state="timed-waiting"} 11.0
+jvm_threads_states_threads{state="waiting"} 17.0
+# HELP logback_events_total Number of log events that were enabled by the effective log level
+# TYPE logback_events_total counter
+logback_events_total{level="debug"} 88531.0
+logback_events_total{level="error"} 30.0
+logback_events_total{level="info"} 690.0
+logback_events_total{level="trace"} 0.0
+logback_events_total{level="warn"} 23.0
+# HELP process_cpu_time_ns_total The "cpu time" used by the Java Virtual Machine process
+# TYPE process_cpu_time_ns_total counter
+process_cpu_time_ns_total 2.8858E11
+# HELP process_cpu_usage The "recent cpu usage" for the Java Virtual Machine process
+# TYPE process_cpu_usage gauge
+process_cpu_usage 0.05159059474412171
+# HELP process_files_max_files The maximum file descriptor count
+# TYPE process_files_max_files gauge
+process_files_max_files 1048576.0
+# HELP process_files_open_files The open file descriptor count
+# TYPE process_files_open_files gauge
+process_files_open_files 66.0
+# HELP process_start_time_seconds Start time of the process since unix epoch.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.736858143487E9
+# HELP process_uptime_seconds The uptime of the Java virtual machine
+# TYPE process_uptime_seconds gauge
+process_uptime_seconds 5138.844
+# HELP spring_data_repository_invocations_seconds Duration of repository invocations
+# TYPE spring_data_repository_invocations_seconds summary
+spring_data_repository_invocations_seconds_count{exception="None",method="count",repository="MessageRepository",state="SUCCESS"} 8
+spring_data_repository_invocations_seconds_sum{exception="None",method="count",repository="MessageRepository",state="SUCCESS"} 0.212046752
+spring_data_repository_invocations_seconds_count{exception="None",method="findAll",repository="BackgroundJobRepository",state="SUCCESS"} 2
+spring_data_repository_invocations_seconds_sum{exception="None",method="findAll",repository="BackgroundJobRepository",state="SUCCESS"} 4.710772452
+spring_data_repository_invocations_seconds_count{exception="None",method="findAll",repository="InformationMessageRepository",state="SUCCESS"} 85
+spring_data_repository_invocations_seconds_sum{exception="None",method="findAll",repository="InformationMessageRepository",state="SUCCESS"} 2.445219998
+spring_data_repository_invocations_seconds_count{exception="None",method="findAll",repository="JpaComponentDirectoryRepository",state="SUCCESS"} 951
+spring_data_repository_invocations_seconds_sum{exception="None",method="findAll",repository="JpaComponentDirectoryRepository",state="SUCCESS"} 13.45724423
+spring_data_repository_invocations_seconds_count{exception="None",method="findAll",repository="LocalKeyPairRepository",state="SUCCESS"} 1
+spring_data_repository_invocations_seconds_sum{exception="None",method="findAll",repository="LocalKeyPairRepository",state="SUCCESS"} 0.09368141
+spring_data_repository_invocations_seconds_count{exception="None",method="findAll",repository="UploadRouteRepository",state="SUCCESS"} 1
+spring_data_repository_invocations_seconds_sum{exception="None",method="findAll",repository="UploadRouteRepository",state="SUCCESS"} 0.008594252
+spring_data_repository_invocations_seconds_count{exception="None",method="findAllByCertificateTypeAndValidityAndDirectory",repository="LocalKeyPairRepository",state="SUCCESS"} 680
+spring_data_repository_invocations_seconds_sum{exception="None",method="findAllByCertificateTypeAndValidityAndDirectory",repository="LocalKeyPairRepository",state="SUCCESS"} 19.701608369
+spring_data_repository_invocations_seconds_count{exception="None",method="findById",repository="JpaComponentDirectoryRepository",state="SUCCESS"} 1
+spring_data_repository_invocations_seconds_sum{exception="None",method="findById",repository="JpaComponentDirectoryRepository",state="SUCCESS"} 0.093477739
+spring_data_repository_invocations_seconds_count{exception="None",method="findByJobName",repository="BackgroundJobRepository",state="SUCCESS"} 3024
+spring_data_repository_invocations_seconds_sum{exception="None",method="findByJobName",repository="BackgroundJobRepository",state="SUCCESS"} 282.688786053
+spring_data_repository_invocations_seconds_count{exception="None",method="findByKey",repository="ApplicationPropertyRepository",state="SUCCESS"} 3088
+spring_data_repository_invocations_seconds_sum{exception="None",method="findByKey",repository="ApplicationPropertyRepository",state="SUCCESS"} 242.618293485
+spring_data_repository_invocations_seconds_count{exception="None",method="findByLocalComponentCode",repository="MessagingStatisticsRepository",state="SUCCESS"} 2
+spring_data_repository_invocations_seconds_sum{exception="None",method="findByLocalComponentCode",repository="MessagingStatisticsRepository",state="SUCCESS"} 0.307719185
+spring_data_repository_invocations_seconds_count{exception="None",method="findByReceiverAndRemoteFalse",repository="JpaMessagePathRepository",state="SUCCESS"} 1
+spring_data_repository_invocations_seconds_sum{exception="None",method="findByReceiverAndRemoteFalse",repository="JpaMessagePathRepository",state="SUCCESS"} 0.096596275
+spring_data_repository_invocations_seconds_count{exception="None",method="findByRemoteComponentCode",repository="MessagingStatisticsRepository",state="SUCCESS"} 2
+spring_data_repository_invocations_seconds_sum{exception="None",method="findByRemoteComponentCode",repository="MessagingStatisticsRepository",state="SUCCESS"} 0.39216566
+spring_data_repository_invocations_seconds_count{exception="None",method="findByRemoteComponentCodeOrderByRemoteComponentCodeAsc",repository="MessagingStatisticsRepository",state="SUCCESS"} 85
+spring_data_repository_invocations_seconds_sum{exception="None",method="findByRemoteComponentCodeOrderByRemoteComponentCodeAsc",repository="MessagingStatisticsRepository",state="SUCCESS"} 4.426166617
+spring_data_repository_invocations_seconds_count{exception="None",method="findFirstByCertificateTypeAndValidityAndDirectory",repository="LocalKeyPairRepository",state="SUCCESS"} 167
+spring_data_repository_invocations_seconds_sum{exception="None",method="findFirstByCertificateTypeAndValidityAndDirectory",repository="LocalKeyPairRepository",state="SUCCESS"} 10.347429146
+spring_data_repository_invocations_seconds_count{exception="None",method="findMessagingMetricsEntityByMetricName",repository="MessagingMetricsRepository",state="SUCCESS"} 171
+spring_data_repository_invocations_seconds_sum{exception="None",method="findMessagingMetricsEntityByMetricName",repository="MessagingMetricsRepository",state="SUCCESS"} 9.654856755
+spring_data_repository_invocations_seconds_count{exception="None",method="findPreferredAuthForBrokerConnection",repository="LocalKeyPairRepository",state="SUCCESS"} 170
+spring_data_repository_invocations_seconds_sum{exception="None",method="findPreferredAuthForBrokerConnection",repository="LocalKeyPairRepository",state="SUCCESS"} 13.582724109
+spring_data_repository_invocations_seconds_count{exception="None",method="save",repository="BackgroundJobRepository",state="SUCCESS"} 2982
+spring_data_repository_invocations_seconds_sum{exception="None",method="save",repository="BackgroundJobRepository",state="SUCCESS"} 120.183924156
+spring_data_repository_invocations_seconds_count{exception="None",method="save",repository="MessagingMetricsRepository",state="SUCCESS"} 5
+spring_data_repository_invocations_seconds_sum{exception="None",method="save",repository="MessagingMetricsRepository",state="SUCCESS"} 0.119215175
+spring_data_repository_invocations_seconds_count{exception="None",method="saveAll",repository="MessagingStatisticsRepository",state="SUCCESS"} 2
+spring_data_repository_invocations_seconds_sum{exception="None",method="saveAll",repository="MessagingStatisticsRepository",state="SUCCESS"} 1.11396E-4
+# HELP spring_data_repository_invocations_seconds_max Duration of repository invocations
+# TYPE spring_data_repository_invocations_seconds_max gauge
+spring_data_repository_invocations_seconds_max{exception="None",method="count",repository="MessageRepository",state="SUCCESS"} 0.0
+spring_data_repository_invocations_seconds_max{exception="None",method="findAll",repository="BackgroundJobRepository",state="SUCCESS"} 0.0
+spring_data_repository_invocations_seconds_max{exception="None",method="findAll",repository="InformationMessageRepository",state="SUCCESS"} 0.027736948
+spring_data_repository_invocations_seconds_max{exception="None",method="findAll",repository="JpaComponentDirectoryRepository",state="SUCCESS"} 0.228576744
+spring_data_repository_invocations_seconds_max{exception="None",method="findAll",repository="LocalKeyPairRepository",state="SUCCESS"} 0.0
+spring_data_repository_invocations_seconds_max{exception="None",method="findAll",repository="UploadRouteRepository",state="SUCCESS"} 0.0
+spring_data_repository_invocations_seconds_max{exception="None",method="findAllByCertificateTypeAndValidityAndDirectory",repository="LocalKeyPairRepository",state="SUCCESS"} 0.072700711
+spring_data_repository_invocations_seconds_max{exception="None",method="findById",repository="JpaComponentDirectoryRepository",state="SUCCESS"} 0.0
+spring_data_repository_invocations_seconds_max{exception="None",method="findByJobName",repository="BackgroundJobRepository",state="SUCCESS"} 3.931163451
+spring_data_repository_invocations_seconds_max{exception="None",method="findByKey",repository="ApplicationPropertyRepository",state="SUCCESS"} 0.335405079
+spring_data_repository_invocations_seconds_max{exception="None",method="findByLocalComponentCode",repository="MessagingStatisticsRepository",state="SUCCESS"} 0.0
+spring_data_repository_invocations_seconds_max{exception="None",method="findByReceiverAndRemoteFalse",repository="JpaMessagePathRepository",state="SUCCESS"} 0.0
+spring_data_repository_invocations_seconds_max{exception="None",method="findByRemoteComponentCode",repository="MessagingStatisticsRepository",state="SUCCESS"} 0.0
+spring_data_repository_invocations_seconds_max{exception="None",method="findByRemoteComponentCodeOrderByRemoteComponentCodeAsc",repository="MessagingStatisticsRepository",state="SUCCESS"} 0.039788311
+spring_data_repository_invocations_seconds_max{exception="None",method="findFirstByCertificateTypeAndValidityAndDirectory",repository="LocalKeyPairRepository",state="SUCCESS"} 0.048404715
+spring_data_repository_invocations_seconds_max{exception="None",method="findMessagingMetricsEntityByMetricName",repository="MessagingMetricsRepository",state="SUCCESS"} 0.056697225
+spring_data_repository_invocations_seconds_max{exception="None",method="findPreferredAuthForBrokerConnection",repository="LocalKeyPairRepository",state="SUCCESS"} 0.237303725
+spring_data_repository_invocations_seconds_max{exception="None",method="save",repository="BackgroundJobRepository",state="SUCCESS"} 0.239307352
+spring_data_repository_invocations_seconds_max{exception="None",method="save",repository="MessagingMetricsRepository",state="SUCCESS"} 0.0
+spring_data_repository_invocations_seconds_max{exception="None",method="saveAll",repository="MessagingStatisticsRepository",state="SUCCESS"} 0.0
+# HELP spring_security_authentications_active_seconds  
+# TYPE spring_security_authentications_active_seconds summary
+spring_security_authentications_active_seconds_count{authentication_failure_type="n/a",authentication_method="ProviderManager",authentication_request_type="UsernamePasswordAuthenticationToken",authentication_result_type="n/a"} 0
+spring_security_authentications_active_seconds_sum{authentication_failure_type="n/a",authentication_method="ProviderManager",authentication_request_type="UsernamePasswordAuthenticationToken",authentication_result_type="n/a"} 0.0
+# HELP spring_security_authentications_active_seconds_max  
+# TYPE spring_security_authentications_active_seconds_max gauge
+spring_security_authentications_active_seconds_max{authentication_failure_type="n/a",authentication_method="ProviderManager",authentication_request_type="UsernamePasswordAuthenticationToken",authentication_result_type="n/a"} 0.0
+# HELP spring_security_authentications_seconds  
+# TYPE spring_security_authentications_seconds summary
+spring_security_authentications_seconds_count{authentication_failure_type="n/a",authentication_method="ProviderManager",authentication_request_type="UsernamePasswordAuthenticationToken",authentication_result_type="UsernamePasswordAuthenticationToken",error="none"} 85
+spring_security_authentications_seconds_sum{authentication_failure_type="n/a",authentication_method="ProviderManager",authentication_request_type="UsernamePasswordAuthenticationToken",authentication_result_type="UsernamePasswordAuthenticationToken",error="none"} 0.253423792
+# HELP spring_security_authentications_seconds_max  
+# TYPE spring_security_authentications_seconds_max gauge
+spring_security_authentications_seconds_max{authentication_failure_type="n/a",authentication_method="ProviderManager",authentication_request_type="UsernamePasswordAuthenticationToken",authentication_result_type="UsernamePasswordAuthenticationToken",error="none"} 0.00154753
+# HELP spring_security_authorizations_active_seconds  
+# TYPE spring_security_authorizations_active_seconds summary
+spring_security_authorizations_active_seconds_count{spring_security_authentication_type="n/a",spring_security_authorization_decision="unknown",spring_security_object="request"} 0
+spring_security_authorizations_active_seconds_sum{spring_security_authentication_type="n/a",spring_security_authorization_decision="unknown",spring_security_object="request"} 0.0
+# HELP spring_security_authorizations_active_seconds_max  
+# TYPE spring_security_authorizations_active_seconds_max gauge
+spring_security_authorizations_active_seconds_max{spring_security_authentication_type="n/a",spring_security_authorization_decision="unknown",spring_security_object="request"} 0.0
+# HELP spring_security_authorizations_seconds  
+# TYPE spring_security_authorizations_seconds summary
+spring_security_authorizations_seconds_count{error="AccessDeniedException",spring_security_authentication_type="AnonymousAuthenticationToken",spring_security_authorization_decision="false",spring_security_object="request"} 2
+spring_security_authorizations_seconds_sum{error="AccessDeniedException",spring_security_authentication_type="AnonymousAuthenticationToken",spring_security_authorization_decision="false",spring_security_object="request"} 0.012794458
+spring_security_authorizations_seconds_count{error="none",spring_security_authentication_type="UsernamePasswordAuthenticationToken",spring_security_authorization_decision="true",spring_security_object="request"} 89
+spring_security_authorizations_seconds_sum{error="none",spring_security_authentication_type="UsernamePasswordAuthenticationToken",spring_security_authorization_decision="true",spring_security_object="request"} 0.445444961
+spring_security_authorizations_seconds_count{error="none",spring_security_authentication_type="n/a",spring_security_authorization_decision="true",spring_security_object="request"} 7
+spring_security_authorizations_seconds_sum{error="none",spring_security_authentication_type="n/a",spring_security_authorization_decision="true",spring_security_object="request"} 0.00730276
+# HELP spring_security_authorizations_seconds_max  
+# TYPE spring_security_authorizations_seconds_max gauge
+spring_security_authorizations_seconds_max{error="AccessDeniedException",spring_security_authentication_type="AnonymousAuthenticationToken",spring_security_authorization_decision="false",spring_security_object="request"} 0.001296962
+spring_security_authorizations_seconds_max{error="none",spring_security_authentication_type="UsernamePasswordAuthenticationToken",spring_security_authorization_decision="true",spring_security_object="request"} 0.001873985
+spring_security_authorizations_seconds_max{error="none",spring_security_authentication_type="n/a",spring_security_authorization_decision="true",spring_security_object="request"} 0.00108684
+# HELP spring_security_filterchains_AccessDeniedFilter_after_total  
+# TYPE spring_security_filterchains_AccessDeniedFilter_after_total counter
+spring_security_filterchains_AccessDeniedFilter_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 80.0
+# HELP spring_security_filterchains_AccessDeniedFilter_before_total  
+# TYPE spring_security_filterchains_AccessDeniedFilter_before_total counter
+spring_security_filterchains_AccessDeniedFilter_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 98.0
+# HELP spring_security_filterchains_AccessGrantedFilter_after_total  
+# TYPE spring_security_filterchains_AccessGrantedFilter_after_total counter
+spring_security_filterchains_AccessGrantedFilter_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 80.0
+# HELP spring_security_filterchains_AccessGrantedFilter_before_total  
+# TYPE spring_security_filterchains_AccessGrantedFilter_before_total counter
+spring_security_filterchains_AccessGrantedFilter_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 96.0
+# HELP spring_security_filterchains_access_exceptions_after_total  
+# TYPE spring_security_filterchains_access_exceptions_after_total counter
+spring_security_filterchains_access_exceptions_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 82.0
+# HELP spring_security_filterchains_access_exceptions_before_total  
+# TYPE spring_security_filterchains_access_exceptions_before_total counter
+spring_security_filterchains_access_exceptions_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 98.0
+# HELP spring_security_filterchains_active_seconds  
+# TYPE spring_security_filterchains_active_seconds summary
+spring_security_filterchains_active_seconds_count{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 0
+spring_security_filterchains_active_seconds_sum{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 0.0
+spring_security_filterchains_active_seconds_count{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 0
+spring_security_filterchains_active_seconds_sum{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 0.0
+# HELP spring_security_filterchains_active_seconds_max  
+# TYPE spring_security_filterchains_active_seconds_max gauge
+spring_security_filterchains_active_seconds_max{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 0.0
+spring_security_filterchains_active_seconds_max{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 0.0
+# HELP spring_security_filterchains_authentication_anonymous_after_total  
+# TYPE spring_security_filterchains_authentication_anonymous_after_total counter
+spring_security_filterchains_authentication_anonymous_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 82.0
+# HELP spring_security_filterchains_authentication_anonymous_before_total  
+# TYPE spring_security_filterchains_authentication_anonymous_before_total counter
+spring_security_filterchains_authentication_anonymous_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 98.0
+# HELP spring_security_filterchains_authentication_basic_after_total  
+# TYPE spring_security_filterchains_authentication_basic_after_total counter
+spring_security_filterchains_authentication_basic_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 82.0
+# HELP spring_security_filterchains_authentication_basic_before_total  
+# TYPE spring_security_filterchains_authentication_basic_before_total counter
+spring_security_filterchains_authentication_basic_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 98.0
+# HELP spring_security_filterchains_authentication_form_after_total  
+# TYPE spring_security_filterchains_authentication_form_after_total counter
+spring_security_filterchains_authentication_form_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 83.0
+# HELP spring_security_filterchains_authentication_form_before_total  
+# TYPE spring_security_filterchains_authentication_form_before_total counter
+spring_security_filterchains_authentication_form_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 99.0
+# HELP spring_security_filterchains_authorization_after_total  
+# TYPE spring_security_filterchains_authorization_after_total counter
+spring_security_filterchains_authorization_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 80.0
+# HELP spring_security_filterchains_authorization_before_total  
+# TYPE spring_security_filterchains_authorization_before_total counter
+spring_security_filterchains_authorization_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 98.0
+# HELP spring_security_filterchains_context_async_after_total  
+# TYPE spring_security_filterchains_context_async_after_total counter
+spring_security_filterchains_context_async_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 83.0
+# HELP spring_security_filterchains_context_async_before_total  
+# TYPE spring_security_filterchains_context_async_before_total counter
+spring_security_filterchains_context_async_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 99.0
+# HELP spring_security_filterchains_context_holder_after_total  
+# TYPE spring_security_filterchains_context_holder_after_total counter
+spring_security_filterchains_context_holder_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 83.0
+# HELP spring_security_filterchains_context_holder_before_total  
+# TYPE spring_security_filterchains_context_holder_before_total counter
+spring_security_filterchains_context_holder_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 99.0
+# HELP spring_security_filterchains_context_servlet_after_total  
+# TYPE spring_security_filterchains_context_servlet_after_total counter
+spring_security_filterchains_context_servlet_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 82.0
+# HELP spring_security_filterchains_context_servlet_before_total  
+# TYPE spring_security_filterchains_context_servlet_before_total counter
+spring_security_filterchains_context_servlet_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 98.0
+# HELP spring_security_filterchains_csrf_after_total  
+# TYPE spring_security_filterchains_csrf_after_total counter
+spring_security_filterchains_csrf_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 83.0
+# HELP spring_security_filterchains_csrf_before_total  
+# TYPE spring_security_filterchains_csrf_before_total counter
+spring_security_filterchains_csrf_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 99.0
+# HELP spring_security_filterchains_header_after_total  
+# TYPE spring_security_filterchains_header_after_total counter
+spring_security_filterchains_header_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 83.0
+# HELP spring_security_filterchains_header_before_total  
+# TYPE spring_security_filterchains_header_before_total counter
+spring_security_filterchains_header_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 99.0
+# HELP spring_security_filterchains_logout_after_total  
+# TYPE spring_security_filterchains_logout_after_total counter
+spring_security_filterchains_logout_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 83.0
+# HELP spring_security_filterchains_logout_before_total  
+# TYPE spring_security_filterchains_logout_before_total counter
+spring_security_filterchains_logout_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 99.0
+# HELP spring_security_filterchains_requestcache_after_total  
+# TYPE spring_security_filterchains_requestcache_after_total counter
+spring_security_filterchains_requestcache_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 82.0
+# HELP spring_security_filterchains_requestcache_before_total  
+# TYPE spring_security_filterchains_requestcache_before_total counter
+spring_security_filterchains_requestcache_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 98.0
+# HELP spring_security_filterchains_seconds  
+# TYPE spring_security_filterchains_seconds summary
+spring_security_filterchains_seconds_count{error="ServletException",security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 15
+spring_security_filterchains_seconds_sum{error="ServletException",security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 0.00665152
+spring_security_filterchains_seconds_count{error="none",security_security_reached_filter_section="after",spring_security_filterchain_position="15",spring_security_filterchain_size="15",spring_security_reached_filter_name="DisableEncodeUrlFilter"} 83
+spring_security_filterchains_seconds_sum{error="none",security_security_reached_filter_section="after",spring_security_filterchain_position="15",spring_security_filterchain_size="15",spring_security_reached_filter_name="DisableEncodeUrlFilter"} 0.102385116
+spring_security_filterchains_seconds_count{error="none",security_security_reached_filter_section="before",spring_security_filterchain_position="14",spring_security_filterchain_size="15",spring_security_reached_filter_name="AuthorizationFilter"} 2
+spring_security_filterchains_seconds_sum{error="none",security_security_reached_filter_section="before",spring_security_filterchain_position="14",spring_security_filterchain_size="15",spring_security_reached_filter_name="AuthorizationFilter"} 0.031902605
+spring_security_filterchains_seconds_count{error="none",security_security_reached_filter_section="before",spring_security_filterchain_position="15",spring_security_filterchain_size="15",spring_security_reached_filter_name="AccessGrantedFilter"} 96
+spring_security_filterchains_seconds_sum{error="none",security_security_reached_filter_section="before",spring_security_filterchain_position="15",spring_security_filterchain_size="15",spring_security_reached_filter_name="AccessGrantedFilter"} 1.568967505
+spring_security_filterchains_seconds_count{error="none",security_security_reached_filter_section="before",spring_security_filterchain_position="7",spring_security_filterchain_size="15",spring_security_reached_filter_name="UsernamePasswordAuthenticationFilter"} 1
+spring_security_filterchains_seconds_sum{error="none",security_security_reached_filter_section="before",spring_security_filterchain_position="7",spring_security_filterchain_size="15",spring_security_reached_filter_name="UsernamePasswordAuthenticationFilter"} 0.014726178
+# HELP spring_security_filterchains_seconds_max  
+# TYPE spring_security_filterchains_seconds_max gauge
+spring_security_filterchains_seconds_max{error="ServletException",security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 0.0
+spring_security_filterchains_seconds_max{error="none",security_security_reached_filter_section="after",spring_security_filterchain_position="15",spring_security_filterchain_size="15",spring_security_reached_filter_name="DisableEncodeUrlFilter"} 0.002128077
+spring_security_filterchains_seconds_max{error="none",security_security_reached_filter_section="before",spring_security_filterchain_position="14",spring_security_filterchain_size="15",spring_security_reached_filter_name="AuthorizationFilter"} 0.00523127
+spring_security_filterchains_seconds_max{error="none",security_security_reached_filter_section="before",spring_security_filterchain_position="15",spring_security_filterchain_size="15",spring_security_reached_filter_name="AccessGrantedFilter"} 0.018249367
+spring_security_filterchains_seconds_max{error="none",security_security_reached_filter_section="before",spring_security_filterchain_position="7",spring_security_filterchain_size="15",spring_security_reached_filter_name="UsernamePasswordAuthenticationFilter"} 0.014726178
+# HELP spring_security_filterchains_session_urlencoding_after_total  
+# TYPE spring_security_filterchains_session_urlencoding_after_total counter
+spring_security_filterchains_session_urlencoding_after_total{security_security_reached_filter_section="after",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 83.0
+# HELP spring_security_filterchains_session_urlencoding_before_total  
+# TYPE spring_security_filterchains_session_urlencoding_before_total counter
+spring_security_filterchains_session_urlencoding_before_total{security_security_reached_filter_section="before",spring_security_filterchain_position="0",spring_security_filterchain_size="0",spring_security_reached_filter_name="none"} 99.0
+# HELP spring_security_http_secured_requests_active_seconds  
+# TYPE spring_security_http_secured_requests_active_seconds summary
+spring_security_http_secured_requests_active_seconds_count 1
+spring_security_http_secured_requests_active_seconds_sum 1.734782311
+# HELP spring_security_http_secured_requests_active_seconds_max  
+# TYPE spring_security_http_secured_requests_active_seconds_max gauge
+spring_security_http_secured_requests_active_seconds_max 1.734805864
+# HELP spring_security_http_secured_requests_seconds  
+# TYPE spring_security_http_secured_requests_seconds summary
+spring_security_http_secured_requests_seconds_count{error="ServletException"} 15
+spring_security_http_secured_requests_seconds_sum{error="ServletException"} 32.304657396
+spring_security_http_secured_requests_seconds_count{error="none"} 80
+spring_security_http_secured_requests_seconds_sum{error="none"} 48.10088168
+# HELP spring_security_http_secured_requests_seconds_max  
+# TYPE spring_security_http_secured_requests_seconds_max gauge
+spring_security_http_secured_requests_seconds_max{error="ServletException"} 0.0
+spring_security_http_secured_requests_seconds_max{error="none"} 1.283822249
+# HELP system_cpu_count The number of processors available to the Java virtual machine
+# TYPE system_cpu_count gauge
+system_cpu_count 1.0
+# HELP system_cpu_usage The "recent cpu usage" of the system the application is running in
+# TYPE system_cpu_usage gauge
+system_cpu_usage 0.05158999591349176
+# HELP system_load_average_1m The sum of the number of runnable entities queued to available processors and the number of runnable entities running on the available processors averaged over a period of time
+# TYPE system_load_average_1m gauge
+system_load_average_1m 4.62
+# HELP tasks_scheduled_execution_active_seconds  
+# TYPE tasks_scheduled_execution_active_seconds summary
+tasks_scheduled_execution_active_seconds_count{code_function="checkIfReady",code_namespace="eu.entsoe.ecp.endpoint.rest.actuator.check.EndpointReadinessCheck",exception="none",outcome="UNKNOWN"} 0
+tasks_scheduled_execution_active_seconds_sum{code_function="checkIfReady",code_namespace="eu.entsoe.ecp.endpoint.rest.actuator.check.EndpointReadinessCheck",exception="none",outcome="UNKNOWN"} 0.0
+tasks_scheduled_execution_active_seconds_count{code_function="checkMasterStatus",code_namespace="eu.entsoe.ecp.cluster.manager.ClusterStatusManager",exception="none",outcome="UNKNOWN"} 0
+tasks_scheduled_execution_active_seconds_sum{code_function="checkMasterStatus",code_namespace="eu.entsoe.ecp.cluster.manager.ClusterStatusManager",exception="none",outcome="UNKNOWN"} 0.0
+tasks_scheduled_execution_active_seconds_count{code_function="checkRegistrationStatus",code_namespace="eu.entsoe.ecp.endpoint.registration.RegistrationStatusChecker",exception="none",outcome="UNKNOWN"} 0
+tasks_scheduled_execution_active_seconds_sum{code_function="checkRegistrationStatus",code_namespace="eu.entsoe.ecp.endpoint.registration.RegistrationStatusChecker",exception="none",outcome="UNKNOWN"} 0.0
+tasks_scheduled_execution_active_seconds_count{code_function="manageRoutes",code_namespace="eu.entsoe.ecp.endpoint.messaging.routes.management.EndpointRoutesManagementJob",exception="none",outcome="UNKNOWN"} 0
+tasks_scheduled_execution_active_seconds_sum{code_function="manageRoutes",code_namespace="eu.entsoe.ecp.endpoint.messaging.routes.management.EndpointRoutesManagementJob",exception="none",outcome="UNKNOWN"} 0.0
+tasks_scheduled_execution_active_seconds_count{code_function="reloadOnConfigurationChange",code_namespace="eu.entsoe.ecp.configuration.db.ConfigurationReloadJob",exception="none",outcome="UNKNOWN"} 0
+tasks_scheduled_execution_active_seconds_sum{code_function="reloadOnConfigurationChange",code_namespace="eu.entsoe.ecp.configuration.db.ConfigurationReloadJob",exception="none",outcome="UNKNOWN"} 0.0
+tasks_scheduled_execution_active_seconds_count{code_function="updateComponentDirectoryCache",code_namespace="eu.entsoe.ecp.directory.cache.JpaBasedDirectoryCacheReloadJob",exception="none",outcome="UNKNOWN"} 0
+tasks_scheduled_execution_active_seconds_sum{code_function="updateComponentDirectoryCache",code_namespace="eu.entsoe.ecp.directory.cache.JpaBasedDirectoryCacheReloadJob",exception="none",outcome="UNKNOWN"} 0.0
+# HELP tasks_scheduled_execution_active_seconds_max  
+# TYPE tasks_scheduled_execution_active_seconds_max gauge
+tasks_scheduled_execution_active_seconds_max{code_function="checkIfReady",code_namespace="eu.entsoe.ecp.endpoint.rest.actuator.check.EndpointReadinessCheck",exception="none",outcome="UNKNOWN"} 0.0
+tasks_scheduled_execution_active_seconds_max{code_function="checkMasterStatus",code_namespace="eu.entsoe.ecp.cluster.manager.ClusterStatusManager",exception="none",outcome="UNKNOWN"} 0.0
+tasks_scheduled_execution_active_seconds_max{code_function="checkRegistrationStatus",code_namespace="eu.entsoe.ecp.endpoint.registration.RegistrationStatusChecker",exception="none",outcome="UNKNOWN"} 0.0
+tasks_scheduled_execution_active_seconds_max{code_function="manageRoutes",code_namespace="eu.entsoe.ecp.endpoint.messaging.routes.management.EndpointRoutesManagementJob",exception="none",outcome="UNKNOWN"} 0.0
+tasks_scheduled_execution_active_seconds_max{code_function="reloadOnConfigurationChange",code_namespace="eu.entsoe.ecp.configuration.db.ConfigurationReloadJob",exception="none",outcome="UNKNOWN"} 0.0
+tasks_scheduled_execution_active_seconds_max{code_function="updateComponentDirectoryCache",code_namespace="eu.entsoe.ecp.directory.cache.JpaBasedDirectoryCacheReloadJob",exception="none",outcome="UNKNOWN"} 0.0
+# HELP tasks_scheduled_execution_seconds  
+# TYPE tasks_scheduled_execution_seconds summary
+tasks_scheduled_execution_seconds_count{code_function="checkIfReady",code_namespace="eu.entsoe.ecp.endpoint.rest.actuator.check.EndpointReadinessCheck",error="none",exception="none",outcome="SUCCESS"} 1004
+tasks_scheduled_execution_seconds_sum{code_function="checkIfReady",code_namespace="eu.entsoe.ecp.endpoint.rest.actuator.check.EndpointReadinessCheck",error="none",exception="none",outcome="SUCCESS"} 180.223263564
+tasks_scheduled_execution_seconds_count{code_function="checkMasterStatus",code_namespace="eu.entsoe.ecp.cluster.manager.ClusterStatusManager",error="none",exception="none",outcome="SUCCESS"} 954
+tasks_scheduled_execution_seconds_sum{code_function="checkMasterStatus",code_namespace="eu.entsoe.ecp.cluster.manager.ClusterStatusManager",error="none",exception="none",outcome="SUCCESS"} 242.174114507
+tasks_scheduled_execution_seconds_count{code_function="checkRegistrationStatus",code_namespace="eu.entsoe.ecp.endpoint.registration.RegistrationStatusChecker",error="none",exception="none",outcome="SUCCESS"} 84
+tasks_scheduled_execution_seconds_sum{code_function="checkRegistrationStatus",code_namespace="eu.entsoe.ecp.endpoint.registration.RegistrationStatusChecker",error="none",exception="none",outcome="SUCCESS"} 32.265618653
+tasks_scheduled_execution_seconds_count{code_function="manageRoutes",code_namespace="eu.entsoe.ecp.endpoint.messaging.routes.management.EndpointRoutesManagementJob",error="none",exception="none",outcome="SUCCESS"} 84
+tasks_scheduled_execution_seconds_sum{code_function="manageRoutes",code_namespace="eu.entsoe.ecp.endpoint.messaging.routes.management.EndpointRoutesManagementJob",error="none",exception="none",outcome="SUCCESS"} 33.344946762
+tasks_scheduled_execution_seconds_count{code_function="reloadOnConfigurationChange",code_namespace="eu.entsoe.ecp.configuration.db.ConfigurationReloadJob",error="none",exception="none",outcome="SUCCESS"} 993
+tasks_scheduled_execution_seconds_sum{code_function="reloadOnConfigurationChange",code_namespace="eu.entsoe.ecp.configuration.db.ConfigurationReloadJob",error="none",exception="none",outcome="SUCCESS"} 359.945617405
+tasks_scheduled_execution_seconds_count{code_function="updateComponentDirectoryCache",code_namespace="eu.entsoe.ecp.directory.cache.JpaBasedDirectoryCacheReloadJob",error="none",exception="none",outcome="SUCCESS"} 951
+tasks_scheduled_execution_seconds_sum{code_function="updateComponentDirectoryCache",code_namespace="eu.entsoe.ecp.directory.cache.JpaBasedDirectoryCacheReloadJob",error="none",exception="none",outcome="SUCCESS"} 261.004612334
+# HELP tasks_scheduled_execution_seconds_max  
+# TYPE tasks_scheduled_execution_seconds_max gauge
+tasks_scheduled_execution_seconds_max{code_function="checkIfReady",code_namespace="eu.entsoe.ecp.endpoint.rest.actuator.check.EndpointReadinessCheck",error="none",exception="none",outcome="SUCCESS"} 0.638260782
+tasks_scheduled_execution_seconds_max{code_function="checkMasterStatus",code_namespace="eu.entsoe.ecp.cluster.manager.ClusterStatusManager",error="none",exception="none",outcome="SUCCESS"} 4.176065213
+tasks_scheduled_execution_seconds_max{code_function="checkRegistrationStatus",code_namespace="eu.entsoe.ecp.endpoint.registration.RegistrationStatusChecker",error="none",exception="none",outcome="SUCCESS"} 0.467106919
+tasks_scheduled_execution_seconds_max{code_function="manageRoutes",code_namespace="eu.entsoe.ecp.endpoint.messaging.routes.management.EndpointRoutesManagementJob",error="none",exception="none",outcome="SUCCESS"} 0.09582653
+tasks_scheduled_execution_seconds_max{code_function="reloadOnConfigurationChange",code_namespace="eu.entsoe.ecp.configuration.db.ConfigurationReloadJob",error="none",exception="none",outcome="SUCCESS"} 4.050618105
+tasks_scheduled_execution_seconds_max{code_function="updateComponentDirectoryCache",code_namespace="eu.entsoe.ecp.directory.cache.JpaBasedDirectoryCacheReloadJob",error="none",exception="none",outcome="SUCCESS"} 7.220203667
+# HELP tomcat_cache_access_total  
+# TYPE tomcat_cache_access_total counter
+tomcat_cache_access_total 0.0
+# HELP tomcat_cache_hit_total  
+# TYPE tomcat_cache_hit_total counter
+tomcat_cache_hit_total 0.0
+# HELP tomcat_connections_config_max_connections  
+# TYPE tomcat_connections_config_max_connections gauge
+tomcat_connections_config_max_connections{name="https-jsse-nio-8443"} 8192.0
+# HELP tomcat_connections_current_connections  
+# TYPE tomcat_connections_current_connections gauge
+tomcat_connections_current_connections{name="https-jsse-nio-8443"} 2.0
+# HELP tomcat_connections_keepalive_current_connections  
+# TYPE tomcat_connections_keepalive_current_connections gauge
+tomcat_connections_keepalive_current_connections{name="https-jsse-nio-8443"} 0.0
+# HELP tomcat_global_error_total  
+# TYPE tomcat_global_error_total counter
+tomcat_global_error_total{name="https-jsse-nio-8443"} 1.0
+# HELP tomcat_global_received_bytes_total  
+# TYPE tomcat_global_received_bytes_total counter
+tomcat_global_received_bytes_total{name="https-jsse-nio-8443"} 0.0
+# HELP tomcat_global_request_max_seconds  
+# TYPE tomcat_global_request_max_seconds gauge
+tomcat_global_request_max_seconds{name="https-jsse-nio-8443"} 0.896
+# HELP tomcat_global_request_seconds  
+# TYPE tomcat_global_request_seconds summary
+tomcat_global_request_seconds_count{name="https-jsse-nio-8443"} 4
+tomcat_global_request_seconds_sum{name="https-jsse-nio-8443"} 0.957
+# HELP tomcat_global_sent_bytes_total  
+# TYPE tomcat_global_sent_bytes_total counter
+tomcat_global_sent_bytes_total{name="https-jsse-nio-8443"} 2398.0
+# HELP tomcat_servlet_error_total  
+# TYPE tomcat_servlet_error_total counter
+tomcat_servlet_error_total{name="default"} 0.0
+tomcat_servlet_error_total{name="dispatcherServlet"} 15.0
+tomcat_servlet_error_total{name="jsp"} 0.0
+tomcat_servlet_error_total{name="messageDispatcherServlet"} 0.0
+# HELP tomcat_servlet_request_max_seconds  
+# TYPE tomcat_servlet_request_max_seconds gauge
+tomcat_servlet_request_max_seconds{name="default"} 0.0
+tomcat_servlet_request_max_seconds{name="dispatcherServlet"} 9.897
+tomcat_servlet_request_max_seconds{name="jsp"} 0.0
+tomcat_servlet_request_max_seconds{name="messageDispatcherServlet"} 0.0
+# HELP tomcat_servlet_request_seconds  
+# TYPE tomcat_servlet_request_seconds summary
+tomcat_servlet_request_seconds_count{name="default"} 0
+tomcat_servlet_request_seconds_sum{name="default"} 0.0
+tomcat_servlet_request_seconds_count{name="dispatcherServlet"} 99
+tomcat_servlet_request_seconds_sum{name="dispatcherServlet"} 83.658
+tomcat_servlet_request_seconds_count{name="jsp"} 0
+tomcat_servlet_request_seconds_sum{name="jsp"} 0.0
+tomcat_servlet_request_seconds_count{name="messageDispatcherServlet"} 0
+tomcat_servlet_request_seconds_sum{name="messageDispatcherServlet"} 0.0
+# HELP tomcat_threads_busy_threads  
+# TYPE tomcat_threads_busy_threads gauge
+tomcat_threads_busy_threads{name="https-jsse-nio-8443"} 1.0
+# HELP tomcat_threads_config_max_threads  
+# TYPE tomcat_threads_config_max_threads gauge
+tomcat_threads_config_max_threads{name="https-jsse-nio-8443"} 150.0
+# HELP tomcat_threads_current_threads  
+# TYPE tomcat_threads_current_threads gauge
+tomcat_threads_current_threads{name="https-jsse-nio-8443"} 10.0
