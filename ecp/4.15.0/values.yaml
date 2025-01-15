@@ -187,6 +187,9 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
           - login: tester # ecp.endpoint.users[1].login
             password: passwordtester # ecp.endpoint.users[1].password
             role: user # ecp.endpoint.users[1].login
+          - login: monitorig # ecp.endpoint.users[1].login
+            password: password # ecp.endpoint.users[1].password
+            role: user # ecp.endpoint.users[1].login
 
 #      ecpPasswordProperties: # ecp-password.properties
 #        encryptionPassword: encryptionPassword # encryption password for Jasypt
