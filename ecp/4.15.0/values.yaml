@@ -76,10 +76,10 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 
         # ------ postgres -------
         springProfilesActive: ecp-ha
-        ecpDBUrl: jdbc:postgresql://ecp-db-cluster-pooler-rw:5432/ep1
+        ecpDBUrl: jdbc:postgresql://ecp-db-cluster-rw:5432/ep1
         ecpDBUsername: ep1
         ecpDBPassword: password
-        ecpDBHostname: ecp-db-cluster-pooler-rw # Required for readiness check
+        ecpDBHostname: ecp-db-cluster-rw # Required for readiness check
         ecpDBName: ep1 # Required for readiness check
         springDatasourceValidationQuery: select 1
         springDatasourceDriverClassName: org.postgresql.Driver
