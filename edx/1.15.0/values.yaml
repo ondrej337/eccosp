@@ -9,7 +9,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
         name: ondrej337/eccosp # URL to docker image.
         tag: edx-toolbox-1.15.0.1597 # Docker image tag - version or 'latest'
 #        pullPolicy: IfNotPresent # Pull policy specifies when the image should be pulled, it is possible to use 'Always' so on every pod (re)start is pulled
-      replicaCount: 3 # number of replicas - EDX cluster
+      replicaCount: 2 # number of replicas - EDX cluster
       resourcesK8s: # section for CPU and memory specification
         requests: # minimum guaranteed amount of a resource that is reserved for a container
           cpu: 500m # minimum CPU - one CPU = 1000m or 1
@@ -20,7 +20,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
           memory: 3Gi # maximum memory for container - 1Gi is equal to 1024 Mi
       storageData: # Storage for embedded database and certificates. If external DB is used, the value can be lower.
       storageLogs: 256Mi # logs # storage for logs
-      sharedStorageSize: 5Gi # Storage size shared between toolbox replicas of this instance. Storage for DMS and pull, located at /opt/shared-storage.
+      sharedStorageSize: 2Gi # Storage size shared between toolbox replicas of this instance. Storage for DMS and pull, located at /opt/shared-storage.
       sharedStorageClass: longhorn # Storage class to allocate shared storage resources. ReadWriteMany access mode is required.
       keepLogsAfterRestart: true # boolean flag - indicates if EDX logs are persisted after pod restart, default value false
       livenessProbe: true # automatic restart if pod is not in health state, default value false
