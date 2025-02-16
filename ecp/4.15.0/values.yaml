@@ -26,10 +26,10 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
       readinessProbe: true # ECP pod will not started before readiness probe is fulfilled - check of availability of external DB
 
       service: # section for definition of services exposed within kubernetes environment
-        type: LoadBalancer # Type of the network service - NodePort/LoadBalancer/ClusterIP
-        https: # protocol used for accessing GUI - can be http or https
-          port: 8443 # port used for exposing HTTP(S) service
-            #          nodePort: 30100  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
+        type: ClusterIP # Type of the network service - NodePort/LoadBalancer/ClusterIP
+        http: # protocol used for accessing GUI - can be http or https
+          port: 8080 # port used for exposing HTTP(S) service
+#          nodePort: 30100  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
       ingress: # an object that allows access to Kubernetes services from outside the Kubernetes cluster.
         enabled: true # boolean flag for enable/disable ingress, default value false
         apiVersion: networking.k8s.io/v1 # Specifies the api version of ingress resource
@@ -38,7 +38,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
         tls: # section for TLS definition for HTTPS connection to ingress
           secretName: tls-ecp  # secret where TLS certificate is stored
         annotations: # ingress annotations section
-          kubernetes.io/ingress.class: nginx  # ingress controller definition
+          kubernetes.io/ingressClassName: nginx  # ingress controller definition
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
           nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
 
