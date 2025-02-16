@@ -27,8 +27,8 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 
       service: # section for definition of services exposed within kubernetes environment
         type: LoadBalancer # Type of the network service - NodePort/LoadBalancer/ClusterIP
-        http: # protocol used for accessing GUI - can be http or https
-          port: 8080 # port used for exposing HTTP(S) service
+        https: # protocol used for accessing GUI - can be http or https
+          port: 8443 # port used for exposing HTTP(S) service
 #          nodePort: 30100  # port used for exposing HTTP(S) service as for external access. Range - 30000-32767
       ingress: # an object that allows access to Kubernetes services from outside the Kubernetes cluster.
         enabled: true # boolean flag for enable/disable ingress, default value false
