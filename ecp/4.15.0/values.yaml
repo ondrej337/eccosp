@@ -39,8 +39,8 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
           secretName: tls-ecp  # secret where TLS certificate is stored
         annotations: # ingress annotations section
           kubernetes.io/ingressClassName: nginx  # ingress controller definition
-#          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
-#          nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
+          nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
 
       # The naming convention for configuration files name and parameters is camelCase instead of 'dot case format'.
       # Mapping of Helm values to ECP configuration file is available in config map ./ecp-endpoint/templates/configMap.yaml
