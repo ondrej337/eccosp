@@ -27,7 +27,7 @@ ecp-endpoint: # type of ECP component. Can be ecp-endpoint, ecp-directory, ecp-b
 
       service: # section for definition of services exposed within kubernetes environment
         type: ClusterIP # Type of the network service - NodePort/LoadBalancer/ClusterIP
-        http: # protocol used for accessing GUI - can be http or https
+#        http: # protocol used for accessing GUI - can be http or https
 #          port: 8080 # port used for exposing HTTP(S) service
         https:
           port: 8443
