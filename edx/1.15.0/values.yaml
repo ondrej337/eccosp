@@ -39,7 +39,7 @@ edx-toolbox: # type of EDX component. Can be edx-catalogue, edx-toolbox
         tls: # section for TLS definition for HTTPS connection to ingress
           secretName: tls-edx  # secret where TLS certificate is stored
         annotations: # ingress annotations section
-          kubernetes.io/ingress.class: nginx # ingress controller definition
+          kubernetes.io/ingressClassName: nginx # ingress controller definition
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # important for remote host tunelling
           nginx.ingress.kubernetes.io/ssl-passthrough: 'true' # important for remote host tunelling
 
